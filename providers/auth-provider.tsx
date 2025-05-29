@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await setPersistence(auth, browserLocalPersistence)
 
         // Set up auth state listener
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
           console.log("Auth state changed:", user ? "User logged in" : "User logged out")
           console.log("User ID:", user?.uid)
           
@@ -54,6 +54,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Sync with our custom session cookie
           if (user) {
             setSessionCookie(user)
+            
+            // Create user document if it doesn't exist
+            try {
+              const { getFirebaseFirestore } = await import("@/lib/firebase")
+              const { doc, getDoc, setDoc } = await import("firebase/firestore")
+              
+              const db = await getFirebaseFirestore()
+              if (!db) {
+                console.error("Firestore not initialized")
+                return
+              }
+              
+              const userDocRef = doc(db, "users", user.uid)
+              const userDoc = await getDoc(userDocRef)
+              
+              if (!userDoc.exists()) {
+                // Create new user document with basic info
+                await setDoc(userDocRef, {
+                  email: user.email,
+                  emailVerified: user.emailVerified,
+                  displayName: user.displayName || "",
+                  onboardingCompleted: false,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                })
+                console.log("Created new user document for:", user.uid)
+              }
+            } catch (error) {
+              console.error("Error creating user document:", error)
+            }
           } else {
             clearSessionCookie()
           }

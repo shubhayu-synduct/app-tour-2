@@ -191,6 +191,14 @@ export function SignInForm() {
         {loading ? "Signing in..." : "Continue"}
       </button>
 
+      {/* Sign Up Link */}
+      <div className="text-center">
+        <span className="text-gray-600">Don't have an account? </span>
+        <Link href="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
+          Sign up
+        </Link>
+      </div>
+
       {/* Social Sign In Buttons */}
       <div className="space-y-3">
         <button

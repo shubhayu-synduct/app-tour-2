@@ -236,12 +236,14 @@ export default function Onboarding() {
         body: JSON.stringify({
           userName: `${formData.firstName} ${formData.lastName}`,
           userEmail: user.email,
-          ndaHtml
+          digitalSignature: ndaData.digitalSignature,
+          address: ndaData.address
         })
       })
 
       if (!response.ok) {
-        throw new Error("Failed to send NDA PDF")
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to send NDA PDF")
       }
 
       router.push("/dashboard")
