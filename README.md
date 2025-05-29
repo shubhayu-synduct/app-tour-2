@@ -82,3 +82,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Medical information is for demonstration purposes only
 - Icons provided by [Lucide](https://lucide.dev/)
 - UI components built with Tailwind CSS 
+
+
+# Deploy
