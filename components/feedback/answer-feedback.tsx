@@ -1,0 +1,303 @@
+"use client"
+
+import { useState } from 'react'
+import { Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { getFirebaseFirestore } from '@/lib/firebase'
+import { doc, setDoc } from 'firebase/firestore'
+
+interface AnswerFeedbackProps {
+  conversationId: string;
+  threadId: string;
+  answerText?: string;
+}
+
+const FEEDBACK_OPTIONS_HELPFUL = [
+  'Relevant', 'Accurate', 'High-evidence', 'Comprehensive', 'Sufficient detail', 'Concise', 'Patient-tailored', 'Current data', 'Well-cited', 'Safe', 'Satisfied', 'Moderate', 'Advanced'
+];
+
+const FEEDBACK_OPTIONS_NOT_HELPFUL = [
+  'Not useful', 'Incorrect', 'Low-evidence', 'Missing options', 'Too long', 'Generic', 'Outdated', 'Poorly cited', 'Safety concern', 'Dissatisfied', 'Too short'
+];
+
+const CONTEXT_OPTIONS = [
+  'ER', 'Patient consult', 'Medication info', 'Disease / Ddx', 'Diagnosis', 'Treatment advice', 'Self-study', 'Exam prep'
+];
+
+export default function AnswerFeedback({ 
+  conversationId, 
+  threadId, 
+  answerText = ''
+}: AnswerFeedbackProps) {
+  const [selectedFeedback, setSelectedFeedback] = useState<string[]>([]);
+  const [contextOfUse, setContextOfUse] = useState<string[]>([]);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState<null | 'helpful' | 'not_helpful'>(null);
+  const [thankYou, setThankYou] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
+  const [submittedFeedback, setSubmittedFeedback] = useState<{
+    helpful?: boolean;
+    not_helpful?: boolean;
+  }>({});
+
+  const toggleFeedback = (option: string) => {
+    setSelectedFeedback(prev =>
+      prev.includes(option) ? prev.filter(r => r !== option) : [...prev, option]
+    );
+  };
+
+  const toggleContext = (option: string) => {
+    setContextOfUse(prev =>
+      prev.includes(option) ? prev.filter(r => r !== option) : [...prev, option]
+    );
+  };
+
+  const handleFeedbackClick = (type: 'helpful' | 'not_helpful') => {
+    // If clicking the same type that's already open, close it
+    if (showForm === type) {
+      setShowForm(null);
+      setSelectedFeedback([]);
+      setFeedbackText('');
+      setThankYou(false);
+    } else {
+      // If clicking a different type, switch to it
+      setShowForm(type);
+      setSelectedFeedback([]);
+      setFeedbackText('');
+      setThankYou(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowForm(null);
+    setSelectedFeedback([]);
+    setFeedbackText('');
+  };
+
+  const saveFeedback = async () => {
+    setIsSubmitting(true);
+    try {
+      const feedbackType = showForm === 'helpful' ? 'helpful' : 'not_helpful';
+      const feedbackData = {
+        options: selectedFeedback,
+        text_comment: feedbackText,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('Attempting to save feedback to Firebase:', {
+        conversationId,
+        threadId,
+        feedbackType,
+        feedbackData
+      });
+
+      if (!threadId) {
+        throw new Error('Thread ID not available yet');
+      }
+
+      const db = getFirebaseFirestore();
+      const feedbackRef = doc(db, 
+        'conversations', 
+        conversationId, 
+        'threads', 
+        threadId, 
+        'feedback', 
+        feedbackType
+      );
+
+      await setDoc(feedbackRef, feedbackData);
+      console.log('Feedback saved successfully to Firebase');
+
+      setThankYou(true);
+      setShowForm(null);
+      setSelectedFeedback([]);
+      setContextOfUse([]);
+      setFeedbackText('');
+      // Mark the current feedback type as submitted
+      setSubmittedFeedback(prev => ({
+        ...prev,
+        [feedbackType]: true
+      }));
+    } catch (error) {
+      console.error('Error saving feedback to Firebase:', error);
+      setValidationMessage('Failed to save feedback. Please try again.');
+      setTimeout(() => {
+        setValidationMessage('');
+      }, 2000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCopyText = async () => {
+    if (!answerText) return;
+    try {
+      await navigator.clipboard.writeText(answerText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
+
+  // Helper for feedback button style
+  const feedbackBtnStyle = (option: string) => {
+    if (selectedFeedback.includes(option)) {
+      return 'border-[#3771FE] text-[#3771FE] bg-white';
+    }
+    return 'border-[#C8C8C8] text-[#223258] bg-white';
+  };
+
+  // Helper for top row button style
+  const topBtnStyle = (type: 'helpful' | 'not_helpful') => {
+    if (showForm === type) {
+      return 'border-[#3771FE] text-[#3771FE] bg-white';
+    }
+    if (submittedFeedback[type === 'helpful' ? 'helpful' : 'not_helpful']) {
+      return 'border-[#C8C8C8] text-[#C8C8C8] bg-gray-50 cursor-not-allowed';
+    }
+    return 'border-[#C8C8C8] text-[#223258] bg-white';
+  };
+
+  const hasValidText = (text: string) => {
+    const words = text.trim().split(/\s+/);
+    return words.some(word => word.length >= 4);
+  };
+
+  const canSubmit = () => {
+    return selectedFeedback.length > 0 || hasValidText(feedbackText);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit()) {
+      setValidationMessage('Please select at least one option or provide feedback with at least one word (4+ characters)');
+      // Clear message after 2 seconds
+      setTimeout(() => {
+        setValidationMessage('');
+      }, 2000);
+      return;
+    }
+    setValidationMessage('');
+    saveFeedback();
+  };
+
+  return (
+    <div className="mt-4 ml-8 max-w-[684px]">
+      {/* Top row: Helpful, Not helpful, Copy */}
+      <div className="flex flex-row items-center gap-3 mb-4">
+        <button
+          onClick={() => handleFeedbackClick('helpful')}
+          className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('helpful')}`}
+          aria-label="Helpful"
+          title={submittedFeedback.helpful ? "You've already submitted helpful feedback" : "This answer was helpful"}
+          disabled={submittedFeedback.helpful}
+        >
+          <ThumbsUp className="inline w-4 h-4 mr-1" /> Helpful
+        </button>
+        <button
+          onClick={() => handleFeedbackClick('not_helpful')}
+          className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('not_helpful')}`}
+          aria-label="Not helpful"
+          title={submittedFeedback.not_helpful ? "You've already submitted not helpful feedback" : "This answer wasn't helpful"}
+          disabled={submittedFeedback.not_helpful}
+        >
+          <ThumbsDown className="inline w-4 h-4 mr-1" /> Not helpful
+        </button>
+        <button
+          onClick={handleCopyText}
+          className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-2 ${copied ? 'text-[#3771FE] border-[#3771FE]' : 'text-[#223258] border-[#223258]'} bg-white`}
+          aria-label="Copy text"
+          title="Copy answer text"
+        >
+          {copied ? (
+            <>
+              <Check size={16} className="text-[#3771FE]" />
+              <span>Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy size={16} className="text-[#223258]" />
+              <span>Copy</span>
+            </>
+          )}
+        </button>
+      </div>
+      {/* Feedback form appears only after clicking Helpful/Not helpful */}
+      {showForm && !thankYou && (
+        <div className="border border-[#C8C8C8] rounded-lg p-6 bg-white">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <div className="font-semibold mb-2" style={{ color: '#62739B' }}>Why was this answer {showForm === 'helpful' ? 'helpful' : 'not helpful'}?</div>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {(showForm === 'helpful' ? FEEDBACK_OPTIONS_HELPFUL : FEEDBACK_OPTIONS_NOT_HELPFUL).map(option => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`px-3 py-1 rounded-lg border text-sm transition-colors duration-100 ${feedbackBtnStyle(option)}`}
+                    onClick={() => toggleFeedback(option)}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-2 mt-2"
+                style={{ 
+                  backgroundColor: 'rgba(238,243,255,0.5)',
+                  color: '#62739B'
+                }}
+                rows={3}
+                placeholder="Tell us more about your experience (Optional)"
+                value={feedbackText}
+                onChange={e => {
+                  setFeedbackText(e.target.value);
+                  setValidationMessage('');
+                }}
+              ></textarea>
+              <style jsx>{`
+                textarea::placeholder {
+                  color: #8997BA;
+                }
+              `}</style>
+              <div className="text-center mb-4 text-sm" style={{ color: '#8997BA' }}>
+                Your feedback can helps us improve our answers
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-6 py-2 rounded-lg border border-[#C8C8C8] text-[#223258] bg-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 rounded-lg border"
+                style={{
+                  backgroundColor: '#C6D7FF',
+                  color: '#214498',
+                  border: '1px solid rgba(55, 113, 254, 0.5)'
+                }}
+                disabled={isSubmitting}
+              >
+                Submit
+              </button>
+            </div>
+            {validationMessage && (
+              <div className="text-center text-red-500 text-sm mt-2">
+                {validationMessage}
+              </div>
+            )}
+          </form>
+        </div>
+      )}
+      {/* Thank you message after submit */}
+      {thankYou && (
+        <div className="mt-4 font-semibold" style={{ color: '#8997BA' }}>Thank you for your feedback!</div>
+      )}
+    </div>
+  );
+} 
