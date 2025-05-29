@@ -19,6 +19,7 @@ interface DrInfoSummaryProps {
   user: any;
   sessionId?: string; // Optional sessionId for loading a specific chat
   onChatCreated?: () => void; // Callback when a new chat is created
+  initialMode?: 'instant' | 'research'; // Add this prop
 }
 
 interface ChatMessage {
@@ -110,7 +111,7 @@ interface DrInfoSummaryData {
 
 const KNOWN_STATUSES: StatusType[] = ['processing', 'searching', 'summarizing', 'formatting', 'complete'];
 
-export function DrInfoSummary({ user, sessionId, onChatCreated }: DrInfoSummaryProps) {
+export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'instant' }: DrInfoSummaryProps) {
   const [query, setQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -131,7 +132,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated }: DrInfoSummaryP
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const router = useRouter()
   const pathname = usePathname()
-  const [activeMode, setActiveMode] = useState<'instant' | 'research'>('instant');
+  const [activeMode, setActiveMode] = useState<'instant' | 'research'>(initialMode);
 
   const contentRef = useRef<HTMLDivElement>(null)
   const inputAnchorRef = useRef<HTMLDivElement>(null)
@@ -139,6 +140,11 @@ export function DrInfoSummary({ user, sessionId, onChatCreated }: DrInfoSummaryP
   useEffect(() => {
     if (sessionId) {
       loadChatSession(sessionId);
+      // Read the mode from sessionStorage
+      const storedMode = sessionStorage.getItem(`chat_mode_${sessionId}`);
+      if (storedMode === 'instant' || storedMode === 'research') {
+        setActiveMode(storedMode);
+      }
     } else {
       setChatHistory([]);
       console.log("Ready for new chat session");
@@ -399,11 +405,12 @@ export function DrInfoSummary({ user, sessionId, onChatCreated }: DrInfoSummaryP
     
     if (!isChatLoading && query && !hasFetched) {
       console.log("[SEARCH] Triggering search with query:", query);
-          setHasFetched(true);
+      console.log("[SEARCH] Using mode:", activeMode === 'instant' ? 'swift' : 'study');
+      setHasFetched(true);
       setTimeout(() => {
           handleSearchWithContent(query, false, activeMode === 'instant' ? 'swift' : 'study');
       }, 0);
-        }
+    }
   }, [sessionId, isChatLoading, query, hasFetched, lastQuestion]);
 
   // Auto-scroll to bottom (with extra space) when messages change (new message, streaming, or complete)
@@ -442,7 +449,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated }: DrInfoSummaryP
     setLastQuestion(followUpQuestion);
     handleSearchWithContent(followUpQuestion, true, activeMode === 'instant' ? 'swift' : 'study');
     setFollowUpQuestion(''); // Clear follow-up input after follow-up
-    setTimeout(scrollToInputWithOffset, 100); // Scroll up with offset after follow-up is asked
+    // Small delay to ensure DOM is updated with new answer icon
+    setTimeout(() => {
+      const answerIcons = document.querySelectorAll('.flex.items-start.gap-2.mb-4');
+      const lastAnswerIcon = answerIcons[answerIcons.length - 1];
+      if (lastAnswerIcon) {
+        lastAnswerIcon.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const parseContent = (content: string) => {
@@ -892,16 +906,18 @@ export function DrInfoSummary({ user, sessionId, onChatCreated }: DrInfoSummaryP
                             <div className="flex-shrink-0 mt-1">
                               <div className="w-6 h-6 flex items-center justify-center">
                                 <img src="/answer-icon.svg" alt="Answer" className="w-6 h-6" />
-            </div>
-              </div>
+                              </div>
+                            </div>
                             <div className="flex items-center">
                               {idx === messages.length - 1 && status !== 'complete' ? (
                                 <span className="text-gray-500 italic">{getStatusMessage(status as StatusType)}</span>
                               ) : (
-                                <span className="font-semibold text-blue-900 text-base">Answer</span>
+                                msg.type === 'assistant' && msg.content && (
+                                  <span className="font-semibold text-blue-900 text-base">Answer</span>
+                                )
                               )}
                             </div>
-                  </div>
+                          </div>
                           {msg.content && (
                             <div className="mb-6 ml-8">
                               <div

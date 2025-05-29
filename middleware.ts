@@ -7,21 +7,33 @@ export function middleware(request: NextRequest) {
   console.log("Middleware processing path:", path)
 
   // Define public paths that don't require authentication
-  const isPublicPath = path === "/" || path === "/login" || path === "/signup" || path === "/forgot-password" || path === "/reset-password"
+  const isPublicPath = path === "/" || 
+    path === "/login" || 
+    path === "/signup" || 
+    path === "/forgot-password" || 
+    path === "/reset-password" ||
+    path === "/verify-email" ||
+    path.startsWith("/_next") ||
+    path.startsWith("/api") ||
+    path.endsWith(".svg") ||
+    path.endsWith(".ico") ||
+    path.endsWith(".png")
 
   // Log all cookies for debugging
   const allCookies = request.cookies.getAll()
   console.log("All cookies:", allCookies.map(c => c.name))
 
   // Check for the drinfo-session cookie which indicates authentication
-  const hasAuthCookie = allCookies.some(cookie => 
-    cookie.name === 'drinfo-session'
-  )
+  const authCookie = request.cookies.get('drinfo-session')
+  const hasAuthCookie = !!authCookie
   
   console.log("Auth cookie found:", hasAuthCookie)
+  if (hasAuthCookie) {
+    console.log("Auth cookie value:", authCookie.value)
+  }
 
   // If the user is authenticated and trying to access login/signup, redirect to dashboard
-  if (hasAuthCookie && isPublicPath) {
+  if (hasAuthCookie && isPublicPath && !path.startsWith("/_next") && !path.startsWith("/api")) {
     console.log("User is authenticated, redirecting to dashboard from:", path)
     return NextResponse.redirect(new URL("/dashboard", request.url))
   }

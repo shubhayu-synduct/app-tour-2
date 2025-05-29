@@ -1,14 +1,22 @@
 "use client"
 
-import { useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { SignInForm } from "@/components/auth/signin-form"
 
 export default function Login() {
-  const searchParams = useSearchParams()
-  const error = searchParams.get("error")
+  const [error, setError] = useState<string | null>(null)
+  const pathname = usePathname()
+  const router = useRouter()
+
+  useEffect(() => {
+    // Get error from URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const errorParam = urlParams.get("error")
+    setError(errorParam)
+  }, [pathname])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 md:p-8">

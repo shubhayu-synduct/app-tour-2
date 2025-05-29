@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { getAuth, applyActionCode } from "firebase/auth"
 import Image from "next/image"
 
 export default function VerifyEmail() {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const pathname = usePathname()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
 
@@ -15,7 +15,8 @@ export default function VerifyEmail() {
     const verifyEmail = async () => {
       try {
         const auth = getAuth()
-        const oobCode = searchParams.get("oobCode")
+        const urlParams = new URLSearchParams(window.location.search)
+        const oobCode = urlParams.get("oobCode")
 
         if (!oobCode) {
           throw new Error("No verification code found")
@@ -34,7 +35,7 @@ export default function VerifyEmail() {
     }
 
     verifyEmail()
-  }, [router, searchParams])
+  }, [router, pathname])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

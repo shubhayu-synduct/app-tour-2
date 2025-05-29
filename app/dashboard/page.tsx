@@ -151,8 +151,10 @@ export default function Dashboard() {
       // Store the query in session storage so the chat page can use it
       sessionStorage.setItem(`chat_query_${sessionId}`, query);
       sessionStorage.setItem(`chat_needs_answer_${sessionId}`, "true");
+      sessionStorage.setItem(`chat_mode_${sessionId}`, activeMode);
       console.log("[DASHBOARD] Stored query in session storage with key:", `chat_query_${sessionId}`);
       console.log("[DASHBOARD] Set flag to fetch answer:", `chat_needs_answer_${sessionId}`);
+      console.log("[DASHBOARD] Stored mode:", activeMode);
       
       // Navigate to the dynamic chat page with the session ID
       console.log("[DASHBOARD] Redirecting to:", `/dashboard/${sessionId}`);

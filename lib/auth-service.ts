@@ -26,9 +26,13 @@ export function setSessionCookie(user: User) {
     Cookies.set(SESSION_COOKIE_NAME, JSON.stringify(session), {
       expires: SESSION_DURATION,
       path: "/",
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production"
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      domain: window.location.hostname
     })
+    
+    // Also set a server-side accessible cookie
+    document.cookie = `${SESSION_COOKIE_NAME}=${JSON.stringify(session)}; path=/; max-age=${SESSION_DURATION * 24 * 60 * 60}; SameSite=Lax`
     
     console.log("Session cookie set successfully")
     return true
@@ -58,7 +62,14 @@ export function getSessionCookie() {
  */
 export function clearSessionCookie() {
   try {
-    Cookies.remove(SESSION_COOKIE_NAME, { path: "/" })
+    Cookies.remove(SESSION_COOKIE_NAME, { 
+      path: "/",
+      domain: window.location.hostname
+    })
+    
+    // Also clear the server-side accessible cookie
+    document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`
+    
     console.log("Session cookie cleared")
     return true
   } catch (error) {

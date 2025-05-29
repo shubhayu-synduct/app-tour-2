@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { setSessionCookie } from "@/lib/auth-service"
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth"
+import { doc, getDoc } from "firebase/firestore"
+import { getFirebaseAuth, getFirebaseFirestore, getGoogleAuthProvider, getMicrosoftAuthProvider } from "@/lib/firebase"
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -41,10 +44,7 @@ export function SignInForm() {
     setError("")
 
     try {
-      const { getFirebaseAuth } = await import("@/lib/firebase")
-      const { signInWithEmailAndPassword } = await import("firebase/auth")
-
-      const auth = await getFirebaseAuth()
+      const auth = getFirebaseAuth()
       if (!auth) {
         throw new Error("Firebase auth not initialized")
       }
@@ -65,13 +65,9 @@ export function SignInForm() {
     setLoading(true)
     
     try {
-      const { signInWithPopup } = await import("firebase/auth")
-      const { doc, getDoc } = await import("firebase/firestore")
-      const { getFirebaseAuth, getFirebaseFirestore, getGoogleAuthProvider } = await import("@/lib/firebase")
-
-      const auth = await getFirebaseAuth()
+      const auth = getFirebaseAuth()
       const googleProvider = getGoogleAuthProvider()
-      const db = await getFirebaseFirestore()
+      const db = getFirebaseFirestore()
       
       if (!auth || !googleProvider || !db) {
         throw new Error("Firebase services not initialized")
@@ -108,13 +104,9 @@ export function SignInForm() {
     setLoading(true)
     
     try {
-      const { signInWithPopup } = await import("firebase/auth")
-      const { doc, getDoc } = await import("firebase/firestore")
-      const { getFirebaseAuth, getFirebaseFirestore, getMicrosoftAuthProvider } = await import("@/lib/firebase")
-
-      const auth = await getFirebaseAuth()
+      const auth = getFirebaseAuth()
       const microsoftProvider = getMicrosoftAuthProvider()
-      const db = await getFirebaseFirestore()
+      const db = getFirebaseFirestore()
       
       if (!auth || !microsoftProvider || !db) {
         throw new Error("Firebase services not initialized")
@@ -199,41 +191,26 @@ export function SignInForm() {
         {loading ? "Signing in..." : "Continue"}
       </button>
 
-      {/* Sign Up Link */}
-      <div className="text-center">
-        <span className="text-gray-600">Don't have an account? </span>
-        <Link href="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
-          Sign up
-        </Link>
-      </div>
-
-      {/* Divider */}
-      <div className="flex items-center my-6">
-        <div className="flex-1 border-t border-gray-200"></div>
-        <span className="px-4 text-gray-500 text-sm">OR</span>
-        <div className="flex-1 border-t border-gray-200"></div>
-      </div>
-
       {/* Social Sign In Buttons */}
       <div className="space-y-3">
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center px-4 py-3 border border-indigo-300 rounded-lg hover:bg-gray-50 bg-white transition duration-200"
+          className="w-full flex items-center justify-center bg-white text-gray-700 border border-gray-300 py-3 px-4 rounded-lg hover:bg-gray-50 transition duration-200 font-medium disabled:opacity-70"
         >
           <GoogleIcon />
-          <span className="text-gray-700">Sign in with Google</span>
+          Continue with Google
         </button>
 
         <button
           type="button"
           onClick={handleMicrosoftSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center px-4 py-3 border border-indigo-300 rounded-lg hover:bg-gray-50 bg-white transition duration-200"
+          className="w-full flex items-center justify-center bg-white text-gray-700 border border-gray-300 py-3 px-4 rounded-lg hover:bg-gray-50 transition duration-200 font-medium disabled:opacity-70"
         >
           <MicrosoftIcon />
-          <span className="text-gray-700">Sign in with Microsoft</span>
+          Continue with Microsoft
         </button>
       </div>
     </form>
