@@ -32,11 +32,11 @@ export function middleware(request: NextRequest) {
     console.log("Auth cookie value:", authCookie.value)
   }
 
-  // If the user is authenticated and trying to access login/signup, redirect to dashboard
-  if (hasAuthCookie && isPublicPath && !path.startsWith("/_next") && !path.startsWith("/api")) {
-    console.log("User is authenticated, redirecting to dashboard from:", path)
-    return NextResponse.redirect(new URL("/dashboard", request.url))
-  }
+  // // If the user is authenticated and trying to access login/signup, redirect to dashboard
+  // if (hasAuthCookie && isPublicPath && !path.startsWith("/_next") && !path.startsWith("/api")) {
+  //   console.log("User is authenticated, redirecting to dashboard from:", path)
+  //   return NextResponse.redirect(new URL("/dashboard", request.url))
+  // }
 
   // If the user is not authenticated and trying to access a protected route, redirect to login
   if (!hasAuthCookie && !isPublicPath) {
