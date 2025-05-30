@@ -231,22 +231,10 @@ export default function Dashboard() {
                           ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
                           : 'bg-white text-gray-500 border-gray-300'
                       }`}
-                      onClick={() => setActiveMode('instant')}
+                      onClick={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
                     >
                       <img src="instant.svg" alt="Instant Mode Icon" className="w-4 h-4" />
                       Acute
-                    </button>
-                    <button
-                      type="button"
-                      className={`px-3 py-1 rounded border text-sm flex items-center gap-1 ${
-                        activeMode === 'research'
-                          ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
-                          : 'bg-white text-gray-500 border-gray-300'
-                      }`}
-                      onClick={() => setActiveMode('research')}
-                    >
-                      <img src="research.svg" alt="Research Mode Icon" className="w-4 h-4" />
-                      Research
                     </button>
                   </div>
                 </div>

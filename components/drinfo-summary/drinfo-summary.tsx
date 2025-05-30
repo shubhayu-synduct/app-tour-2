@@ -111,7 +111,7 @@ interface DrInfoSummaryData {
 
 const KNOWN_STATUSES: StatusType[] = ['processing', 'searching', 'summarizing', 'formatting', 'complete'];
 
-export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'instant' }: DrInfoSummaryProps) {
+export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'research' }: DrInfoSummaryProps) {
   const [query, setQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -839,7 +839,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'i
           setIsLoading(false);
         }
       },
-      { sessionId: sessionId, userId, is_follow_up: isFollowUp, mode }
+      { sessionId: sessionId, userId, is_follow_up: isFollowUp, mode: activeMode === 'instant' ? 'swift' : 'study' }
     );
   };
 
@@ -995,22 +995,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'i
                         ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
                         : 'bg-white text-gray-500 border-gray-300'
                     }`}
-                    onClick={() => setActiveMode('instant')}
+                    onClick={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
                   >
                     <img src="/instant.svg" alt="Instant Mode Icon" className="w-4 h-4" />
                     Acute
-                  </button>
-                  <button
-                    type="button"
-                    className={`px-3 py-1 rounded border text-sm flex items-center gap-1 ${
-                      activeMode === 'research'
-                        ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
-                        : 'bg-white text-gray-500 border-gray-300'
-                    }`}
-                    onClick={() => setActiveMode('research')}
-                  >
-                    <img src="/research.svg" alt="Research Mode Icon" className="w-4 h-4" />
-                    Research
                   </button>
                 </div>
               </div>

@@ -33,6 +33,14 @@ interface GuidelineSummaryModalProps {
   url?: string;
 }
 
+function decodeUnicode(str: string): string {
+  if (!str) return str;
+  const singleEscaped = str.replace(/\\u/g, '\\u');
+  return singleEscaped.replace(/\\u([0-9a-fA-F]{4})/g, (_, grp) =>
+    String.fromCharCode(parseInt(grp, 16))
+  );
+}
+
 export default function GuidelineSummaryModal({ 
   isOpen, 
   onClose, 
@@ -110,12 +118,15 @@ export default function GuidelineSummaryModal({
         }
         
         const data = await response.json()
-        setSummary(data)
+        // Decode unicode in summary before using it
+        const decodedSummary = decodeUnicode(data.summary)
+        console.log('Summary API response:', decodedSummary)
+        setSummary({ ...data, summary: decodedSummary })
         
         // Add the initial summary to the chat history
         setChatHistory([{
           type: 'main',
-          answer: data.summary,
+          answer: decodedSummary,
           sources: data.sources,
           page_references: data.page_references
         }])
@@ -124,7 +135,7 @@ export default function GuidelineSummaryModal({
         referenceOccurrences.current.clear()
         
         if (data && data.summary) {
-          setProcessedMarkdown(processMarkdown(data.summary))
+          setProcessedMarkdown(processMarkdown(decodedSummary))
         }
       } catch (err: any) {
         console.error('Error fetching summary:', err)
@@ -450,21 +461,27 @@ export default function GuidelineSummaryModal({
         )}
         {/* Scrollable source text only */}
         <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
-          <pre
-            className="full-reference whitespace-pre-wrap"
+          <div
+            className="full-reference"
             style={{
-              fontFamily: 'var(--font-poppins)',
+              fontFamily: 'DM Sans, sans-serif',
+              lineHeight: 1.7,
+              padding: '1rem',
+              backgroundColor: '#f8f9fa',
+              overflowY: 'auto',
+              wordBreak: 'break-word',
+              width: '100%',
               fontSize: '1rem',
               color: '#223258',
               background: 'none',
               border: 'none',
               boxShadow: 'none',
-              padding: 0,
-              margin: 0
+              margin: 0,
+              whiteSpace: 'normal'
             }}
           >
             {formattedContent}
-          </pre>
+          </div>
         </div>
       </div>
     )
@@ -769,11 +786,20 @@ export default function GuidelineSummaryModal({
         }
 
         .full-reference {
-          font-family: monospace;
-          line-height: 1.5;
+          font-family: 'DM Sans', sans-serif;
+          line-height: 1.7;
           padding: 1rem;
           background-color: #f8f9fa;
-          overflow-x: auto;
+          overflow-y: auto;
+          word-break: break-word;
+          width: 100%;
+          font-size: 1rem;
+          color: #223258;
+          background: none;
+          border: none;
+          box-shadow: none;
+          margin: 0;
+          white-space: normal;
         }
 
         .reference-highlight {
@@ -926,6 +952,14 @@ export default function GuidelineSummaryModal({
         .hide-scrollbar {
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;     /* Firefox */
+        }
+
+        /* Override prose font weight for normal text */
+        .prose p, .prose span, .prose li, .prose div {
+          font-weight: 400 !important;
+        }
+        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+          font-weight: 700 !important;
         }
       `}</style>
     </div>
