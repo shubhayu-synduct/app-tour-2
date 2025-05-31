@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React from 'react';
+import Image from 'next/image';
+import DrugsLinksIcon from '@/components/ui/DrugsLinksIcon';
 
 interface DrugData {
   name: string;
@@ -236,9 +238,10 @@ export default function DrugDetailPage() {
       return (
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="mb-6">
-            <Link href="/drug-information" className="inline-flex items-center text-blue-600 hover:text-blue-800">
+            <Link href="/drug-information" className="inline-flex items-center bg-[#214498] text-white px-4 py-2 rounded-lg font-['DM_Sans'] hover:bg-[#1a3780] transition-colors">
               <ChevronLeft size={20} />
-              <span>Back to Drug List</span>
+              <ChevronLeft size={20} className="-ml-3" />
+              <span>Back</span>
             </Link>
           </div>
           
@@ -257,23 +260,24 @@ export default function DrugDetailPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <Link href="/drug-information" className="inline-flex items-center text-blue-600 hover:text-blue-800">
+          <Link href="/drug-information" className="inline-flex items-center bg-[#214498] text-white px-4 py-2 rounded-lg font-['DM_Sans'] hover:bg-[#1a3780] transition-colors">
             <ChevronLeft size={20} />
-            <span>Back to Drug List</span>
+            <ChevronLeft size={20} className="-ml-3" />
+            <span>Back</span>
           </Link>
         </div>
         
         {/* Search bar with autocomplete */}
         <div className="relative mb-8" ref={searchContainerRef}>
-          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-            <div className="pl-4 pr-2">
-              <Search className="text-gray-400" size={20} />
+          <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 rounded-xl bg-white mt-5">
+            <div className="pl-2 flex items-center">
+              <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
             </div>
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search by drug name"
-              className="w-full py-3 px-2 outline-none text-gray-700"
+              placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list.."
+              className="w-full py-3 px-2 outline-none text-[#223258] font-['DM_Sans'] text-[18px] placeholder:text-[#9599A8]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => {
@@ -321,7 +325,7 @@ export default function DrugDetailPage() {
                 <Link 
                   key={index}
                   href={`/drug-information/${slugify(rec.name)}`}
-                  className="block px-4 py-2 hover:bg-blue-50 text-gray-700"
+                  className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] text-[18px]"
                   onClick={() => {
                     setShowRecommendations(false);
                     // Refocus the input before navigation
@@ -343,22 +347,23 @@ export default function DrugDetailPage() {
 
         {/* Document header */}
         <div className="flex items-start mb-8">
-          <FileText className="text-blue-700 mt-1 mr-3" size={24} />
-          <h2 className="text-lg text-blue-800 font-medium">
+          <Image src="/answer-icon.svg" alt="Answer Icon" width={24} height={24} className="mt-1 mr-3" />
+          <h2 className="text-lg text-[#273561] font-['DM_Sans'] font-regular">
             Drug information from the European Medicines Agency approved Summary of Product Characteristics
           </h2>
         </div>
         
         {/* Accordion sections */}
-        <div className="space-y-3 mb-8">
+        <div className="mb-8 p-2 rounded-2xl" style={{ background: '#E4ECFF' }}>
           {sections.map((section) => (
             <div 
               key={section.id}
-              className="border border-gray-200 rounded-lg overflow-hidden"
+              className="rounded-lg overflow-hidden mb-3"
               data-section-number={section.number}
             >
               <button
-                className="w-full flex justify-between items-center p-4 text-left focus:outline-none"
+                className="w-full flex justify-between items-center p-4 text-left focus:outline-none bg-white border rounded-[10px] font-['DM_Sans']"
+                style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}
                 onClick={() => toggleSection(section.id)}
               >
                 <span className="font-medium">{section.title}</span>
@@ -367,11 +372,10 @@ export default function DrugDetailPage() {
                   size={20} 
                 />
               </button>
-              
               {/* Collapsible content */}
               {openSections[section.id] && (
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
-                  <div className="prose max-w-none text-gray-700">
+                <div className="p-4 bg-white border rounded-[10px]" style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}>
+                  <div className="prose max-w-none text-gray-700 font-['DM_Sans']">
                     <ReactMarkdown 
                       remarkPlugins={[remarkGfm]}
                       components={{
@@ -387,10 +391,8 @@ export default function DrugDetailPage() {
                           <th className="px-4 py-3 text-left text-sm font-medium text-gray-900" {...props} />
                         ),
                         td: ({node, children, ...props}) => {
-                          // Process the content to replace <br/> tags with actual line breaks in table cells
                           if (typeof children === 'string') {
-                            // Split the text by <br/> or <br> tags and reconstruct with proper breaks
-                            const parts = children.split(/<br\s*\/?>/gi);
+                            const parts = children.split(/<br\s*\/?\>/gi);
                             if (parts.length > 1) {
                               return (
                                 <td className="px-4 py-3 text-sm text-gray-700 border-t border-gray-200" {...props}>
@@ -419,10 +421,8 @@ export default function DrugDetailPage() {
                           <li className="mb-1" {...props} />
                         ),
                         p: ({node, children, ...props}) => {
-                          // Process the content to replace <br/> tags with actual line breaks
                           if (typeof children === 'string') {
-                            // Split the text by <br/> or <br> tags and reconstruct with proper breaks
-                            const parts = children.split(/<br\s*\/?>/gi);
+                            const parts = children.split(/<br\s*\/?\>/gi);
                             if (parts.length > 1) {
                               return (
                                 <p className="mb-4" {...props}>
@@ -464,36 +464,38 @@ export default function DrugDetailPage() {
         {/* Links section */}
         <div className="mb-6">
           <div className="flex items-center mb-4">
-            <ExternalLink className="text-blue-700 mr-3" size={20} />
-            <h3 className="text-lg text-blue-800 font-medium">Links</h3>
+            <DrugsLinksIcon className="mr-3" />
+            <h3 className="text-lg text-[#273561] font-['DM_Sans'] font-normal">Links</h3>
           </div>
           
-          <div className="border border-gray-200 rounded-lg p-4">
-            {drug.pdf_url ? (
-              <a 
-                href={drug.pdf_url} 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline block mb-4"
-              >
-                EMA Document PDF: {drug.name}
-              </a>
-            ) : (
-              <p className="text-gray-600">No PDF document available</p>
-            )}
-            
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-2">
-                <span className="text-xs text-blue-800 font-bold">EMA</span>
+          <div className="rounded-lg">
+            <div className="border rounded-[10px] p-4" style={{ borderColor: 'rgba(55, 113, 254, 0.5)', borderWidth: '1px' }}>
+              {drug.pdf_url ? (
+                <a 
+                  href={drug.pdf_url} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold font-['DM_Sans'] text-[#273561] hover:text-[#3771FE] block mb-4 text-lg underline"
+                >
+                  EMA Document PDF: {drug.name}
+                </a>
+              ) : (
+                <p className="text-gray-600">No PDF document available</p>
+              )}
+              
+              <div className="flex items-center">
+                <div className="px-3 py-1 border rounded-[8px] flex items-center font-['DM_Sans']" style={{ borderColor: 'rgba(39, 53, 97, 0.5)', backgroundColor: '#EEF3FF' }}>
+                  <img src="/logo_ema.svg" alt="EMA Logo" className="mr-2" style={{ height: '25px', width: 'auto', display: 'inline-block' }} />
+                  <span className="text-[#273561] text-md">European Medicines Agency</span>
+                </div>
               </div>
-              <span className="text-gray-700">European Medicines Agency</span>
             </div>
           </div>
         </div>
         
-        <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600 italic">
+        {/* <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600 italic">
           <p>Disclaimer: The information provided is for educational purposes only and should not replace professional medical advice. Always consult a healthcare professional before taking any medication.</p>
-        </div>
+        </div> */}
       </div>
     );
   };

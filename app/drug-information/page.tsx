@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { useAuth } from "@/hooks/use-auth";
+import Image from 'next/image';
 
 interface Drug {
   name: string;
@@ -20,6 +21,7 @@ export default function DrugInformationPage() {
   const [showRecommendations, setShowRecommendations] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [selectedLetter, setSelectedLetter] = useState('A');
   
   // Fetch all drugs on component mount
   useEffect(() => {
@@ -38,35 +40,43 @@ export default function DrugInformationPage() {
     fetchDrugs();
   }, []);
   
-  // Fetch recommendations when search term changes
+  // Fetch recommendations function
+  const fetchRecommendations = async (term: string) => {
+    console.log('fetchRecommendations called with:', term);
+    if (term.trim() === '') {
+      setRecommendations([]);
+      setShowRecommendations(false);
+      return;
+    }
+    setShowRecommendations(true);
+    try {
+      const response = await fetch(`https://ai-drug-summary.duckdns.org/drug-summary/search?q=${encodeURIComponent(term)}&limit=10`);
+      console.log('API response status:', response.status);
+      const data = await response.json();
+      console.log('API response data:', data);
+      setRecommendations(data);
+      console.log('Recommendations set:', data);
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+    }
+  };
+
+  // Fetch recommendations when search term changes (debounced)
   useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
     if (searchTerm.trim() === '') {
       setRecommendations([]);
       setShowRecommendations(false);
       return;
     }
-    
-    setShowRecommendations(true);
-    
-    // Debounce the API call to avoid making too many requests
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    
-    searchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const response = await fetch(`https://ai-drug-summary.duckdns.org/drug-summary/search?q=${encodeURIComponent(searchTerm)}&limit=10`);
-        const data = await response.json();
-        setRecommendations(data);
-        // Ensure focus stays in the input after recommendations update
-        if (searchInputRef.current) {
-          searchInputRef.current.focus();
-        }
-      } catch (error) {
-        console.error('Error fetching recommendations:', error);
-      }
-    }, 300); // 300ms debounce
-    
+    searchTimeoutRef.current = setTimeout(() => {
+      fetchRecommendations(searchTerm);
+    }, 300);
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
@@ -113,27 +123,36 @@ export default function DrugInformationPage() {
     };
   }, []);
 
+  // Filter drugs by selected letter
+  const filteredDrugs = drugs.filter(drug => drug.name && drug.name[0].toUpperCase() === selectedLetter);
+
   const DrugInformationContent = () => (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 mt-16">
       <div className="text-center mb-4">
-        <h1 className="text-4xl font-bold text-blue-700 mb-2">Drug Information</h1>
-        <p className="text-gray-600 text-lg">European Medicines Agency approved drug information</p>
+        <h1 className="text-3xl md:text-4xl lg:text-[52px] font-semibold text-[#214498] mb-2 font-['DM_Sans']">Drug Information</h1>
+        <p className="text-gray-600 text-lg mt-6">European Medicines Agency approved drug information</p>
       </div>
       
       <div className="relative mb-8" ref={searchContainerRef}>
-        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-          <div className="pl-4 pr-2">
-            <Search className="text-gray-400" size={20} />
+        <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 rounded-xl bg-white mt-5">
+          <div className="pl-2 flex items-center">
+            <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
           </div>
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search by drug name"
-            className="w-full py-3 px-2 outline-none text-gray-700"
+            placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list..."
+            className="w-full py-3 px-2 outline-none text-[#223258] font-['DM_Sans'] font-normal text-[20px] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[16px]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => {
               if (searchTerm.trim() !== '') {
+                setShowRecommendations(true);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchTerm.trim() !== '') {
+                // Trigger search
                 setShowRecommendations(true);
               }
             }}
@@ -152,17 +171,19 @@ export default function DrugInformationPage() {
               }, 100);
             }}
           />
-          {searchTerm && (
-            <button 
-              className="bg-blue-600 hover:bg-blue-700 p-3 text-white"
-              onClick={() => setSearchTerm('')}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-45">
-                <path d="M5 12h14"></path>
-                <path d="M12 5v14"></path>
-              </svg>
-            </button>
-          )}
+          <button 
+            className="w-10 h-10 flex items-center justify-center hover:bg-blue-600 border-none bg-[#3771FE] rounded-[6px] relative ml-2"
+            onClick={() => {
+              if (searchTerm.trim() !== '') {
+                fetchRecommendations(searchTerm);
+              }
+            }}
+          >
+            <svg className="text-white" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 24L24 8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+              <path d="M14 8H24V18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+            </svg>
+          </button>
         </div>
         
         {/* Recommendations dropdown */}
@@ -172,7 +193,7 @@ export default function DrugInformationPage() {
               <Link 
                 key={index}
                 href={`/drug-information/${slugify(drug.name)}`}
-                className="block px-4 py-2 hover:bg-blue-50 text-gray-700"
+                className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] font-normal text-[20px]"
                 onClick={() => {
                   setShowRecommendations(false);
                   // Refocus the input before navigation
@@ -192,6 +213,20 @@ export default function DrugInformationPage() {
         )}
       </div>
       
+      {/* Alphabet bar moved below search bar, no borders, hide scrollbar */}
+      <div className="flex overflow-x-auto gap-2 mb-6 pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
+          <button
+            key={letter}
+            className={`min-w-[36px] px-3 py-1 rounded-lg text-lg font-['DM_Sans'] transition-colors focus:outline-none font-semibold ${selectedLetter === letter ? 'bg-[#214498] text-white' : 'text-[#878787]'}`}
+            style={{ background: selectedLetter === letter ? '#214498' : 'transparent', border: 'none' }}
+            onClick={() => setSelectedLetter(letter)}
+          >
+            {letter}
+          </button>
+        ))}
+      </div>
+      
       {/* Drug list */}
       <div>
         {isLoading ? (
@@ -200,19 +235,19 @@ export default function DrugInformationPage() {
           </div>
         ) : (
           <>
-            {drugs.map((drug, index) => (
+            {filteredDrugs.map((drug, index) => (
               <div key={index} className="border-b border-gray-200 py-3">
                 <Link 
                   href={`/drug-information/${slugify(drug.name)}`} 
-                  className="text-blue-700 hover:text-blue-900"
+                  className="text-[#223258] font-['DM_Sans'] font-normal text-[20px] hover:text-blue-900"
                 >
                   {drug.name}
                 </Link>
               </div>
             ))}
-            {drugs.length === 0 && (
+            {filteredDrugs.length === 0 && (
               <div className="text-center py-6 text-gray-500">
-                No drugs found. Please try again later.
+                No drugs found for this letter.
               </div>
             )}
           </>
