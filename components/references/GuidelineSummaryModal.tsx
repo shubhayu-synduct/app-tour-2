@@ -23,14 +23,9 @@ interface ChatMessage {
 }
 
 interface GuidelineSummaryModalProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  guidelineId: number;
-  guidelineTitle: string;
-  year?: string;
-  society?: string;
-  link?: string;
-  url?: string;
+  citation: any;
 }
 
 function decodeUnicode(str: string): string {
@@ -41,18 +36,8 @@ function decodeUnicode(str: string): string {
   );
 }
 
-export default function GuidelineSummaryModal({ 
-  isOpen, 
-  onClose, 
-  guidelineId, 
-  guidelineTitle,
-  year,
-  society,
-  link,
-  url
-}: GuidelineSummaryModalProps) {
+export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ open, onClose, citation }) => {
   const router = useRouter();
-  const effectiveLink = link || url;
   const [summary, setSummary] = useState<Summary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -108,8 +93,8 @@ export default function GuidelineSummaryModal({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            title: guidelineTitle,
-            guidelines_index: guidelineId
+            title: citation.title,
+            guidelines_index: citation.guidelines_index
           })
         })
         
@@ -145,10 +130,10 @@ export default function GuidelineSummaryModal({
       }
     }
     
-    if (isOpen && guidelineId && !summary) {
+    if (open && citation && !summary) {
       fetchSummary()
     }
-  }, [isOpen, guidelineId, guidelineTitle, summary])
+  }, [open, citation, summary])
 
   const extractReferenceText = useCallback((refNumber: string, refIndex: number) => {
     if (!summary) return null
@@ -313,8 +298,8 @@ export default function GuidelineSummaryModal({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: guidelineTitle,
-          guidelines_index: guidelineId,
+          title: citation.title,
+          guidelines_index: citation.guidelines_index,
           question: followupQuestion
         })
       })
@@ -487,7 +472,7 @@ export default function GuidelineSummaryModal({
     )
   }
 
-  if (!isOpen) return null;
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-end z-50 p-0">
@@ -522,23 +507,23 @@ export default function GuidelineSummaryModal({
                         lineHeight: 1.2
                       }}
                     >
-                      {effectiveLink ? (
+                      {citation.link ? (
                         <a
-                          href={effectiveLink}
+                          href={citation.link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="guideline-title-link"
                           style={{ color: '#273561', cursor: 'pointer', transition: 'color 0.2s' }}
                         >
-                          {summary?.title || guidelineTitle}
+                          {summary?.title || citation.title}
                         </a>
                       ) : (
-                        summary?.title || guidelineTitle
+                        summary?.title || citation.title
                       )}
                     </h1>
                     {/* Tags */}
                     <div className="flex gap-2 mb-6">
-                      {year && (
+                      {citation.year && (
                         <span
                           className="px-3 py-1 text-sm"
                           style={{
@@ -550,10 +535,10 @@ export default function GuidelineSummaryModal({
                             borderRadius: 6,
                           }}
                         >
-                          {year}
+                          {citation.year}
                         </span>
                       )}
-                      {society && (
+                      {citation.society && (
                         <span
                           className="px-3 py-1 text-sm"
                           style={{
@@ -565,7 +550,7 @@ export default function GuidelineSummaryModal({
                             borderRadius: 6,
                           }}
                         >
-                          {society}
+                          {citation.society}
                         </span>
                       )}
                     </div>
@@ -705,9 +690,9 @@ export default function GuidelineSummaryModal({
                     Original Source
                   </h2>
                 </button>
-                {effectiveLink && (
+                {citation.link && (
                   <a
-                    href={effectiveLink}
+                    href={citation.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -964,4 +949,4 @@ export default function GuidelineSummaryModal({
       `}</style>
     </div>
   );
-} 
+}; 

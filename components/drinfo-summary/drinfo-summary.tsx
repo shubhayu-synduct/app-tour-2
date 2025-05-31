@@ -111,7 +111,7 @@ interface DrInfoSummaryData {
 
 const KNOWN_STATUSES: StatusType[] = ['processing', 'searching', 'summarizing', 'formatting', 'complete'];
 
-export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'instant' }: DrInfoSummaryProps) {
+export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'research' }: DrInfoSummaryProps) {
   const [query, setQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -124,6 +124,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'i
   const [searchPosition, setSearchPosition] = useState<"middle" | "bottom">("middle")
   const [showCitationsSidebar, setShowCitationsSidebar] = useState(false)
   const [activeCitations, setActiveCitations] = useState<Record<string, Citation> | null>(null)
+  const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
+  const [showGuidelineModal, setShowGuidelineModal] = useState(false)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [isChatLoading, setIsChatLoading] = useState(false)
@@ -413,27 +415,28 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'i
     }
   }, [sessionId, isChatLoading, query, hasFetched, lastQuestion]);
 
-  // Auto-scroll to bottom (with extra space) when messages change (new message, streaming, or complete)
+  // Add new controlled scroll effect
   useEffect(() => {
-    if (inputAnchorRef.current) {
-      inputAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if (isStreaming && status !== 'complete') {
+      // During streaming, scroll to the bottom of the content
+      const contentDiv = document.querySelector('.prose');
+      if (contentDiv) {
+        contentDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    } else if (!isStreaming && status === 'complete') {
+      // After streaming is complete, scroll to bottom
+      if (inputAnchorRef.current) {
+        inputAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
     }
-  }, [messages, isStreaming, status]);
+  }, [isStreaming, status, messages, streamedContent]);
 
-  // Scroll up a bit when a follow-up is asked (so input is visible, not at very bottom)
-  const scrollToInput = () => {
-    if (inputAnchorRef.current) {
-      inputAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  // Add a separate effect to handle content container scrolling
+  useEffect(() => {
+    if (contentRef.current && isStreaming) {
+      contentRef.current.scrollTop = contentRef.current.scrollHeight;
     }
-  };
-
-  const scrollToInputWithOffset = () => {
-    if (contentRef.current && inputAnchorRef.current) {
-      const offset = 180; // px, adjust as needed
-      const target = inputAnchorRef.current.offsetTop - offset;
-      contentRef.current.scrollTo({ top: target > 0 ? target : 0, behavior: 'smooth' });
-    }
-  };
+  }, [streamedContent, isStreaming]);
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -447,16 +450,20 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'i
     e.preventDefault();
     if (!followUpQuestion.trim()) return;
     setLastQuestion(followUpQuestion);
+    
+    // Start the search/streaming first to create the answer icon
     handleSearchWithContent(followUpQuestion, true, activeMode === 'instant' ? 'swift' : 'study');
     setFollowUpQuestion(''); // Clear follow-up input after follow-up
-    // Small delay to ensure DOM is updated with new answer icon
-    setTimeout(() => {
-      const answerIcons = document.querySelectorAll('.flex.items-start.gap-2.mb-4');
-      const lastAnswerIcon = answerIcons[answerIcons.length - 1];
-      if (lastAnswerIcon) {
-        lastAnswerIcon.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
+
+    // Wait for the DOM to update with the new answer icon
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Now scroll to the answer icon
+    const answerIcons = document.querySelectorAll('.flex.items-start.gap-2.mb-4');
+    const lastAnswerIcon = answerIcons[answerIcons.length - 1];
+    if (lastAnswerIcon) {
+      lastAnswerIcon.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   const parseContent = (content: string) => {
@@ -839,7 +846,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'i
           setIsLoading(false);
         }
       },
-      { sessionId: sessionId, userId, is_follow_up: isFollowUp, mode }
+      { sessionId: sessionId, userId, is_follow_up: isFollowUp, mode: activeMode === 'instant' ? 'swift' : 'study' }
     );
   };
 
@@ -922,6 +929,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'i
                             <div className="mb-6 ml-8">
                               <div
                                 className="prose prose-slate prose-ul:text-black marker:text-black max-w-none"
+                                style={{ fontFamily: 'DM Sans, sans-serif' }}
                                 dangerouslySetInnerHTML={{
                                   __html:
                                     idx === messages.length - 1 && status !== 'complete'
@@ -995,22 +1003,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'i
                         ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
                         : 'bg-white text-gray-500 border-gray-300'
                     }`}
-                    onClick={() => setActiveMode('instant')}
+                    onClick={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
                   >
                     <img src="/instant.svg" alt="Instant Mode Icon" className="w-4 h-4" />
                     Acute
-                  </button>
-                  <button
-                    type="button"
-                    className={`px-3 py-1 rounded border text-sm flex items-center gap-1 ${
-                      activeMode === 'research'
-                        ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
-                        : 'bg-white text-gray-500 border-gray-300'
-                    }`}
-                    onClick={() => setActiveMode('research')}
-                  >
-                    <img src="/research.svg" alt="Research Mode Icon" className="w-4 h-4" />
-                    Research
                   </button>
                 </div>
               </div>
