@@ -88,3 +88,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 #### Lets se
 
 ## Miracales Happen
+
+### mergeing sandy guidelines with ai summary
