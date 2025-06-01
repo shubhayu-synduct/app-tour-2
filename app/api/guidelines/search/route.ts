@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // The URL for the external guidelines search API
-const GUIDELINES_API_URL = 'http://dev-guidelines.eastus.cloudapp.azure.com/search';
+const GUIDELINES_API_URL = 'https://guidelines-stage.duckdns.org/search';
 
 export async function POST(request: NextRequest) {
   try {

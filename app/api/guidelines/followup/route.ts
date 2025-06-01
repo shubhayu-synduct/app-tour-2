@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // The URL for the external guidelines followup API
-const GUIDELINES_API_URL = 'http://dev-guidelines.eastus.cloudapp.azure.com/followup';
+const GUIDELINES_API_URL = 'https://guidelines-stage.duckdns.org/followup';
 
 export async function POST(request: NextRequest) {
   try {
