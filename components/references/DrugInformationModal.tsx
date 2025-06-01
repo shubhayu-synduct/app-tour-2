@@ -77,9 +77,13 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
       const cleanDrugName = citation.title
         .replace(/\s*\([^)]*\)/g, '') // Remove anything in parentheses
         .replace(/-previously-.*$/, '') // Remove "-previously-anything" from the end
-        .replace(/-/g, ' '); // Replace remaining hyphens with spaces
-      
+        .replace(/-/g, ' ')            // Replace hyphens with spaces
+        .replace(/\//g, ' ')           // Replace slashes with spaces
+        .replace(/\s+/g, ' ')          // Collapse multiple spaces to one
+        .trim();                       // Trim leading/trailing spaces
+      // console.log('cleanDrugName', cleanDrugName);
       const response = await fetch(`https://drugsumary.drinfo.ai/api/drugs/${cleanDrugName}`);
+      // console.log('Response:', response);
       
       if (!response.ok) {
         throw new Error('Drug Information Not Available');
