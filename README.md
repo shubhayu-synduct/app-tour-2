@@ -90,3 +90,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Miracales Happen
 
 ### mergeing sandy guidelines with ai summary
+# Deploying sandys latest commit 
