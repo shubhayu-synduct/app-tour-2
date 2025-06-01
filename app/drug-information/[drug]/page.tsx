@@ -117,7 +117,7 @@ export default function DrugDetailPage() {
           .replace(/-previously-.*$/, '') // Remove "-previously-anything" from the end
           .replace(/-/g, ' '); // Replace remaining hyphens with spaces
         
-        console.log('cleanDrugSlug', cleanDrugSlug);
+        // console.log('cleanDrugSlug', cleanDrugSlug);
         const response = await fetch(`https://drugsumary.drinfo.ai/api/drugs/${cleanDrugSlug}`);
         
         if (!response.ok) {
