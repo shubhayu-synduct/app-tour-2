@@ -19,8 +19,9 @@ interface DrugData {
 }
 
 interface Drug {
-  name: string;
-  match_score?: number;
+  brand_name: string;
+  active_substance: string[];
+  inn: string[];
 }
 
 export default function DrugDetailPage() {
@@ -110,10 +111,17 @@ export default function DrugDetailPage() {
     
     const fetchDrugData = async () => {
       try {
-        const response = await fetch(`https://ai-drug-summary.duckdns.org/drug-summary/drugs/${drugSlug}`);
+        // Clean the drug name by removing anything in brackets and handling hyphens
+        const cleanDrugSlug = drugSlug
+          .replace(/\s*\([^)]*\)/g, '') // Remove anything in parentheses
+          .replace(/-previously-.*$/, '') // Remove "-previously-anything" from the end
+          .replace(/-/g, ' '); // Replace remaining hyphens with spaces
+        
+        console.log('cleanDrugSlug', cleanDrugSlug);
+        const response = await fetch(`https://drugsumary.drinfo.ai/api/drugs/${cleanDrugSlug}`);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch drug information');
+          throw new Error('Drug Information Not Available');
         }
         
         const data = await response.json();
@@ -150,7 +158,7 @@ export default function DrugDetailPage() {
   // Fetch recommendations when search term changes
   useEffect(() => {
     // Don't show recommendations if the search term is empty or matches the initial one
-    if (searchTerm.trim() === '' || searchTerm === initialSearchTerm) {
+    if (searchTerm.trim() === '' || searchTerm === initialSearchTerm || searchTerm.trim().length < 2) {
       setRecommendations([]);
       setShowRecommendations(false);
       return;
@@ -166,9 +174,37 @@ export default function DrugDetailPage() {
     
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        const response = await fetch(`https://ai-drug-summary.duckdns.org/drug-summary/search?q=${encodeURIComponent(searchTerm)}&limit=10`);
+        console.log('Searching for term:', searchTerm);
+        const response = await fetch(`https://drugsumary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(searchTerm.trim())}&limit=10`);
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        setRecommendations(data);
+        console.log('Response data:', data);
+        
+        let transformedData = [];
+        
+        // Handle direct brand match
+        if (data.direct_match) {
+          transformedData.push({
+            brand_name: data.direct_match.name,
+            active_substance: [], // Direct matches don't have active substances in the response
+            inn: []
+          });
+        }
+        
+        // Handle brand options
+        if (data.brand_options && data.brand_options.length > 0) {
+          const brandOptions = data.brand_options.map((drug: any) => ({
+            brand_name: drug.brand_name,
+            active_substance: drug.active_substance || [],
+            inn: drug.inn || []
+          }));
+          transformedData = [...transformedData, ...brandOptions];
+        }
+        
+        setRecommendations(transformedData);
         // Ensure focus stays in the input after recommendations update
         if (searchInputRef.current) {
           searchInputRef.current.focus();
@@ -324,7 +360,7 @@ export default function DrugDetailPage() {
               {recommendations.map((rec, index) => (
                 <Link 
                   key={index}
-                  href={`/drug-information/${slugify(rec.name)}`}
+                  href={`/drug-information/${slugify(rec.brand_name)}`}
                   className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] text-[18px]"
                   onClick={() => {
                     setShowRecommendations(false);
@@ -338,7 +374,15 @@ export default function DrugDetailPage() {
                     e.preventDefault();
                   }}
                 >
-                  {rec.name}
+                  {rec.active_substance && rec.active_substance.length > 0 ? (
+                    <>
+                      <b>{rec.active_substance.join(', ')}</b> (<i>Brand Name:</i> <b>{rec.brand_name}</b>)
+                    </>
+                  ) : (
+                    <>
+                      <i>Brand Name:</i> <b>{rec.brand_name}</b>
+                    </>
+                  )}
                 </Link>
               ))}
             </div>

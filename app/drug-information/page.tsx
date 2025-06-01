@@ -1,15 +1,18 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, ArrowUpRight } from 'lucide-react';
+import { Search, ArrowUpRight, ArrowLeftRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import Link from 'next/link';
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { useAuth } from "@/hooks/use-auth";
 import Image from 'next/image';
 
 interface Drug {
-  name: string;
-  match_score?: number;
+  brand_name: string;
+  inn: string[];
+  active_substance: string[];
+  first_letter: string;
+  pdf_url: string;
 }
 
 export default function DrugInformationPage() {
@@ -23,13 +26,52 @@ export default function DrugInformationPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [selectedLetter, setSelectedLetter] = useState('A');
   
-  // Fetch all drugs on component mount
+  const alphabetBarRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollAmount = 5 * 28;
+
+  const updateScrollButtons = () => {
+    if (alphabetBarRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = alphabetBarRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    updateScrollButtons();
+    const handleResize = () => updateScrollButtons();
+    window.addEventListener('resize', handleResize);
+    if (alphabetBarRef.current) {
+      alphabetBarRef.current.addEventListener('scroll', updateScrollButtons);
+    }
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (alphabetBarRef.current) {
+        alphabetBarRef.current.removeEventListener('scroll', updateScrollButtons);
+      }
+    };
+  }, []);
+
+  const scrollAlphabetBar = (direction: 'left' | 'right') => {
+    if (alphabetBarRef.current) {
+      const { scrollLeft } = alphabetBarRef.current;
+      alphabetBarRef.current.scrollTo({
+        left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+  
+  // Fetch drugs when selected letter changes
   useEffect(() => {
     const fetchDrugs = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch('https://ai-drug-summary.duckdns.org/drug-summary/drugs');
+        const response = await fetch(`https://drugsumary.drinfo.ai/api/library/drugs?letter=${selectedLetter}&offset=0`);
         const data = await response.json();
-        setDrugs(data);
+        setDrugs(data.drugs);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching drugs:', error);
@@ -38,7 +80,7 @@ export default function DrugInformationPage() {
     };
     
     fetchDrugs();
-  }, []);
+  }, [selectedLetter]);
   
   // Fetch recommendations function
   const fetchRecommendations = async (term: string) => {
@@ -50,12 +92,34 @@ export default function DrugInformationPage() {
     }
     setShowRecommendations(true);
     try {
-      const response = await fetch(`https://ai-drug-summary.duckdns.org/drug-summary/search?q=${encodeURIComponent(term)}&limit=10`);
+      const response = await fetch(`https://drugsumary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(term)}&limit=10`);
       console.log('API response status:', response.status);
       const data = await response.json();
       console.log('API response data:', data);
-      setRecommendations(data);
-      console.log('Recommendations set:', data);
+      
+      let transformedData = [];
+      
+      // Handle direct brand match
+      if (data.direct_match) {
+        transformedData.push({
+          brand_name: data.direct_match.name,
+          active_substance: [], // Direct matches don't have active substances in the response
+          inn: []
+        });
+      }
+      
+      // Handle brand options
+      if (data.brand_options && data.brand_options.length > 0) {
+        const brandOptions = data.brand_options.map((drug: any) => ({
+          brand_name: drug.brand_name,
+          active_substance: drug.active_substance || [],
+          inn: drug.inn || []
+        }));
+        transformedData = [...transformedData, ...brandOptions];
+      }
+      
+      setRecommendations(transformedData);
+      console.log('Recommendations set:', transformedData);
       if (searchInputRef.current) {
         searchInputRef.current.focus();
       }
@@ -100,6 +164,7 @@ export default function DrugInformationPage() {
 
   // Function to convert drug name to URL-friendly format
   const slugify = (text: string) => {
+    if (!text) return '';
     return text
       .toLowerCase()
       .replace(/ /g, '-')
@@ -122,9 +187,6 @@ export default function DrugInformationPage() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  // Filter drugs by selected letter
-  const filteredDrugs = drugs.filter(drug => drug.name && drug.name[0].toUpperCase() === selectedLetter);
 
   const DrugInformationContent = () => (
     <div className="max-w-4xl mx-auto px-4 py-8 mt-16">
@@ -192,7 +254,7 @@ export default function DrugInformationPage() {
             {recommendations.map((drug, index) => (
               <Link 
                 key={index}
-                href={`/drug-information/${slugify(drug.name)}`}
+                href={`/drug-information/${slugify(drug.brand_name)}`}
                 className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] font-normal text-[20px]"
                 onClick={() => {
                   setShowRecommendations(false);
@@ -206,7 +268,15 @@ export default function DrugInformationPage() {
                   e.preventDefault();
                 }}
               >
-                {drug.name}
+                {drug.active_substance && drug.active_substance.length > 0 ? (
+                  <>
+                    <b>{drug.active_substance.join(', ')}</b> (<i>Brand Name:</i> <b>{drug.brand_name}</b>)
+                  </>
+                ) : (
+                  <>
+                    <i>Brand Name:</i> <b>{drug.brand_name}</b>
+                  </>
+                )}
               </Link>
             ))}
           </div>
@@ -214,44 +284,100 @@ export default function DrugInformationPage() {
       </div>
       
       {/* Alphabet bar moved below search bar, no borders, hide scrollbar */}
-      <div className="flex overflow-x-auto gap-2 mb-6 pb-2 hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
+      <div className="flex justify-center w-full">
+        <div className="flex items-center mb-6 pb-2 max-w-[1118px] w-full justify-center">
           <button
-            key={letter}
-            className={`min-w-[36px] px-3 py-1 rounded-lg text-lg font-['DM_Sans'] transition-colors focus:outline-none font-semibold ${selectedLetter === letter ? 'bg-[#214498] text-white' : 'text-[#878787]'}`}
-            style={{ background: selectedLetter === letter ? '#214498' : 'transparent', border: 'none' }}
-            onClick={() => setSelectedLetter(letter)}
+            className={`mr-1 p-0 bg-transparent border-none shadow-none hover:bg-transparent focus:outline-none transition-opacity`}
+            onClick={() => scrollAlphabetBar('left')}
+            aria-label="Scroll left"
+            type="button"
+            // disabled={!canScrollLeft}
           >
-            {letter}
+            <ChevronsLeft size={24} color="#214498" />
           </button>
-        ))}
+          <div
+            ref={alphabetBarRef}
+            className="flex overflow-x-auto hide-scrollbar"
+            style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', scrollBehavior: 'smooth', minWidth: 0 }}
+          >
+            {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
+              <button
+                key={letter}
+                className={`min-w-[28px] px-0.5 py-1 rounded-lg text-lg font-['DM_Sans'] transition-colors focus:outline-none font-semibold ${selectedLetter === letter ? 'bg-[#214498] text-white' : 'text-[#878787]'}`}
+                style={{ background: selectedLetter === letter ? '#214498' : 'transparent', border: 'none' }}
+                onClick={() => setSelectedLetter(letter)}
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
+          <button
+            className={`ml-1 p-0 bg-transparent border-none shadow-none hover:bg-transparent focus:outline-none transition-opacity`}
+            onClick={() => scrollAlphabetBar('right')}
+            aria-label="Scroll right"
+            type="button"
+            // disabled={!canScrollRight} 
+          >
+            <ChevronsRight size={24} color="#214498" />
+          </button>
+        </div>
       </div>
       
-      {/* Drug list */}
-      <div>
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        ) : (
-          <>
-            {filteredDrugs.map((drug, index) => (
-              <div key={index} className="border-b border-gray-200 py-3">
-                <Link 
-                  href={`/drug-information/${slugify(drug.name)}`} 
-                  className="text-[#223258] font-['DM_Sans'] font-normal text-[20px] hover:text-blue-900"
-                >
-                  {drug.name}
-                </Link>
-              </div>
-            ))}
-            {filteredDrugs.length === 0 && (
-              <div className="text-center py-6 text-gray-500">
-                No drugs found for this letter.
-              </div>
+      <div
+        className="overflow-x-scroll w-full max-w-[1118px] mx-auto"
+        style={{ scrollbarGutter: 'stable' }}
+      >
+        <table className="min-w-full table-fixed">
+          <colgroup>
+            <col style={{ width: '90%' }} />
+            <col style={{ width: '10%' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th className="text-left px-4 py-2 font-semibold text-[#223258] text-lg">Brand Name</th>
+              <th className="text-left px-4 py-2 font-semibold text-[#223258] text-lg">Active Substance(s)</th>
+            </tr>
+          </thead>
+          <tbody style={{ minHeight: '300px' }}>
+            {isLoading ? (
+              <tr>
+                <td colSpan={2} className="text-center py-12">
+                  <div className="flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              <>
+                {drugs.map((drug, index) => {
+                  const sortedActiveSubstances = drug.active_substance ? [...drug.active_substance].sort((a, b) => a.localeCompare(b)) : [];
+                  return (
+                    <tr key={index} className="border-b border-gray-100">
+                      <td className="px-4 py-3">
+                        <Link 
+                          href={`/drug-information/${slugify(drug.brand_name)}`} 
+                          className="text-[#223258] font-['DM_Sans'] font-normal text-[20px] hover:text-blue-900"
+                        >
+                          {drug.brand_name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-[#223258] font-['DM_Sans'] text-[20px]">
+                        {sortedActiveSubstances.length > 0 ? sortedActiveSubstances.join(', ') : '-'}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {drugs.length === 0 && (
+                  <tr>
+                    <td colSpan={2} className="text-center py-6 text-gray-500">
+                      No drugs found for this letter.
+                    </td>
+                  </tr>
+                )}
+              </>
             )}
-          </>
-        )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
