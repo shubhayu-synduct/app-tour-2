@@ -1,16 +1,27 @@
-"use client"
-
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { ChevronLeft, ChevronDown, FileText, ExternalLink, Search } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
-import { useAuth } from "@/hooks/use-auth";
+import React, { useState, useEffect, useRef } from 'react';
+import { X, ChevronLeft, ChevronDown, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import React from 'react';
 import Image from 'next/image';
 import DrugsLinksIcon from '@/components/ui/DrugsLinksIcon';
+import Link from 'next/link';
+
+interface Citation {
+  title: string;
+  url?: string;
+  authors?: string[];
+  year?: string | number;
+  journal?: string;
+  doi?: string;
+  source_type?: string;
+}
+
+interface DrugInformationModalProps {
+  open: boolean;
+  citation: Citation | null;
+  onClose: () => void;
+}
 
 interface DrugData {
   name: string;
@@ -24,9 +35,8 @@ interface Drug {
   inn: string[];
 }
 
-export default function DrugDetailPage() {
-  const { user } = useAuth();
-  const params = useParams();
+export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open, citation, onClose }) => {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [drug, setDrug] = useState<DrugData | null>(null);
@@ -34,20 +44,19 @@ export default function DrugDetailPage() {
   
   // Search functionality
   const [searchTerm, setSearchTerm] = useState('');
-  const [initialSearchTerm, setInitialSearchTerm] = useState(''); // Track the initial search term
+  const [initialSearchTerm, setInitialSearchTerm] = useState('');
   const [recommendations, setRecommendations] = useState<Drug[]>([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Function to convert slug back to drug name for API call
-  const unslugify = (slug: string) => {
-    return slug
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, letter => letter.toUpperCase());
-  };
-  
+
+  useEffect(() => {
+    if (citation) {
+      fetchDrugData();
+    }
+  }, [citation]);
+
   // Function to convert drug name to URL-friendly format
   const slugify = (text: string) => {
     return text
@@ -56,105 +65,52 @@ export default function DrugDetailPage() {
       .replace(/\//g, '-')
       .replace(/[^\w-]+/g, '');
   };
-  
-  const drugSlug = params.drug as string;
-  const drugName = drugSlug ? unslugify(drugSlug) : '';
-  
-  // Function to toggle accordion sections
-  const toggleSection = (sectionId: string) => {
-    setOpenSections(prev => ({
-      ...prev,
-      [sectionId]: !prev[sectionId]
-    }));
-  };
 
-  // Process markdown content to extract sections and create accordion structure
-  const processMarkdownContent = (content: string) => {
-    // Split the markdown content into sections using regex
-    const sections = [];
+  const fetchDrugData = async () => {
+    if (!citation) return;
     
-    // Define regex to match section headers (## 4.1, ## 4.2, etc.) without using 's' flag
-    const sectionRegex = /##\s+(\d+\.\d+\s+.*?)(?=(?:\n##\s+\d+\.\d+)|$)/g;
-    
-    // Replace all newlines with a special marker to simulate dot-all behavior
-    const processedContent = content.replace(/\n/g, "<<NEWLINE>>");
-    const processedRegex = /##\s+(\d+\.\d+\s+.*?)(?=(?:<<NEWLINE>>##\s+\d+\.\d+)|$)/g;
-    
-    let match;
-    while ((match = processedRegex.exec(processedContent)) !== null) {
-      const fullSection = match[0].replace(/<<NEWLINE>>/g, "\n");
-      const sectionTitle = fullSection.split('\n')[0].replace('##', '').trim();
-      
-      // Extract section number and descriptive title
-      const sectionNumber = sectionTitle.split(' ')[0];
-      // Get the title without the section number (skip the number and any whitespace after it)
-      const descriptiveTitle = sectionTitle.replace(/^\d+\.\d+\s+/, '');
-      
-      const sectionContent = fullSection.split('\n').slice(1).join('\n').trim();
-      
-      sections.push({
-        id: sectionNumber.replace(/\./g, '_'),
-        number: sectionNumber,
-        title: descriptiveTitle,
-        content: sectionContent
-      });
-    }
-    
-    return sections;
-  };
-  
-  // Fetch drug data when drugSlug changes
-  useEffect(() => {
-    // Reset loading state when drug param changes
     setLoading(true);
     setError(null);
     
-    const fetchDrugData = async () => {
-      try {
-        // Clean the drug name by removing anything in brackets and handling hyphens
-        const cleanDrugSlug = drugSlug
-          .replace(/\s*\([^)]*\)/g, '') // Remove anything in parentheses
-          .replace(/-previously-.*$/, '') // Remove "-previously-anything" from the end
-          .replace(/-/g, ' '); // Replace remaining hyphens with spaces
-        
-        console.log('cleanDrugSlug', cleanDrugSlug);
-        const response = await fetch(`https://drugsumary.drinfo.ai/api/drugs/${cleanDrugSlug}`);
-        
-        if (!response.ok) {
-          throw new Error('Drug Information Not Available');
-        }
-        
-        const data = await response.json();
-        // Pre-process the markdown content
-        if (data.markdown_content) {
-          // Replace <br> tags with spaces
-          data.markdown_content = data.markdown_content.replace(/<br\s*\/?>/gi, ' ');
-          
-          // Replace LaTeX-style math expressions with appropriate symbols
-          data.markdown_content = data.markdown_content.replace(/\$\\geq\$/g, '≥');
-          data.markdown_content = data.markdown_content.replace(/\$\\tgeq\$/g, '≥');
-          data.markdown_content = data.markdown_content.replace(/\$\\leq\$/g, '≤');
-          data.markdown_content = data.markdown_content.replace(/\$\\tleq\$/g, '≤');
-          data.markdown_content = data.markdown_content.replace(/\$\\times\$/g, '×');
-          data.markdown_content = data.markdown_content.replace(/\$\\pm\$/g, '±');
-        }
-        setDrug(data);
-        // Initialize search term with drug name and store it as the initial term
-        setSearchTerm(data.name);
-        setInitialSearchTerm(data.name);
-      } catch (error) {
-        console.error('Error fetching drug data:', error);
-        setError(error instanceof Error ? error.message : 'An unknown error occurred');
-      } finally {
-        setLoading(false);
+    try {
+      // Clean the drug name by removing anything in brackets and handling hyphens
+      const cleanDrugName = citation.title
+        .replace(/\s*\([^)]*\)/g, '') // Remove anything in parentheses
+        .replace(/-previously-.*$/, '') // Remove "-previously-anything" from the end
+        .replace(/-/g, ' '); // Replace remaining hyphens with spaces
+      
+      const response = await fetch(`https://drugsumary.drinfo.ai/api/drugs/${cleanDrugName}`);
+      
+      if (!response.ok) {
+        throw new Error('Drug Information Not Available');
       }
-    };
-    
-    if (drugSlug) {
-      fetchDrugData();
+      
+      const data = await response.json();
+      // Pre-process the markdown content
+      if (data.markdown_content) {
+        // Replace <br> tags with spaces
+        data.markdown_content = data.markdown_content.replace(/<br\s*\/?>/gi, ' ');
+        
+        // Replace LaTeX-style math expressions with appropriate symbols
+        data.markdown_content = data.markdown_content.replace(/\$\\geq\$/g, '≥');
+        data.markdown_content = data.markdown_content.replace(/\$\\tgeq\$/g, '≥');
+        data.markdown_content = data.markdown_content.replace(/\$\\leq\$/g, '≤');
+        data.markdown_content = data.markdown_content.replace(/\$\\tleq\$/g, '≤');
+        data.markdown_content = data.markdown_content.replace(/\$\\times\$/g, '×');
+        data.markdown_content = data.markdown_content.replace(/\$\\pm\$/g, '±');
+      }
+      setDrug(data);
+      // Initialize search term with drug name and store it as the initial term
+      setSearchTerm(data.name);
+      setInitialSearchTerm(data.name);
+    } catch (error) {
+      console.error('Error fetching drug data:', error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+    } finally {
+      setLoading(false);
     }
-  }, [drugSlug]);
-  
+  };
+
   // Fetch recommendations when search term changes
   useEffect(() => {
     // Don't show recommendations if the search term is empty or matches the initial one
@@ -220,21 +176,21 @@ export default function DrugDetailPage() {
       }
     };
   }, [searchTerm, initialSearchTerm]);
-  
+
   // Keep focus on search input after every keystroke
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [searchTerm]);
-  
+
   // Also maintain focus when recommendations state changes
   useEffect(() => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [recommendations, showRecommendations]);
-  
+
   // Handle clicking outside the recommendations to close them
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -249,14 +205,73 @@ export default function DrugDetailPage() {
     };
   }, []);
 
-  const DrugDetailContent = () => {
-    if (loading) {
-      return (
-        <div className="max-w-4xl mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
+
+  const processMarkdownContent = (content: string) => {
+    const sections = [];
+    
+    const sectionRegex = /##\s+(\d+\.\d+\s+.*?)(?=(?:\n##\s+\d+\.\d+)|$)/g;
+    const processedContent = content.replace(/\n/g, "<<NEWLINE>>");
+    const processedRegex = /##\s+(\d+\.\d+\s+.*?)(?=(?:<<NEWLINE>>##\s+\d+\.\d+)|$)/g;
+    
+    let match;
+    while ((match = processedRegex.exec(processedContent)) !== null) {
+      const fullSection = match[0].replace(/<<NEWLINE>>/g, "\n");
+      const sectionTitle = fullSection.split('\n')[0].replace('##', '').trim();
+      
+      const sectionNumber = sectionTitle.split(' ')[0];
+      const descriptiveTitle = sectionTitle.replace(/^\d+\.\d+\s+/, '');
+      
+      const sectionContent = fullSection.split('\n').slice(1).join('\n').trim();
+      
+      sections.push({
+        id: sectionNumber.replace(/\./g, '_'),
+        number: sectionNumber,
+        title: descriptiveTitle,
+        content: sectionContent
+      });
+    }
+    
+    return sections;
+  };
+
+  if (!open || !citation) return null;
+
+  const handleBackClick = () => {
+    onClose();
+  };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-end">
+        <div
+          className="bg-white h-full overflow-y-auto shadow-xl p-6 animate-slide-in-right"
+          style={{ width: "70vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <button
+              className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[8px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+              onClick={handleBackClick}
+            >
+              <ChevronLeft size={16} />
+              <ChevronLeft size={16} className="-ml-3" />
+              <span>Back</span>
+            </button>
+            <button 
+              className="p-2 hover:bg-gray-100 rounded-full"
+              onClick={onClose}
+            >
+              <X size={20} style={{ color: "#263969" }} />
+            </button>
+          </div>
           <div className="animate-pulse flex flex-col w-full">
             <div className="h-10 bg-gray-200 rounded w-3/4 mb-6"></div>
             <div className="h-6 bg-gray-200 rounded w-1/2 mb-10"></div>
-            
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="mb-8">
                 <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
@@ -267,42 +282,67 @@ export default function DrugDetailPage() {
             ))}
           </div>
         </div>
-      );
-    }
-    
-    if (error || !drug) {
-      return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="mb-6">
-            <Link href="/drug-information" className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[8px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors">
+      </div>
+    );
+  }
+
+  if (error || !drug) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-end">
+        <div
+          className="bg-white h-full overflow-y-auto shadow-xl p-6 animate-slide-in-right"
+          style={{ width: "70vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <button
+              className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[10px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+              onClick={handleBackClick}
+            >
               <ChevronLeft size={16} />
               <ChevronLeft size={16} className="-ml-3" />
               <span>Back</span>
-            </Link>
+            </button>
+            <button 
+              className="p-2 hover:bg-gray-100 rounded-full"
+              onClick={onClose}
+            >
+              <X size={20} style={{ color: "#263969" }} />
+            </button>
           </div>
-          
           <div className="text-center py-12">
-            <FileText size={48} className="mx-auto mb-4 text-red-500" />
             <h1 className="text-2xl font-bold mb-2">Drug Not Found</h1>
             <p className="text-gray-600">{error || "The requested drug information could not be found."}</p>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    // Process markdown to extract sections
-    const sections = processMarkdownContent(drug.markdown_content);
+  const sections = processMarkdownContent(drug.markdown_content);
 
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Link href="/drug-information" className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[8px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors">
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-end">
+      <div
+        className="bg-white h-full overflow-y-auto shadow-xl p-6 animate-slide-in-right"
+        style={{ width: "70vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
+      >
+        <div className="flex justify-between items-center mb-6">
+          <button
+            className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[10px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+            onClick={handleBackClick}
+          >
             <ChevronLeft size={16} />
             <ChevronLeft size={16} className="-ml-3" />
             <span>Back</span>
-          </Link>
+          </button>
+          <button 
+            className="p-2 hover:bg-gray-100 rounded-full"
+            onClick={onClose}
+          >
+            <X size={20} style={{ color: "#263969" }} />
+          </button>
         </div>
-        
+
         {/* Search bar with autocomplete */}
         <div className="relative mb-8" ref={searchContainerRef}>
           <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 rounded-xl bg-white mt-5">
@@ -536,17 +576,7 @@ export default function DrugDetailPage() {
             </div>
           </div>
         </div>
-        
-        {/* <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600 italic">
-          <p>Disclaimer: The information provided is for educational purposes only and should not replace professional medical advice. Always consult a healthcare professional before taking any medication.</p>
-        </div> */}
       </div>
-    );
-  };
-
-  return (
-    <DashboardLayout>
-      {user && <DrugDetailContent />}
-    </DashboardLayout>
+    </div>
   );
-} 
+}; 

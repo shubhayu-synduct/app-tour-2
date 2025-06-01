@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, ArrowLeft } from "lucide-react";
 import { GuidelineSummaryModal } from "./GuidelineSummaryModal";
+import { DrugInformationModal } from "./DrugInformationModal";
 
 interface Citation {
   title: string;
@@ -21,6 +22,7 @@ interface ReferencesSidebarProps {
 export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, citations, onClose }) => {
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null);
   const [showGuidelineModal, setShowGuidelineModal] = useState(false);
+  const [showDrugModal, setShowDrugModal] = useState(false);
 
   if (!open || !citations) return null;
 
@@ -29,11 +31,18 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
       setSelectedCitation(citation);
       setShowGuidelineModal(true);
     }
-    // You can add logic for other source_types here if needed
+  };
+
+  const handleDrugClick = (citation: Citation) => {
+    if (citation.source_type === 'drug_database') {
+      setSelectedCitation(citation);
+      setShowDrugModal(true);
+    }
   };
 
   const handleBackClick = () => {
     setShowGuidelineModal(false);
+    setShowDrugModal(false);
     setSelectedCitation(null);
   };
 
@@ -43,7 +52,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
         className="citations-sidebar bg-white h-full overflow-y-auto shadow-xl p-6 animate-slide-in-right"
         style={{ width: "70vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
       >
-        {!showGuidelineModal ? (
+        {!showGuidelineModal && !showDrugModal ? (
           // References View
           <>
             <div className="flex justify-between items-center mb-6">
@@ -89,7 +98,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                       style={{
                         border: "none"
                       }}
-                      // You can add a handler for drug info modal here in the future
+                      onClick={() => handleDrugClick(citation)}
                     >
                       <span className="text-white font-regular text-xs" style={{ fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
                         More Information
@@ -180,9 +189,15 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
               ))}
             </div>
           </>
-        ) : (
+        ) : showGuidelineModal ? (
           <GuidelineSummaryModal
             open={showGuidelineModal}
+            onClose={handleBackClick}
+            citation={selectedCitation}
+          />
+        ) : (
+          <DrugInformationModal
+            open={showDrugModal}
             onClose={handleBackClick}
             citation={selectedCitation}
           />
