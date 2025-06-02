@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Sync with our custom session cookie
           if (user) {
-            setSessionCookie(user)
+            await setSessionCookie(user)
             
             // Create user document if it doesn't exist
             try {

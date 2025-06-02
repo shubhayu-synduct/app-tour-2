@@ -50,7 +50,7 @@ export function SignInForm() {
       }
 
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      setSessionCookie(userCredential.user)
+      await setSessionCookie(userCredential.user)
       router.push("/dashboard")
     } catch (err: any) {
       console.error("Error during signin:", err)
@@ -74,7 +74,7 @@ export function SignInForm() {
       }
 
       const result = await signInWithPopup(auth, googleProvider)
-      setSessionCookie(result.user)
+      await setSessionCookie(result.user)
       
       const userDocRef = doc(db, "users", result.user.uid)
       const userDoc = await getDoc(userDocRef)
@@ -113,7 +113,7 @@ export function SignInForm() {
       }
 
       const result = await signInWithPopup(auth, microsoftProvider)
-      setSessionCookie(result.user)
+      await setSessionCookie(result.user)
       
       const userDocRef = doc(db, "users", result.user.uid)
       const userDoc = await getDoc(userDocRef)
