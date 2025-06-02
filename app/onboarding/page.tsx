@@ -26,7 +26,9 @@ export default function Onboarding() {
     experience: "",
     institution: "",
     specialties: "",
-    otherSpecialty: ""
+    otherSpecialty: "",
+    address: "",
+    country: ""
   })
 
   const [ndaData, setNdaData] = useState({
@@ -67,7 +69,10 @@ export default function Onboarding() {
       lastName: "Last Name",
       age: "Age",
       gender: "Gender",
-      occupation: "Occupation"
+      occupation: "Occupation",
+      experience: "Experience",
+      placeOfWork: "Place of Work",
+      country: "Country"
     }
 
     const errors: Record<string, string> = {}
@@ -267,8 +272,8 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6 pb-8">
+      <div className="w-full max-w-sm">
         {/* Header */}
         <div className="text-center mb-4">
           <div className="flex items-center justify-center mb-2">
@@ -299,7 +304,7 @@ export default function Onboarding() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-indigo-50 shadow-lg border-2 border-indigo-300 px-8 py-5">
+        <div className="bg-[#F4F7FF] shadow-lg border-2 border-[#C6D7FF]/50 px-8 py-5 rounded-[8px]">
           {currentStep === 1 ? (
             // Step 1: Customer Information Form
             <div className="space-y-3">
@@ -311,7 +316,7 @@ export default function Onboarding() {
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.firstName ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
+                    className={`px-3 py-2 border ${fieldErrors.firstName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
                   />
                   {fieldErrors.firstName && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.firstName}</p>
@@ -324,7 +329,7 @@ export default function Onboarding() {
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.lastName ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
+                    className={`px-3 py-2 border ${fieldErrors.lastName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
                   />
                   {fieldErrors.lastName && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.lastName}</p>
@@ -340,7 +345,7 @@ export default function Onboarding() {
                     placeholder="Age"
                     value={formData.age}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.age ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
+                    className={`px-3 py-2 border ${fieldErrors.age ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
                   />
                   {fieldErrors.age && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.age}</p>
@@ -351,9 +356,9 @@ export default function Onboarding() {
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.gender ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm w-full`}
+                    className={`px-3 py-2 border ${fieldErrors.gender ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm w-full ${!formData.gender ? 'text-gray-400' : 'text-[#223258]'}`}
                   >
-                    <option value="" disabled>Select Sex</option>
+                    <option value="" disabled style={{ color: '#9ca3af' }}>Select Sex</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="other">Other</option>
@@ -369,13 +374,18 @@ export default function Onboarding() {
                   name="occupation"
                   value={formData.occupation}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.occupation ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm`}
+                  className={`w-full px-3 py-2 border ${fieldErrors.occupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.occupation ? 'text-gray-400' : 'text-[#223258]'}`}
                 >
-                  <option value="" disabled>Select Occupation</option>
-                  <option value="doctor">Doctor</option>
-                  <option value="nurse">Nurse</option>
-                  <option value="researcher">Researcher</option>
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Profession</option>
+                  <option value="physician">Physician</option>
+                  <option value="fellow">Fellow</option>
+                  <option value="consultant">Consultant</option>
+                  <option value="intern-resident">Intern/Resident</option>
+                  <option value="student">Student</option>
                   <option value="pharmacist">Pharmacist</option>
+                  <option value="advanced-practice-nurse">Advanced Practice Nurse</option>
+                  <option value="dentist">Dentist</option>
+                  <option value="medical-librarian">Medical Librarian</option>
                   <option value="other">Other</option>
                 </select>
                 {fieldErrors.occupation && (
@@ -387,112 +397,291 @@ export default function Onboarding() {
                 <input
                   type="text"
                   name="otherOccupation"
-                  placeholder="Please specify your occupation"
+                  placeholder="Please specify your profession"
                   value={formData.otherOccupation || ""}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.otherOccupation ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
+                  className={`w-full px-3 py-2 border ${fieldErrors.otherOccupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
                 />
               )}
               {fieldErrors.otherOccupation && (
                 <p className="text-red-500 text-xs mt-1">{fieldErrors.otherOccupation}</p>
               )}
 
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  name="placeOfWork"
-                  placeholder="Place of work (Optional)"
-                  value={formData.placeOfWork}
-                  onChange={handleInputChange}
-                  className="px-3 py-2 border border-indigo-300 rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
-                <input
-                  type="text"
+              <div>
+                <select
                   name="experience"
-                  placeholder="Experience (Optional)"
                   value={formData.experience}
                   onChange={handleInputChange}
-                  className="px-3 py-2 border border-indigo-300 rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
+                  className={`w-full px-3 py-2 border ${fieldErrors.experience ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.experience ? 'text-gray-400' : 'text-[#223258]'}`}
+                >
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Professional Experience</option>
+                  <option value="less-than-1">Experience ≤ 1 year</option>
+                  <option value="less-than-3">Experience ≤ 3 years</option>
+                  <option value="less-than-5">Experience ≤ 5 years</option>
+                </select>
+                {fieldErrors.experience && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.experience}</p>
+                )}
               </div>
 
-              <input
-                type="text"
-                name="institution"
-                placeholder="Institution"
-                value={formData.institution}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border ${fieldErrors.institution ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
-              />
-              {fieldErrors.institution && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.institution}</p>
-              )}
+              <div>
+                <select
+                  name="placeOfWork"
+                  value={formData.placeOfWork}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${fieldErrors.placeOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.placeOfWork ? 'text-gray-400' : 'text-[#223258]'}`}
+                >
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Place of Work</option>
+                  <option value="hospital-clinic">Hospital/Clinic</option>
+                  <option value="outpatient-clinic">Outpatient Clinic</option>
+                  <option value="private-practice">Private Practice</option>
+                </select>
+                {fieldErrors.placeOfWork && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.placeOfWork}</p>
+                )}
+              </div>
 
-              <select
-                name="specialties"
-                value={formData.specialties}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border ${fieldErrors.specialties ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm`}
-              >
-                <option value="" disabled>Select Specialties</option>
-                <option value="allergy-immunology">Allergy & Immunology</option>
-                <option value="anesthesiology">Anesthesiology</option>
-                <option value="cardiology">Cardiology</option>
-                <option value="critical-care">Critical Care</option>
-                <option value="dermatology">Dermatology</option>
-                <option value="emergency-medicine">Emergency Medicine</option>
-                <option value="endocrinology">Endocrinology</option>
-                <option value="family-medicine">Family Medicine</option>
-                <option value="gastroenterology">Gastroenterology</option>
-                <option value="geriatrics">Geriatrics</option>
-                <option value="hematology">Hematology</option>
-                <option value="infectious-disease">Infectious Disease</option>
-                <option value="internal-medicine">Internal Medicine</option>
-                <option value="microbiology">Microbiology</option>
-                <option value="nephrology">Nephrology</option>
-                <option value="neurology">Neurology</option>
-                <option value="nuclear-medicine">Nuclear Medicine</option>
-                <option value="obstetrics-gynecology">Obstetrics and Gynecology</option>
-                <option value="oncology">Oncology</option>
-                <option value="ophthalmology">Ophthalmology</option>
-                <option value="orthopedics">Orthopedics</option>
-                <option value="otolaryngology">Otolaryngology</option>
-                <option value="palliative-care">Palliative Care Medicine</option>
-                <option value="pathology">Pathology</option>
-                <option value="pediatrics">Pediatrics</option>
-                <option value="psychiatry">Psychiatry</option>
-                <option value="pulmonology">Pulmonology</option>
-                <option value="radiology">Radiology</option>
-                <option value="reproductive-endocrinology">Reproductive Endocrinology & Infertility</option>
-                <option value="rheumatology">Rheumatology</option>
-                <option value="sports-medicine">Sports Medicine</option>
-                <option value="surgery">Surgery</option>
-                <option value="urology">Urology</option>
-                <option value="other">Other</option>
-              </select>
-              {fieldErrors.specialties && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.specialties}</p>
-              )}
-
-              {formData.specialties === "other" && (
+              <div>
                 <input
                   type="text"
-                  name="otherSpecialty"
-                  placeholder="Please specify your specialty"
-                  value={formData.otherSpecialty || ""}
+                  name="institution"
+                  placeholder="Institution (Optional)"
+                  value={formData.institution}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.otherSpecialty ? 'border-red-500' : 'border-indigo-300'} rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
+                  className={`w-full px-3 py-2 border ${fieldErrors.institution ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
                 />
-              )}
-              {fieldErrors.otherSpecialty && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.otherSpecialty}</p>
-              )}
+                {fieldErrors.institution && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.institution}</p>
+                )}
+              </div>
 
-              {error && <div className="bg-red-50 text-red-600 p-2 rounded-lg text-sm">{error}</div>}
+              <div>
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${fieldErrors.address ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
+                />
+                {fieldErrors.address && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.address}</p>
+                )}
+              </div>
+
+              <div>
+                <select
+                  name="country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${fieldErrors.country ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.country ? 'text-gray-400' : 'text-[#223258]'}`}
+                >
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Country</option>
+                  <option value="afghanistan">Afghanistan</option>
+                  <option value="albania">Albania</option>
+                  <option value="algeria">Algeria</option>
+                  <option value="andorra">Andorra</option>
+                  <option value="angola">Angola</option>
+                  <option value="antigua-and-barbuda">Antigua and Barbuda</option>
+                  <option value="argentina">Argentina</option>
+                  <option value="armenia">Armenia</option>
+                  <option value="australia">Australia</option>
+                  <option value="austria">Austria</option>
+                  <option value="azerbaijan">Azerbaijan</option>
+                  <option value="bahamas">Bahamas</option>
+                  <option value="bahrain">Bahrain</option>
+                  <option value="bangladesh">Bangladesh</option>
+                  <option value="barbados">Barbados</option>
+                  <option value="belarus">Belarus</option>
+                  <option value="belgium">Belgium</option>
+                  <option value="belize">Belize</option>
+                  <option value="benin">Benin</option>
+                  <option value="bhutan">Bhutan</option>
+                  <option value="bolivia">Bolivia</option>
+                  <option value="bosnia-and-herzegovina">Bosnia and Herzegovina</option>
+                  <option value="botswana">Botswana</option>
+                  <option value="brazil">Brazil</option>
+                  <option value="brunei">Brunei</option>
+                  <option value="bulgaria">Bulgaria</option>
+                  <option value="burkina-faso">Burkina Faso</option>
+                  <option value="burundi">Burundi</option>
+                  <option value="cabo-verde">Cabo Verde</option>
+                  <option value="cambodia">Cambodia</option>
+                  <option value="cameroon">Cameroon</option>
+                  <option value="canada">Canada</option>
+                  <option value="central-african-republic">Central African Republic</option>
+                  <option value="chad">Chad</option>
+                  <option value="chile">Chile</option>
+                  <option value="china">China</option>
+                  <option value="colombia">Colombia</option>
+                  <option value="comoros">Comoros</option>
+                  <option value="congo">Congo</option>
+                  <option value="costa-rica">Costa Rica</option>
+                  <option value="croatia">Croatia</option>
+                  <option value="cuba">Cuba</option>
+                  <option value="cyprus">Cyprus</option>
+                  <option value="czech-republic">Czech Republic</option>
+                  <option value="denmark">Denmark</option>
+                  <option value="djibouti">Djibouti</option>
+                  <option value="dominica">Dominica</option>
+                  <option value="dominican-republic">Dominican Republic</option>
+                  <option value="ecuador">Ecuador</option>
+                  <option value="egypt">Egypt</option>
+                  <option value="el-salvador">El Salvador</option>
+                  <option value="equatorial-guinea">Equatorial Guinea</option>
+                  <option value="eritrea">Eritrea</option>
+                  <option value="estonia">Estonia</option>
+                  <option value="eswatini">Eswatini</option>
+                  <option value="ethiopia">Ethiopia</option>
+                  <option value="fiji">Fiji</option>
+                  <option value="finland">Finland</option>
+                  <option value="france">France</option>
+                  <option value="gabon">Gabon</option>
+                  <option value="gambia">Gambia</option>
+                  <option value="georgia">Georgia</option>
+                  <option value="germany">Germany</option>
+                  <option value="ghana">Ghana</option>
+                  <option value="greece">Greece</option>
+                  <option value="grenada">Grenada</option>
+                  <option value="guatemala">Guatemala</option>
+                  <option value="guinea">Guinea</option>
+                  <option value="guinea-bissau">Guinea-Bissau</option>
+                  <option value="guyana">Guyana</option>
+                  <option value="haiti">Haiti</option>
+                  <option value="honduras">Honduras</option>
+                  <option value="hungary">Hungary</option>
+                  <option value="iceland">Iceland</option>
+                  <option value="india">India</option>
+                  <option value="indonesia">Indonesia</option>
+                  <option value="iran">Iran</option>
+                  <option value="iraq">Iraq</option>
+                  <option value="ireland">Ireland</option>
+                  <option value="israel">Israel</option>
+                  <option value="italy">Italy</option>
+                  <option value="jamaica">Jamaica</option>
+                  <option value="japan">Japan</option>
+                  <option value="jordan">Jordan</option>
+                  <option value="kazakhstan">Kazakhstan</option>
+                  <option value="kenya">Kenya</option>
+                  <option value="kiribati">Kiribati</option>
+                  <option value="kuwait">Kuwait</option>
+                  <option value="kyrgyzstan">Kyrgyzstan</option>
+                  <option value="laos">Laos</option>
+                  <option value="latvia">Latvia</option>
+                  <option value="lebanon">Lebanon</option>
+                  <option value="lesotho">Lesotho</option>
+                  <option value="liberia">Liberia</option>
+                  <option value="libya">Libya</option>
+                  <option value="liechtenstein">Liechtenstein</option>
+                  <option value="lithuania">Lithuania</option>
+                  <option value="luxembourg">Luxembourg</option>
+                  <option value="madagascar">Madagascar</option>
+                  <option value="malawi">Malawi</option>
+                  <option value="malaysia">Malaysia</option>
+                  <option value="maldives">Maldives</option>
+                  <option value="mali">Mali</option>
+                  <option value="malta">Malta</option>
+                  <option value="marshall-islands">Marshall Islands</option>
+                  <option value="mauritania">Mauritania</option>
+                  <option value="mauritius">Mauritius</option>
+                  <option value="mexico">Mexico</option>
+                  <option value="micronesia">Micronesia</option>
+                  <option value="moldova">Moldova</option>
+                  <option value="monaco">Monaco</option>
+                  <option value="mongolia">Mongolia</option>
+                  <option value="montenegro">Montenegro</option>
+                  <option value="morocco">Morocco</option>
+                  <option value="mozambique">Mozambique</option>
+                  <option value="myanmar">Myanmar</option>
+                  <option value="namibia">Namibia</option>
+                  <option value="nauru">Nauru</option>
+                  <option value="nepal">Nepal</option>
+                  <option value="netherlands">Netherlands</option>
+                  <option value="new-zealand">New Zealand</option>
+                  <option value="nicaragua">Nicaragua</option>
+                  <option value="niger">Niger</option>
+                  <option value="nigeria">Nigeria</option>
+                  <option value="north-korea">North Korea</option>
+                  <option value="north-macedonia">North Macedonia</option>
+                  <option value="norway">Norway</option>
+                  <option value="oman">Oman</option>
+                  <option value="pakistan">Pakistan</option>
+                  <option value="palau">Palau</option>
+                  <option value="palestine">Palestine</option>
+                  <option value="panama">Panama</option>
+                  <option value="papua-new-guinea">Papua New Guinea</option>
+                  <option value="paraguay">Paraguay</option>
+                  <option value="peru">Peru</option>
+                  <option value="philippines">Philippines</option>
+                  <option value="poland">Poland</option>
+                  <option value="portugal">Portugal</option>
+                  <option value="qatar">Qatar</option>
+                  <option value="romania">Romania</option>
+                  <option value="russia">Russia</option>
+                  <option value="rwanda">Rwanda</option>
+                  <option value="saint-kitts-and-nevis">Saint Kitts and Nevis</option>
+                  <option value="saint-lucia">Saint Lucia</option>
+                  <option value="saint-vincent-and-the-grenadines">Saint Vincent and the Grenadines</option>
+                  <option value="samoa">Samoa</option>
+                  <option value="san-marino">San Marino</option>
+                  <option value="sao-tome-and-principe">Sao Tome and Principe</option>
+                  <option value="saudi-arabia">Saudi Arabia</option>
+                  <option value="senegal">Senegal</option>
+                  <option value="serbia">Serbia</option>
+                  <option value="seychelles">Seychelles</option>
+                  <option value="sierra-leone">Sierra Leone</option>
+                  <option value="singapore">Singapore</option>
+                  <option value="slovakia">Slovakia</option>
+                  <option value="slovenia">Slovenia</option>
+                  <option value="solomon-islands">Solomon Islands</option>
+                  <option value="somalia">Somalia</option>
+                  <option value="south-africa">South Africa</option>
+                  <option value="south-korea">South Korea</option>
+                  <option value="south-sudan">South Sudan</option>
+                  <option value="spain">Spain</option>
+                  <option value="sri-lanka">Sri Lanka</option>
+                  <option value="sudan">Sudan</option>
+                  <option value="suriname">Suriname</option>
+                  <option value="sweden">Sweden</option>
+                  <option value="switzerland">Switzerland</option>
+                  <option value="syria">Syria</option>
+                  <option value="taiwan">Taiwan</option>
+                  <option value="tajikistan">Tajikistan</option>
+                  <option value="tanzania">Tanzania</option>
+                  <option value="thailand">Thailand</option>
+                  <option value="timor-leste">Timor-Leste</option>
+                  <option value="togo">Togo</option>
+                  <option value="tonga">Tonga</option>
+                  <option value="trinidad-and-tobago">Trinidad and Tobago</option>
+                  <option value="tunisia">Tunisia</option>
+                  <option value="turkey">Turkey</option>
+                  <option value="turkmenistan">Turkmenistan</option>
+                  <option value="tuvalu">Tuvalu</option>
+                  <option value="uganda">Uganda</option>
+                  <option value="ukraine">Ukraine</option>
+                  <option value="united-arab-emirates">United Arab Emirates</option>
+                  <option value="united-kingdom">United Kingdom</option>
+                  <option value="united-states">United States</option>
+                  <option value="uruguay">Uruguay</option>
+                  <option value="uzbekistan">Uzbekistan</option>
+                  <option value="vanuatu">Vanuatu</option>
+                  <option value="vatican-city">Vatican City</option>
+                  <option value="venezuela">Venezuela</option>
+                  <option value="vietnam">Vietnam</option>
+                  <option value="yemen">Yemen</option>
+                  <option value="zambia">Zambia</option>
+                  <option value="zimbabwe">Zimbabwe</option>
+                </select>
+                {fieldErrors.country && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.country}</p>
+                )}
+              </div>
+
+              {error && <div className="bg-red-50 text-red-600 p-2 rounded-[8px] text-sm">{error}</div>}
 
               <button
                 onClick={handleNext}
-                className="w-full bg-indigo-200 text-indigo-700 py-2 px-4 border border-indigo-400 rounded-lg font-medium hover:bg-indigo-300 transition-colors duration-200 mt-4 text-sm"
+                className="w-full bg-[#C6D7FF]/50 text-[#3771FE] py-2 px-4 border border-[#3771FE]/50 rounded-[8px] font-medium hover:bg-[#C6D7FF]/70 transition-colors duration-200 mt-4 text-sm"
               >
                 Next
               </button>

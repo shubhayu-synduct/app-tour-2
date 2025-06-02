@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { getAuth, applyActionCode } from "firebase/auth"
 import Image from "next/image"
+import { getFirebaseAuth } from "@/lib/firebase"
 
 export default function VerifyEmail() {
   const router = useRouter()
@@ -14,7 +15,9 @@ export default function VerifyEmail() {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        const auth = getAuth()
+        const auth = await getFirebaseAuth()
+        if (!auth) throw new Error("Firebase auth not initialized")
+
         const urlParams = new URLSearchParams(window.location.search)
         const oobCode = urlParams.get("oobCode")
 

@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
       if (!auth) throw new Error("Firebase auth not initialized")
 
       await sendPasswordResetEmail(auth, email, {
-        url: "https://app.drinfo.ai/reset-password",
+        url: "http://localhost:3000/reset-password",
         handleCodeInApp: true
       })
       setSuccess(true)
