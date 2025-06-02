@@ -868,18 +868,6 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
 
   return (
     <div className="p-4 md:p-6 h-full flex flex-col relative">
-      <div className="flex justify-end mb-6">
-        <div className="flex items-center space-x-2">
-          <div className="text-right">
-            <p className="font-medium">{user?.displayName || "Dr. Thomas Müller"}</p>
-            <p className="text-sm text-gray-500">Physician</p>
-          </div>
-          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-            {user?.displayName?.[0] || "T"}
-          </div>
-        </div>
-      </div>
-
       <div className="flex-1 flex flex-col">
         {isChatLoading ? (
           <div className="flex-1 flex items-center justify-center">

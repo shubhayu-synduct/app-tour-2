@@ -6,8 +6,8 @@ import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { getFirebaseFirestore } from '@/lib/firebase'
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore'
 import Link from "next/link"
-import { format } from 'date-fns'
-import { MessageSquare, Trash2, Search, ArrowUpDown, X } from 'lucide-react'
+import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns'
+import { MessageSquare, Trash2, Search, ArrowUpDown, X, Clock } from 'lucide-react'
 import { doc, deleteDoc } from 'firebase/firestore'
 import { getSessionCookie } from '@/lib/auth-service'
 
@@ -236,19 +236,20 @@ export default function ChatHistory() {
   return (
     <DashboardLayout>
       <div className="p-4 md:p-6 h-full flex flex-col">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-blue-800">Chat History</h1>
-          <Link 
-            href="/dashboard"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            New Chat
-          </Link>
+        <div className="mb-6 w-full flex justify-center items-center">
+          <h1 className="text-3xl font-bold text-center" style={{ fontFamily: 'DM Sans, sans-serif', color: '#214498' }}>History</h1>
         </div>
 
         {/* Search and Filters */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div ref={searchRef} className="relative flex-grow">
+        <div className="mb-6 w-full flex flex-col sm:flex-row gap-4 max-w-3xl mx-auto items-center justify-between">
+          <Link 
+            href="/dashboard"
+            className="h-11 px-4 min-w-[110px] flex items-center justify-center bg-[#214498] text-white rounded-[10px] hover:bg-[#1a3780] transition-colors font-medium gap-2 whitespace-nowrap text-xs md:text-sm md:gap-2 md:px-5"
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
+          >
+            <span className="text-xs md:text-sm font-medium">New Search</span>
+          </Link>
+          <div ref={searchRef} className="relative flex-grow min-w-[320px] max-w-xl w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               type="text"
@@ -258,7 +259,8 @@ export default function ChatHistory() {
               onFocus={() => {
                 if (searchTerm) setShowSuggestions(true)
               }}
-              className="pl-10 pr-10 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10 pr-10 h-11 w-full border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
+              style={{ fontFamily: 'DM Sans, sans-serif', borderColor: 'rgba(55, 113, 254, 0.5)' }}
             />
             {searchTerm && (
               <button 
@@ -268,15 +270,14 @@ export default function ChatHistory() {
                 <X size={16} />
               </button>
             )}
-            
             {/* Autocomplete suggestions */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+              <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-w-xl w-full" style={{ fontFamily: 'DM Sans, sans-serif' }}>
                 <ul className="py-1">
                   {suggestions.map((suggestion, index) => (
                     <li 
                       key={index} 
-                      className="px-4 py-2 hover:bg-blue-50 cursor-pointer truncate"
+                      className="px-4 py-2 hover:bg-blue-50 cursor-pointer truncate text-base"
                       onClick={() => handleSuggestionClick(suggestion)}
                     >
                       {suggestion}
@@ -286,23 +287,23 @@ export default function ChatHistory() {
               </div>
             )}
           </div>
-          
-          <div className="relative">
+          <div className="relative min-w-[180px]">
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value as SortOption)}
-              className="appearance-none pl-10 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="appearance-none pl-10 pr-10 h-11 w-full border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base text-[#214498] font-normal"
+              style={{ fontFamily: 'DM Sans, sans-serif', color: '#214498', fontWeight: 400, borderColor: 'rgba(55, 113, 254, 0.5)' }}
             >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="alphabetical">Alphabetical</option>
+              <option value="newest" style={{ color: '#214498', fontFamily: 'DM Sans, sans-serif', fontWeight: 'regular' }}>Newest First</option>
+              <option value="oldest" style={{ color: '#214498', fontFamily: 'DM Sans, sans-serif', fontWeight: 'regular' }}>Oldest First</option>
+              <option value="alphabetical" style={{ color: '#214498', fontFamily: 'DM Sans, sans-serif', fontWeight: 'regular' }}>Alphabetical</option>
             </select>
             <ArrowUpDown className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           </div>
         </div>
 
         {/* Simple Table View */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
           {loading ? (
             <div className="flex items-center justify-center h-32">
               <div className="h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -320,84 +321,53 @@ export default function ChatHistory() {
               ) : (
                 <>
                   <p>No chat history found</p>
-                  <p className="text-sm mt-1">Start a new conversation by clicking the New Chat button</p>
+                  <p className="text-sm mt-1">Start a new conversation by clicking the New Search button</p>
                 </>
               )}
             </div>
           ) : (
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="text-left p-4 border-b border-gray-200 font-medium text-gray-700">Query</th>
-                  <th className="text-left p-4 border-b border-gray-200 font-medium text-gray-700 hidden md:table-cell">Date</th>
-                  <th className="text-right p-4 border-b border-gray-200 font-medium text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {filteredAndSortedSessions.map((session) => (
-                  <tr 
-                    key={session.id}
-                    className="hover:bg-blue-50 group"
-                  >
-                    <td className="p-4">
-                      <Link 
-                        href={`/dashboard/${session.id}`}
-                        className="flex items-start"
-                      >
-                        <MessageSquare 
-                          size={18} 
-                          className="mt-1 flex-shrink-0 mr-2 text-gray-500" 
-                        />
-                        <div>
-                          <div className="font-medium text-gray-800">
-                            {session.title}
+            (() => {
+              const groups: Record<string, typeof filteredAndSortedSessions> = {};
+              filteredAndSortedSessions.forEach(session => {
+                const date = new Date(session.updatedAt);
+                let groupLabel = format(date, 'MMMM d, yyyy');
+                if (isToday(date)) groupLabel = 'Today';
+                else if (isYesterday(date)) groupLabel = 'Yesterday';
+                if (!groups[groupLabel]) groups[groupLabel] = [];
+                groups[groupLabel].push(session);
+              });
+              return (
+                <div className="space-y-8 max-w-4xl mx-auto">
+                  {Object.entries(groups).map(([label, sessions]) => (
+                    <div key={label}>
+                      <div className="text-lg font-semibold text-[#214498] mb-3" style={{ fontFamily: 'DM Sans, sans-serif' }}>{label}</div>
+                      <div className="space-y-4">
+                        {sessions.map(session => (
+                          <div key={session.id} className="bg-[#F4F7FF] rounded-xl p-4 flex items-start shadow-sm hover:shadow-md transition-shadow relative border" style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}>
+                            <Link href={`/dashboard/${session.id}`} className="flex-1 min-w-0 group">
+                              <div className="text-base font-medium mb-2 group-hover:underline" style={{ fontFamily: 'DM Sans, sans-serif', color: '#223258' }}>
+                                {session.title}
+                              </div>
+                              <div className="flex items-center text-xs text-[#7A8CA3] font-['DM_Sans']">
+                                <Clock size={14} className="mr-1" />
+                                {formatDistanceToNow(new Date(session.updatedAt), { addSuffix: true })}
+                              </div>
+                            </Link>
+                            <button
+                              onClick={e => deleteChatSession(session.id, e)}
+                              className="ml-4 p-2 rounded-full transition-colors text-[#223258] absolute top-3 right-3 bg-transparent hover:bg-red-50"
+                              aria-label="Delete chat"
+                            >
+                              <Trash2 size={18} />
+                            </button>
                           </div>
-                          <div className="text-xs text-gray-500 md:hidden">
-                            {session.updatedAt
-                              ? format(
-                                  (session.updatedAt && typeof session.updatedAt === 'object' && 'toDate' in session.updatedAt)
-                                    ? (session.updatedAt as { toDate: () => Date }).toDate()
-                                    : new Date(session.updatedAt),
-                                  'MMM d, yyyy h:mm a'
-                                )
-                              : '—'}
-                          </div>
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="p-4 hidden md:table-cell text-gray-600">
-                      {session.updatedAt
-                        ? format(
-                            (session.updatedAt && typeof session.updatedAt === 'object' && 'toDate' in session.updatedAt)
-                              ? (session.updatedAt as { toDate: () => Date }).toDate()
-                              : new Date(session.updatedAt),
-                            'MMM d, yyyy'
-                          )
-                        : '—'}
-                      <div className="text-xs text-gray-500">
-                        {session.updatedAt
-                          ? format(
-                              (session.updatedAt && typeof session.updatedAt === 'object' && 'toDate' in session.updatedAt)
-                                ? (session.updatedAt as { toDate: () => Date }).toDate()
-                                : new Date(session.updatedAt),
-                              'h:mm a'
-                            )
-                          : '—'}
+                        ))}
                       </div>
-                    </td>
-                    <td className="p-4 text-right">
-                      <button
-                        onClick={(e) => deleteChatSession(session.id, e)}
-                        className="p-1.5 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-500 transition-colors"
-                        aria-label="Delete chat"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()
           )}
         </div>
       </div>

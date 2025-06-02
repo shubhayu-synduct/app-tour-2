@@ -156,7 +156,7 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
   return (
     <div className="h-full flex flex-col bg-white border-r">
       <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold text-gray-800">Chat History</h2>
+        <h2 className="text-lg font-semibold text-center" style={{ fontFamily: 'DM Sans, sans-serif', color: '#214498' }}>History</h2>
       </div>
 
       <div className="p-3">

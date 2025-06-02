@@ -12,13 +12,23 @@ const SESSION_DURATION = 7
 /**
  * Sets the session cookie after successful authentication
  */
-export function setSessionCookie(user: User) {
+export async function setSessionCookie(user: User) {
   try {
+    // Get user data from Firestore
+    const { getFirebaseFirestore } = await import("@/lib/firebase")
+    const { doc, getDoc } = await import("firebase/firestore")
+    
+    const db = await getFirebaseFirestore()
+    if (!db) throw new Error("Firestore not initialized")
+    
+    const userDoc = await getDoc(doc(db, "users", user.uid))
+    const userData = userDoc.data()
+    
     // Create a session object with essential user info
     const session = {
       uid: user.uid,
       email: user.email,
-      displayName: user.displayName,
+      displayName: userData?.displayName || user.email?.split('@')[0] || '',
       timestamp: Date.now()
     }
     
