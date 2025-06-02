@@ -139,15 +139,15 @@ export function SignInForm() {
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form className="space-y-4 font-['DM_Sans']" onSubmit={handleSubmit}>
       {/* Email Input */}
       <div>
         <input
           type="email"
-          placeholder="Your email address..."
+          placeholder="Enter your email address..."
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-gray-400"
+          className="w-full px-4 py-3 border border-[#3771FE]/50 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-[#8997BA] font-['DM_Sans']"
           required
         />
       </div>
@@ -159,7 +159,7 @@ export function SignInForm() {
           placeholder="Enter your password..."
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-gray-400 pr-12"
+          className="w-full px-4 py-3 border border-[#3771FE]/50 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-[#8997BA] pr-12 font-['DM_Sans']"
           required
         />
         <button
@@ -174,29 +174,36 @@ export function SignInForm() {
       <div className="flex justify-end">
         <Link 
           href="/forgot-password" 
-          className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+          className="text-sm text-[#223258] hover:text-[#223258] font-medium font-['DM_Sans']"
         >
           Forgot Password?
         </Link>
       </div>
 
-      {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg">{error}</div>}
+      {error && <div className="bg-red-50 text-red-600 p-3 rounded-[10px] font-['DM_Sans']">{error}</div>}
 
       {/* Continue Button */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-indigo-200 text-blue-600 border border-indigo-300 py-3 px-4 rounded-lg hover:bg-indigo-200 transition duration-200 font-medium disabled:opacity-70"
+        className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
       >
-        {loading ? "Signing in..." : "Continue"}
+        {loading ? "Signing in..." : "Sign in"}
       </button>
 
       {/* Sign Up Link */}
       <div className="text-center">
-        <span className="text-gray-600">Don't have an account? </span>
-        <Link href="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
-          Sign up
+        <span className="text-black-600 font-['DM_Sans']">Don't have an account? </span>
+        <Link href="/signup" className="text-[#3771FE] hover:text-[#3771FE] font-medium font-['DM_Sans']">
+          Create an account
         </Link>
+      </div>
+
+      {/* OR Divider */}
+      <div className="flex items-center my-6">
+        <div className="flex-1 h-[1px] bg-gradient-to-r from-white to-black"></div>
+        <span className="px-4 text-[#000000] text-sm font-['DM_Sans']">OR</span>
+        <div className="flex-1 h-[1px] bg-gradient-to-l from-white to-black"></div>
       </div>
 
       {/* Social Sign In Buttons */}
@@ -205,20 +212,20 @@ export function SignInForm() {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center bg-white text-gray-700 border border-gray-300 py-3 px-4 rounded-lg hover:bg-gray-50 transition duration-200 font-medium disabled:opacity-70"
+          className="w-full flex items-center justify-center bg-white text-[#223258] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
         >
           <GoogleIcon />
-          Continue with Google
+          Sign in with Google
         </button>
 
         <button
           type="button"
           onClick={handleMicrosoftSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center bg-white text-gray-700 border border-gray-300 py-3 px-4 rounded-lg hover:bg-gray-50 transition duration-200 font-medium disabled:opacity-70"
+          className="w-full flex items-center justify-center bg-white text-[#223258] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
         >
           <MicrosoftIcon />
-          Continue with Microsoft
+          Sign in with Microsoft
         </button>
       </div>
     </form>

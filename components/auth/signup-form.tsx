@@ -203,10 +203,10 @@ export function SignUpForm() {
         <div>
           <input
             type="email"
-            placeholder="Your email address..."
+            placeholder="Enter your email address..."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-gray-400"
+            className="w-full px-4 py-3 border border-[#3771FE]/50 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-[#8997BA] font-['DM_Sans']"
             required
           />
         </div>
@@ -215,10 +215,10 @@ export function SignUpForm() {
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
-            placeholder="Create a password..."
+            placeholder="Enter your password..."
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-gray-400 pr-12"
+            className="w-full px-4 py-3 border border-[#3771FE]/50 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-[#8997BA] pr-12 font-['DM_Sans']"
             required
           />
           <button
@@ -230,30 +230,30 @@ export function SignUpForm() {
           </button>
         </div>
 
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg">{error}</div>}
+        {error && <div className="bg-red-50 text-red-600 p-3 rounded-[10px]">{error}</div>}
 
         {/* Continue Button */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-indigo-200 text-blue-600 border border-indigo-300 py-3 px-4 rounded-lg hover:bg-indigo-200 transition duration-200 font-medium disabled:opacity-70"
+          className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] transition duration-200 font-medium disabled:opacity-70"
         >
           {loading ? "Signing up..." : "Continue"}
         </button>
 
         {/* Sign In Link */}
         <div className="text-center">
-          <span className="text-gray-600">Already have an account? </span>
-          <Link href="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+          <span className="text-black-600">Already have an account? </span>
+          <Link href="/login" className="text-[#3771FE] hover:text-[#3771FE] font-medium">
             Sign in
           </Link>
         </div>
 
         {/* Divider */}
         <div className="flex items-center my-6">
-          <div className="flex-1 border-t border-gray-200"></div>
-          <span className="px-4 text-gray-500 text-sm">OR</span>
-          <div className="flex-1 border-t border-gray-200"></div>
+          <div className="flex-1 h-[1px] bg-gradient-to-r from-white to-black"></div>
+          <span className="px-4 text-[#000000] text-sm font-['DM_Sans']">OR</span>
+          <div className="flex-1 h-[1px] bg-gradient-to-l from-white to-black"></div>
         </div>
 
         {/* Social Sign In Buttons */}
@@ -262,20 +262,20 @@ export function SignUpForm() {
             type="button"
             onClick={handleGoogleSignUp}
             disabled={loading}
-            className="w-full flex items-center justify-center px-4 py-3 border border-indigo-300 rounded-lg hover:bg-gray-50 bg-white transition duration-200"
+            className="w-full flex items-center justify-center px-4 py-3 border border-indigo-300 rounded-[10px] hover:bg-[#C6D7FF]/50 bg-white transition duration-200"
           >
             <GoogleIcon />
-            <span className="text-gray-700">Sign up with Google</span>
+            <span className="text-[#223258]">Sign up with Google</span>
           </button>
 
           <button
             type="button"
             onClick={handleMicrosoftSignUp}
             disabled={loading}
-            className="w-full flex items-center justify-center px-4 py-3 border border-indigo-300 rounded-lg hover:bg-gray-50 bg-white transition duration-200"
+            className="w-full flex items-center justify-center px-4 py-3 border border-indigo-300 rounded-[10px] hover:bg-[#C6D7FF]/50 bg-white transition duration-200"
           >
             <MicrosoftIcon />
-            <span className="text-gray-700">Sign up with Microsoft</span>
+            <span className="text-[#223258]">Sign up with Microsoft</span>
           </button>
 
         </div>
