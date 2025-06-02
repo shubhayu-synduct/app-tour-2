@@ -22,6 +22,7 @@ interface Drug {
   brand_name: string;
   active_substance: string[];
   inn: string[];
+  search_type: string;
 }
 
 export default function DrugDetailPage() {
@@ -189,8 +190,9 @@ export default function DrugDetailPage() {
         if (data.direct_match) {
           transformedData.push({
             brand_name: data.direct_match.name,
-            active_substance: [], // Direct matches don't have active substances in the response
-            inn: []
+            active_substance: data.direct_match.active_substance, // Direct matches don't have active substances in the response
+            inn: [],
+            search_type: 'direct_brand'
           });
         }
         
@@ -199,7 +201,8 @@ export default function DrugDetailPage() {
           const brandOptions = data.brand_options.map((drug: any) => ({
             brand_name: drug.brand_name,
             active_substance: drug.active_substance || [],
-            inn: drug.inn || []
+            inn: drug.inn || [],
+            search_type: drug.search_type || 'brand_option'
           }));
           transformedData = [...transformedData, ...brandOptions];
         }
@@ -374,13 +377,13 @@ export default function DrugDetailPage() {
                     e.preventDefault();
                   }}
                 >
-                  {rec.active_substance && rec.active_substance.length > 0 ? (
+                  {rec.search_type !== 'direct_brand' ? (
                     <>
                       <b>{rec.active_substance.join(', ')}</b> (<i>Brand Name:</i> <b>{rec.brand_name}</b>)
                     </>
                   ) : (
                     <>
-                      <i>Brand Name:</i> <b>{rec.brand_name}</b>
+                      <b>{rec.brand_name}</b> (<i>active substances:</i> <b>{rec.active_substance.join(', ')}</b>)
                     </>
                   )}
                 </Link>

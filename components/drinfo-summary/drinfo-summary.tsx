@@ -972,7 +972,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                     value={followUpQuestion}
                     onChange={(e) => setFollowUpQuestion(e.target.value)}
                     placeholder="Ask a follow-up question..."
-                    className="ml-2 flex-1 text-[18px] text-[#9499a8] outline-none border-none bg-transparent h-12"
+                    className="ml-2 flex-1 text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none border-none bg-transparent h-12"
                     onKeyDown={(e) => e.key === 'Enter' && handleFollowUpQuestion(e as any)}
                   />
                   <button onClick={handleFollowUpQuestion} className="ml-2 h-12 flex items-center" disabled={isLoading}>
