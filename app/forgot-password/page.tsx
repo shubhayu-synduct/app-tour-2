@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Mail } from "lucide-react"
 import { getFirebaseAuth } from "@/lib/firebase"
+import { sendPasswordResetEmail } from "firebase/auth"
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
@@ -20,12 +21,13 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
-      const { sendPasswordResetEmail } = await import("firebase/auth")
       const auth = await getFirebaseAuth()
-      
       if (!auth) throw new Error("Firebase auth not initialized")
 
-      await sendPasswordResetEmail(auth, email)
+      await sendPasswordResetEmail(auth, email, {
+        url: "https://app.drinfo.ai/reset-password",
+        handleCodeInApp: true
+      })
       setSuccess(true)
     } catch (err: any) {
       console.error("Password reset error:", err)
@@ -49,59 +51,81 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  // Handler for resending the email
+  const handleResend = async () => {
+    setError(null)
+    setIsLoading(true)
+    try {
+      const auth = await getFirebaseAuth()
+      if (!auth) throw new Error("Firebase auth not initialized")
+      await sendPasswordResetEmail(auth, email)
+      setSuccess(true)
+    } catch (err: any) {
+      setError(err.message || "An error occurred while resending the email")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-r from-blue-50 to-white">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Reset Password</h1>
-          <p className="mt-2 text-gray-600">
-            Enter your email address and we'll send you a link to reset your password
-          </p>
+      <div className="w-full max-w-md flex flex-col items-center space-y-8">
+        <div className="flex flex-col items-center justify-center mb-2">
+          <img src="/login-logo.svg" alt="DR. INFO Logo" width={200} height={200} />
         </div>
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+        <div className="text-center">
+          <h1 className="text-3xl font-bold" style={{ fontFamily: 'DM Sans', color: '#223258' }}>Reset Password</h1>
+        </div>
+        {success ? (
+          <div className="w-full border border-[#3771FE80] bg-[#F4F7FF] rounded-xl p-8 flex flex-col items-center text-center">
+            <img src="/emailout.svg" alt="Email sent" width={48} height={48} className="mb-4" />
+            <h2 className="text-[20px] font-semibold mb-2" style={{ color: '#223258', fontFamily: 'DM Sans' }}>Check Your Email</h2>
+            <p className="mb-1 text-[#000000] text-[12px] font-normal font-['DM_Sans']">We've sent a password reset link to <a href={`mailto:${email}`} className="text-[#3771FE] underline break-all font-['DM_Sans']">{email}</a></p>
+            <p className="mb-4 text-[#000000] text-[12px] font-normal font-['DM_Sans']">Please check your inbox and follow the instructions.</p>
+            <p className="text-[#000000] text-[12px] font-normal font-['DM_Sans']">Didn't receive the email? <button type="button" onClick={handleResend} className="text-[#3771FE] underline font-normal disabled:opacity-60 font-['DM_Sans']" disabled={isLoading}>{isLoading ? 'Resending...' : 'Resend Email'}</button></p>
           </div>
-
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="bg-green-50 text-green-600 p-3 rounded-lg">
-              Password reset email sent! Please check your inbox.
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg transition duration-200 disabled:opacity-70 flex items-center justify-center gap-2"
+        ) : (
+          <div className="w-full border border-[#3771FE80] bg-[#F4F7FF] rounded-xl p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="email" className="text-[#223258] text-base font-medium" style={{ fontFamily: 'DM Sans' }}>
+                  Enter your email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-[#3771FE80] bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-[#223258] text-[#223258] font-['DM_Sans']"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full border border-[#3771FE80] bg-[#C6D7FF]/50 text-[#3771FE] font-bold py-3 rounded-lg transition duration-200 disabled:opacity-70 flex items-center justify-center gap-2"
+              >
+                <Mail size={20} />
+                {isLoading ? "Sending..." : "Send reset link"}
+              </button>
+            </form>
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-50 text-red-600 p-3 rounded-lg w-full max-w-md">
+            {error}
+          </div>
+        )}
+        <div className="text-center mt-4">
+          <Link 
+            href="/login" 
+            className="text-base text-[#3771FE] hover:underline font-['DM_Sans']"
           >
-            <Mail size={20} />
-            {isLoading ? "Sending..." : "Send Reset Link"}
-          </button>
-
-          <div className="text-center">
-            <Link 
-              href="/login" 
-              className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
-            >
-              Back to Sign In
-            </Link>
-          </div>
-        </form>
+            Back to sign in
+          </Link>
+        </div>
       </div>
     </div>
   )
