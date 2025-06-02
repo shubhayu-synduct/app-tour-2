@@ -33,6 +33,7 @@ interface Drug {
   brand_name: string;
   active_substance: string[];
   inn: string[];
+  search_type: string;
 }
 
 export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open, citation, onClose }) => {
@@ -149,8 +150,9 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
         if (data.direct_match) {
           transformedData.push({
             brand_name: data.direct_match.name,
-            active_substance: [], // Direct matches don't have active substances in the response
-            inn: []
+            active_substance: data.direct_match.active_substance, // Direct matches don't have active substances in the response
+            inn: [],
+            search_type: 'direct_brand'
           });
         }
         
@@ -159,7 +161,8 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
           const brandOptions = data.brand_options.map((drug: any) => ({
             brand_name: drug.brand_name,
             active_substance: drug.active_substance || [],
-            inn: drug.inn || []
+            inn: drug.inn || [],
+            search_type: drug.search_type || 'brand_option'
           }));
           transformedData = [...transformedData, ...brandOptions];
         }
@@ -224,6 +227,7 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
     const processedRegex = /##\s+(\d+\.\d+\s+.*?)(?=(?:<<NEWLINE>>##\s+\d+\.\d+)|$)/g;
     
     let match;
+    let index = 0;
     while ((match = processedRegex.exec(processedContent)) !== null) {
       const fullSection = match[0].replace(/<<NEWLINE>>/g, "\n");
       const sectionTitle = fullSection.split('\n')[0].replace('##', '').trim();
@@ -234,11 +238,12 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
       const sectionContent = fullSection.split('\n').slice(1).join('\n').trim();
       
       sections.push({
-        id: sectionNumber.replace(/\./g, '_'),
+        id: `${sectionNumber.replace(/\./g, '_')}_${index}`,
         number: sectionNumber,
         title: descriptiveTitle,
         content: sectionContent
       });
+      index++;
     }
     
     return sections;
@@ -418,13 +423,13 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
                     e.preventDefault();
                   }}
                 >
-                  {rec.active_substance && rec.active_substance.length > 0 ? (
+                  {rec.search_type !== 'direct_brand' ? (
                     <>
                       <b>{rec.active_substance.join(', ')}</b> (<i>Brand Name:</i> <b>{rec.brand_name}</b>)
                     </>
                   ) : (
                     <>
-                      <i>Brand Name:</i> <b>{rec.brand_name}</b>
+                      <b>{rec.brand_name}</b> (<i>active substances:</i> <b>{rec.active_substance.join(', ')}</b>)
                     </>
                   )}
                 </Link>
