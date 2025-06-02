@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [previousQueries, setPreviousQueries] = useState<string[]>([])
   const user = getSessionCookie()
-  const [query, setQuery] = useState("How to treat atopic dermatitis in adults")
+  const [query, setQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -195,12 +195,12 @@ export default function Dashboard() {
                     <input
                       type="text"
                       value={query}
-                      className="ml-2 flex-1 text-[18px] text-[#9499a8] outline-none"
+                      className="ml-2 flex-1 text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none"
                       onChange={(e) => setQuery(e.target.value)}
                       onFocus={() => {
                         if (query) setShowSuggestions(true)
                       }}
-                      placeholder="How to treat atopic dermatitis in adults"
+                      placeholder="How to treat atopic dermatitis in adults..?"
                     />
                     <button type="submit">
                       {isLoading ? (
