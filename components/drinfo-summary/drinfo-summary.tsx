@@ -760,7 +760,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       {
         id: `user-${tempThreadId}`,
         type: 'user',
-        content: content,
+        content: content, 
         timestamp: Date.now(),
         questionType: isFollowUp ? 'follow-up' : 'main',
         threadId: tempThreadId
@@ -867,14 +867,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   };
 
   return (
-    <div className="p-4 md:p-6 h-full flex flex-col relative">
+    <div className="p-2 sm:p-4 md:p-6 h-full flex flex-col relative">
       <div className="flex-1 flex flex-col">
         {isChatLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="flex flex-col items-center space-y-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               <span className="text-blue-600 font-medium">Loading ...</span>
-              </div>
+            </div>
           </div>
         ) : (
           <>
@@ -882,41 +882,41 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
               <div className="flex-1 flex flex-col items-center justify-center">
               </div>
             ) : (
-              <div className="flex-1 overflow-auto mb-4 max-w-3xl mx-auto w-full font-sans overflow-visible" ref={contentRef}>
-            {error && (
-              <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
-                {error}
-              </div>
-            )}
-                <div className="space-y-8">
+              <div className="flex-1 overflow-auto mb-4 max-w-3xl mx-auto w-full font-sans overflow-visible px-2 sm:px-4" ref={contentRef}>
+                {error && (
+                  <div className="bg-red-50 text-red-600 p-3 sm:p-4 rounded-lg mb-4">
+                    {error}
+                  </div>
+                )}
+                <div className="space-y-6 sm:space-y-8">
                   {messages.map((msg, idx) => (
                     <div key={msg.id} className="mb-4">
                       {msg.type === 'user' ? (
-                        <div className="p-4 border rounded-md" style={{ borderColor: '#3771FE', fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '18px', color: '#223258', backgroundColor: '#F1F5FD' }}>
+                        <div className="p-3 sm:p-4 border rounded-md" style={{ borderColor: '#3771FE', fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '16px sm:text-[18px]', color: '#223258', backgroundColor: '#F1F5FD' }}>
                           <p className="m-0">{msg.content}</p>
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-start gap-2 mb-4">
+                          <div className="flex items-start gap-2 mb-3 sm:mb-4">
                             <div className="flex-shrink-0 mt-1">
-                              <div className="w-6 h-6 flex items-center justify-center">
-                                <img src="/answer-icon.svg" alt="Answer" className="w-6 h-6" />
+                              <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
+                                <img src="/answer-icon.svg" alt="Answer" className="w-5 h-5 sm:w-6 sm:h-6" />
                               </div>
                             </div>
                             <div className="flex items-center">
                               {idx === messages.length - 1 && status !== 'complete' ? (
-                                <span className="text-gray-500 italic">{getStatusMessage(status as StatusType)}</span>
+                                <span className="text-gray-500 italic text-sm sm:text-base">{getStatusMessage(status as StatusType)}</span>
                               ) : (
                                 msg.type === 'assistant' && msg.content && (
-                                  <span className="font-semibold text-blue-900 text-base">Answer</span>
+                                  <span className="font-semibold text-blue-900 text-sm sm:text-base">Answer</span>
                                 )
                               )}
                             </div>
                           </div>
                           {msg.content && (
-                            <div className="mb-6 ml-8">
+                            <div className="mb-4 sm:mb-6">
                               <div
-                                className="prose prose-slate prose-ul:text-black marker:text-black max-w-none"
+                                className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-sm sm:text-base"
                                 style={{ fontFamily: 'DM Sans, sans-serif' }}
                                 dangerouslySetInnerHTML={{
                                   __html:
@@ -930,11 +930,11 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                         ),
                                 }}
                               />
-                </div>
+                            </div>
                           )}
                           {msg.answer?.citations && Object.keys(msg.answer.citations).length > 0 && (
-                            <div className="mt-6 ml-8">
-                              <p className="text-slate-500 text-sm">
+                            <div className="mt-4 sm:mt-6">
+                              <p className="text-slate-500 text-xs sm:text-sm">
                                 Used {getCitationCount(msg.answer.citations)} references
                               </p>
                               <ReferenceGrid
@@ -942,64 +942,64 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                 onShowAll={handleShowAllCitations}
                                 getCitationCount={getCitationCount}
                               />
-                              <div className="mt-4">
+                              <div className="mt-3 sm:mt-4">
                                 <AnswerFeedback
                                   conversationId={sessionId || ''}
                                   threadId={msg.threadId}
                                   answerText={msg.content || ''}
                                 />
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
-                        </>
-                    )}
-                  </div>
-                ))}
-              </div>
-          </div>
-        )}
 
             {(searchPosition === "bottom" || chatHistory.length > 0 || streamedContent.mainSummary) && (
               <>
-                <div ref={inputAnchorRef} style={{ marginBottom: '100px' }} />
-          <div className="sticky bottom-0 bg-gray-50 pt-2 pb-4">
-            <div className="max-w-3xl mx-auto">
-              <div className="relative w-full bg-white border rounded-xl shadow-[0px_0px_11px_#0000000c] p-4">
-                <div className="flex items-center">
-                  <Search className="text-slate-400 h-5 w-5 mr-2" />
-                  <input
-                    type="text"
-                    value={followUpQuestion}
-                    onChange={(e) => setFollowUpQuestion(e.target.value)}
-                    placeholder="Ask a follow-up question..."
-                    className="ml-2 flex-1 text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none border-none bg-transparent h-12"
-                    onKeyDown={(e) => e.key === 'Enter' && handleFollowUpQuestion(e as any)}
-                  />
-                  <button onClick={handleFollowUpQuestion} className="ml-2 h-12 flex items-center" disabled={isLoading}>
-                    {isLoading ? (
-                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <img src="/search.svg" alt="Search" width={30} height={30} />
-                    )}
-                  </button>
+                <div ref={inputAnchorRef} style={{ marginBottom: '80px sm:100px' }} />
+                <div className="sticky bottom-0 bg-gray-50 pt-2 pb-4">
+                  <div className="max-w-3xl mx-auto px-2 sm:px-4">
+                    <div className="relative w-full bg-white border rounded-xl shadow-[0px_0px_11px_#0000000c] p-3 sm:p-4">
+                      <div className="flex items-center">
+                        <Search className="text-slate-400 h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                        <input
+                          type="text"
+                          value={followUpQuestion}
+                          onChange={(e) => setFollowUpQuestion(e.target.value)}
+                          placeholder="Ask a follow-up question..."
+                         className="ml-2 flex-1 text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none border-none bg-transparent h-12"
+                          onKeyDown={(e) => e.key === 'Enter' && handleFollowUpQuestion(e as any)}
+                        />
+                        <button onClick={handleFollowUpQuestion} className="ml-2 h-10 sm:h-12 flex items-center" disabled={isLoading}>
+                          {isLoading ? (
+                            <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <img src="/search.svg" alt="Search" width={24} height={24} className="sm:w-[30px] sm:h-[30px]" />
+                          )}
+                        </button>
+                      </div>
+                      <div className="flex space-x-2 mt-2">
+                        <button
+                          type="button"
+                          className={`px-2 sm:px-3 py-1 rounded border text-xs sm:text-sm flex items-center gap-1 ${
+                            activeMode === 'instant'
+                              ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
+                              : 'bg-white text-gray-500 border-gray-300'
+                          }`}
+                          onClick={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
+                        >
+                          <img src="/instant.svg" alt="Instant Mode Icon" className="w-3 h-3 sm:w-4 sm:h-4" />
+                          Acute
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex space-x-2 mt-2">
-                  <button
-                    type="button"
-                    className={`px-3 py-1 rounded border text-sm flex items-center gap-1 ${
-                      activeMode === 'instant'
-                        ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
-                        : 'bg-white text-gray-500 border-gray-300'
-                    }`}
-                    onClick={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
-                  >
-                    <img src="/instant.svg" alt="Instant Mode Icon" className="w-4 h-4" />
-                    Acute
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
               </>
             )}
           </>

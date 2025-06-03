@@ -184,58 +184,60 @@ export default function AnswerFeedback({
   };
 
   return (
-    <div className="mt-4 ml-8 max-w-[684px]">
+    <div className="mt-4 max-w-[684px]">
       {/* Top row: Helpful, Not helpful, Copy */}
-      <div className="flex flex-row items-center gap-3 mb-4">
+      <div className="flex flex-row items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
         <button
           onClick={() => handleFeedbackClick('helpful')}
-          className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('helpful')}`}
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('helpful')}`}
           aria-label="Helpful"
           title={submittedFeedback.helpful ? "You've already submitted helpful feedback" : "This answer was helpful"}
           disabled={submittedFeedback.helpful}
         >
-          <ThumbsUp className="inline w-4 h-4 mr-1" /> Helpful
+          <ThumbsUp className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+          <span className="text-xs sm:text-sm">Helpful</span>
         </button>
         <button
           onClick={() => handleFeedbackClick('not_helpful')}
-          className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('not_helpful')}`}
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('not_helpful')}`}
           aria-label="Not helpful"
           title={submittedFeedback.not_helpful ? "You've already submitted not helpful feedback" : "This answer wasn't helpful"}
           disabled={submittedFeedback.not_helpful}
         >
-          <ThumbsDown className="inline w-4 h-4 mr-1" /> Not helpful
+          <ThumbsDown className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+          <span className="text-xs sm:text-sm">Not helpful</span>
         </button>
         <button
           onClick={handleCopyText}
-          className={`px-4 py-2 rounded-lg border transition-all flex items-center gap-2 ${copied ? 'text-[#3771FE] border-[#3771FE]' : 'text-[#223258] border-[#223258]'} bg-white`}
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1 sm:gap-2 ${copied ? 'text-[#3771FE] border-[#3771FE]' : 'text-[#223258] border-[#223258]'} bg-white`}
           aria-label="Copy text"
           title="Copy answer text"
         >
           {copied ? (
             <>
-              <Check size={16} className="text-[#3771FE]" />
-              <span>Copied</span>
+              <Check size={14} className="text-[#3771FE] sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm">Copied</span>
             </>
           ) : (
             <>
-              <Copy size={16} className="text-[#223258]" />
-              <span>Copy</span>
+              <Copy size={14} className="text-[#223258] sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm">Copy</span>
             </>
           )}
         </button>
       </div>
       {/* Feedback form appears only after clicking Helpful/Not helpful */}
       {showForm && !thankYou && (
-        <div className="border border-[#C8C8C8] rounded-lg p-6 bg-white">
+        <div className="border border-[#C8C8C8] rounded-lg p-3 sm:p-6 bg-white">
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <div className="font-semibold mb-2" style={{ color: '#62739B' }}>Why was this answer {showForm === 'helpful' ? 'helpful' : 'not helpful'}?</div>
-              <div className="flex flex-wrap gap-2 mb-2">
+            <div className="mb-3 sm:mb-4">
+              <div className="font-semibold mb-2 text-sm sm:text-base" style={{ color: '#62739B' }}>Why was this answer {showForm === 'helpful' ? 'helpful' : 'not helpful'}?</div>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2">
                 {(showForm === 'helpful' ? FEEDBACK_OPTIONS_HELPFUL : FEEDBACK_OPTIONS_NOT_HELPFUL).map(option => (
                   <button
                     key={option}
                     type="button"
-                    className={`px-3 py-1 rounded-lg border text-sm transition-colors duration-100 ${feedbackBtnStyle(option)}`}
+                    className={`px-2 sm:px-3 py-1 rounded-lg border text-xs sm:text-sm transition-colors duration-100 ${feedbackBtnStyle(option)}`}
                     onClick={() => toggleFeedback(option)}
                   >
                     {option}
@@ -243,7 +245,7 @@ export default function AnswerFeedback({
                 ))}
               </div>
               <textarea
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-2 mt-2"
+                className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-2 mt-2 text-sm sm:text-base"
                 style={{ 
                   backgroundColor: 'rgba(238,243,255,0.5)',
                   color: '#62739B'
@@ -261,7 +263,7 @@ export default function AnswerFeedback({
                   color: #8997BA;
                 }
               `}</style>
-              <div className="text-center mb-4 text-sm" style={{ color: '#8997BA' }}>
+              <div className="text-center mb-3 sm:mb-4 text-xs sm:text-sm" style={{ color: '#8997BA' }}>
                 Your feedback can helps us improve our answers
               </div>
             </div>
@@ -269,13 +271,13 @@ export default function AnswerFeedback({
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-6 py-2 rounded-lg border border-[#C8C8C8] text-[#223258] bg-white"
+                className="px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg border border-[#C8C8C8] text-[#223258] bg-white text-xs sm:text-sm"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 rounded-lg border"
+                className="px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg border text-xs sm:text-sm"
                 style={{
                   backgroundColor: '#C6D7FF',
                   color: '#214498',
@@ -287,7 +289,7 @@ export default function AnswerFeedback({
               </button>
             </div>
             {validationMessage && (
-              <div className="text-center text-red-500 text-sm mt-2">
+              <div className="text-center text-red-500 text-xs sm:text-sm mt-2">
                 {validationMessage}
               </div>
             )}
@@ -296,7 +298,7 @@ export default function AnswerFeedback({
       )}
       {/* Thank you message after submit */}
       {thankYou && (
-        <div className="mt-4 font-semibold" style={{ color: '#8997BA' }}>Thank you for your feedback!</div>
+        <div className="mt-3 sm:mt-4 font-semibold text-sm sm:text-base" style={{ color: '#8997BA' }}>Thank you for your feedback!</div>
       )}
     </div>
   );

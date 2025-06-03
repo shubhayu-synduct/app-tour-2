@@ -17,19 +17,21 @@ interface ReferenceGridProps {
 
 export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowAll, getCitationCount }) => {
   return (
-    <div className="mt-4 grid grid-cols-3 gap-1">
+    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-1">
       {(() => {
         const entries = Object.entries(citations);
         const showAll = getCitationCount(citations) > 3;
-        const items = entries.slice(0, showAll ? 2 : 3).map(([key, citation]) => (
+        
+        // Mobile view - single citation
+        const mobileItems = entries.slice(0, 1).map(([key, citation]) => (
           <div
-            key={`streaming-citation-${key}`}
-            className="rounded-xl p-4 cursor-pointer hover:bg-blue-50 transition-colors"
+            key={`mobile-citation-${key}`}
+            className="sm:hidden rounded-xl p-4 cursor-pointer hover:bg-blue-50 transition-colors h-[90px] md:h-[100px] lg:h-[120px]"
             style={{
               background: "#EEF3FF",
               border: "1px solid #3771FE",
-              height: "120px",
-              width: "220px"
+              width: "100%",
+              maxWidth: "220px"
             }}
             onClick={() => onShowAll(citations)}
           >
@@ -40,8 +42,12 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 fontFamily: "DM Sans, sans-serif",
                 display: "block",
                 marginBottom: "2px",
-                fontSize: "14px",
+                fontSize: "12px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
               }}
+              className="text-xs sm:text-sm md:text-base"
             >
               {citation.source_type === 'guideline_database'
                 ? 'Guidelines'
@@ -54,29 +60,84 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 color: "#273561",
                 fontWeight: 600,
                 fontFamily: "DM Sans, sans-serif",
-                fontSize: "16px",
                 lineHeight: "1.4",
                 margin: 0,
                 overflow: "hidden",
                 display: "-webkit-box",
-                WebkitLineClamp: 3,
+                WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
+                maxHeight: "calc(100% - 24px)"
               }}
+              className="text-sm sm:text-base md:text-lg"
             >
               {citation.title}
             </p>
           </div>
         ));
+
+        // Desktop view - two citations
+        const desktopItems = entries.slice(0, 2).map(([key, citation]) => (
+          <div
+            key={`desktop-citation-${key}`}
+            className="hidden sm:block rounded-xl p-4 cursor-pointer hover:bg-blue-50 transition-colors h-[90px] md:h-[100px] lg:h-[120px]"
+            style={{
+              background: "#EEF3FF",
+              border: "1px solid #3771FE",
+              width: "100%",
+              maxWidth: "220px"
+            }}
+            onClick={() => onShowAll(citations)}
+          >
+            <span
+              style={{
+                color: "#8D8D8D",
+                fontWeight: 500,
+                fontFamily: "DM Sans, sans-serif",
+                display: "block",
+                marginBottom: "2px",
+                fontSize: "12px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
+              }}
+              className="text-xs sm:text-sm md:text-base"
+            >
+              {citation.source_type === 'guideline_database'
+                ? 'Guidelines'
+                : citation.source_type === 'drug_database'
+                ? 'Drugs'
+                : 'Internet'}
+            </span>
+            <p
+              style={{
+                color: "#273561",
+                fontWeight: 600,
+                fontFamily: "DM Sans, sans-serif",
+                lineHeight: "1.4",
+                margin: 0,
+                overflow: "hidden",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                maxHeight: "calc(100% - 24px)"
+              }}
+              className="text-sm sm:text-base md:text-lg"
+            >
+              {citation.title}
+            </p>
+          </div>
+        ));
+
+        const items = [...mobileItems, ...desktopItems];
+
         if (showAll) {
           items.push(
             <div 
               key="show-all"
-              className="rounded-xl p-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 show-all-citations-btn"
+              className="rounded-xl p-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 show-all-citations-btn h-[90px] md:h-[100px] lg:h-[120px]"
               style={{
                 background: "#EEF3FF",
                 border: "1px solid #3771FE",
-                height: "120px",
-                width: "220px"
               }}
               onClick={() => onShowAll(citations)}
             >
@@ -85,9 +146,9 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                   color: "#273561",
                   fontWeight: 600,
                   fontFamily: "DM Sans, sans-serif",
-                  fontSize: "16px",
                   margin: 0,
                 }}
+                className="text-sm sm:text-base md:text-lg"
               >
                 Show All ({getCitationCount(citations)})
               </p>
