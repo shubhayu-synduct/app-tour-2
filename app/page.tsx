@@ -1,8 +1,9 @@
 "use client"
 
 import { redirect, useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function HomePage() {
+function HomePageContent() {
   const searchParams = useSearchParams()
   const mode = searchParams.get('mode')
   const oobCode = searchParams.get('oobCode')
@@ -21,4 +22,16 @@ export default function HomePage() {
 
   // Default redirect to login
   redirect('/login')
+
+  // This line will never be reached due to the redirects above,
+  // but it's needed to satisfy TypeScript's return type requirements
+  return null
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomePageContent />
+    </Suspense>
+  )
 }
