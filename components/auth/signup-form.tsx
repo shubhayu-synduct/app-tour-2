@@ -71,7 +71,7 @@ export function SignUpForm() {
 
       // Send email verification
       await sendEmailVerification(user, {
-        url: `${window.location.origin}/login`,
+        url: `${window.location.origin}/verify-email`,
         handleCodeInApp: true
       })
 

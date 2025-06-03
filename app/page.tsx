@@ -7,17 +7,32 @@ function HomePageContent() {
   const searchParams = useSearchParams()
   const mode = searchParams.get('mode')
   const oobCode = searchParams.get('oobCode')
+  const apiKey = searchParams.get('apiKey')
+  const continueUrl = searchParams.get('continueUrl')
+  const lang = searchParams.get('lang')
+
+  // Handle email verification first
+  if (mode === 'verifyEmail' && oobCode) {
+    // Create new URLSearchParams with all necessary parameters
+    const params = new URLSearchParams()
+    params.set('mode', mode)
+    params.set('oobCode', oobCode)
+    if (apiKey) params.set('apiKey', apiKey)
+    if (lang) params.set('lang', lang)
+    
+    // Always redirect to verify-email page with the parameters
+    redirect(`/verify-email?${params.toString()}`)
+  }
 
   // Handle password reset
   if (mode === 'resetPassword' && oobCode) {
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams()
+    params.set('mode', mode)
+    params.set('oobCode', oobCode)
+    if (apiKey) params.set('apiKey', apiKey)
+    if (lang) params.set('lang', lang)
+    
     redirect(`/reset-password?${params.toString()}`)
-  }
-
-  // Handle email verification (which leads to onboarding)
-  if (mode === 'verifyEmail' && oobCode) {
-    const params = new URLSearchParams(searchParams)
-    redirect(`/verify-email?${params.toString()}`)
   }
 
   // Default redirect to login
