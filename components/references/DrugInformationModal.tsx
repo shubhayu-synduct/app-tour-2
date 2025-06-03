@@ -259,8 +259,8 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
     return (
       <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-end">
         <div
-          className="bg-white h-full overflow-y-auto shadow-xl p-6 animate-slide-in-right"
-          style={{ width: "70vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
+          className="bg-white h-full overflow-y-auto shadow-xl p-3 sm:p-4 md:p-6 animate-slide-in-right"
+          style={{ width: "90vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
         >
           <div className="flex justify-between items-center mb-6">
             <button
@@ -299,8 +299,8 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
     return (
       <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-end">
         <div
-          className="bg-white h-full overflow-y-auto shadow-xl p-6 animate-slide-in-right"
-          style={{ width: "70vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
+          className="bg-white h-full overflow-y-auto shadow-xl p-3 sm:p-4 md:p-6 animate-slide-in-right"
+          style={{ width: "90vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
         >
           <div className="flex justify-between items-center mb-6">
             <button
@@ -332,8 +332,8 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-end">
       <div
-        className="bg-white h-full overflow-y-auto shadow-xl p-6 animate-slide-in-right"
-        style={{ width: "70vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
+        className="bg-white h-full overflow-y-auto shadow-xl p-3 sm:p-4 md:p-6 animate-slide-in-right"
+        style={{ width: "90vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
       >
         <div className="flex justify-between items-center mb-6">
           <button

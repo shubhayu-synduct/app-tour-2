@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from "react"
+import React, { useEffect,useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { Sidebar } from "./sidebar"
@@ -12,6 +12,18 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter()
   const { user, loading } = useAuth()
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('sidebarOpen')
+      return stored === null ? false : stored === 'true'
+    }
+    return false
+  })
+
+  // Keep sidebar open/close state in sync with localStorage
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', isOpen.toString())
+  }, [isOpen])
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -40,11 +52,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Mobile Top Navbar */}
+    <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-40 flex items-center px-4">
+        <button
+          className="p-2 hover:bg-gray-100 rounded-md"
+          onClick={() => setIsOpen(true)}
+        >
+          <img src="/sidebar_open_icon.svg" alt="Open Sidebar" className="w-7 h-7" />
+        </button>
+      </div>
+      
       {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">
+      <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+      {/* Main content */} 
+      <main className="flex-1 overflow-auto md:mt-0 mt-14">
         {children}
       </main>
     </div>
