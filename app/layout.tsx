@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="font-['DM_Sans']">
       <body className={`${inter.className} ${poppins.variable}`}>
         <AuthProvider>{children}</AuthProvider>
       </body>
