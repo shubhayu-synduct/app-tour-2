@@ -112,9 +112,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         "/login", 
         "/signup", 
         "/forgot-password",
-        "/reset-password"
+        "/reset-password",
+        "/verify-email"
       ]
-      const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith("/reset-password")
+      const isPublicRoute = publicRoutes.includes(pathname) || 
+        pathname.startsWith("/reset-password") || 
+        pathname.startsWith("/verify-email")
       
       // If user is not authenticated and trying to access a protected route, redirect to login
       if (!user && !isPublicRoute) {
@@ -148,8 +151,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               emailVerified: user.emailVerified 
             })
             
-            // If email is not verified and not on signup page, redirect to login
-            if (!user.emailVerified && pathname !== "/signup") {
+            // If email is not verified and not on signup or verify-email page, redirect to login
+            if (!user.emailVerified && !pathname.startsWith("/verify-email") && pathname !== "/signup") {
               console.log("Email not verified, redirecting to login")
               router.push("/login?error=email-not-verified")
               return

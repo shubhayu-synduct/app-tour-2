@@ -418,6 +418,7 @@ export default function Onboarding() {
                   <option value="less-than-1">Experience ≤ 1 year</option>
                   <option value="less-than-3">Experience ≤ 3 years</option>
                   <option value="less-than-5">Experience ≤ 5 years</option>
+                  <option value="more-than-5">Experience {'>'} 5 years</option>
                 </select>
                 {fieldErrors.experience && (
                   <p className="text-red-500 text-xs mt-1">{fieldErrors.experience}</p>

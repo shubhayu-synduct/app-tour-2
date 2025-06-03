@@ -12,12 +12,16 @@ export function middleware(request: NextRequest) {
     path === "/signup" || 
     path === "/forgot-password" || 
     path === "/reset-password" ||
-    path === "/verify-email" ||
     path.startsWith("/_next") ||
     path.startsWith("/api") ||
     path.endsWith(".svg") ||
     path.endsWith(".ico") ||
     path.endsWith(".png")
+
+  // Special case for verify-email: always allow access regardless of auth state
+  if (path === "/verify-email") {
+    return NextResponse.next()
+  }
 
   // Log all cookies for debugging
   const allCookies = request.cookies.getAll()
@@ -59,7 +63,8 @@ export const config = {
      * - favicon.ico (favicon file)
      * - forgot-password (password reset flow)
      * - reset-password (password reset flow)
+     * - verify-email (email verification flow)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|forgot-password|reset-password).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|forgot-password|reset-password|verify-email).*)',
   ],
 }
