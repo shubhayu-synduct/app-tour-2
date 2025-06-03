@@ -177,7 +177,10 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 <div className="absolute bottom-full left-0 w-full mb-2 bg-white rounded-[10px] shadow-lg border border-[#B5C9FC]">
                   <div className="p-2">
                     {/* Profile Settings */}
-                    <button className="flex items-center w-full px-3 py-2 rounded-[8px] bg-[#E4ECFF] text-[#223258] font-semibold mb-1">
+                    <button
+                      className="flex items-center w-full px-3 py-2 rounded-[8px] bg-[#E4ECFF] text-[#223258] font-semibold mb-1"
+                      onClick={() => router.push("/dashboard/profile")}
+                    >
                       <svg className="mr-3 h-5 w-5" fill="none" stroke="#223258" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                       Profile Settings
                     </button>
