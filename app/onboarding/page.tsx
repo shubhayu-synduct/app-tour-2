@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { Check } from "lucide-react"
@@ -37,6 +37,18 @@ export default function Onboarding() {
   })
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  // For scroll indicator
+  const ndaScrollRef = useRef<HTMLDivElement>(null)
+  const [ndaAtBottom, setNdaAtBottom] = useState(false)
+
+  const [registrationSuccess, setRegistrationSuccess] = useState(false)
+
+  const handleNdaScroll = () => {
+    const el = ndaScrollRef.current
+    if (!el) return
+    setNdaAtBottom(el.scrollTop + el.clientHeight >= el.scrollHeight - 2)
+  }
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -152,88 +164,6 @@ export default function Onboarding() {
       // Update user document
       await updateDoc(doc(db, "users", user.uid), userProfileData)
 
-      // Generate and send NDA PDF
-      const ndaHtml = `
-        <div style="font-family: Arial, sans-serif; padding: 40px;">
-          <div style="text-align: right; margin-bottom: 40px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUxIiBoZWlnaHQ9IjczIiB2aWV3Qm94PSIwIDAgMjUxIDczIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik00LjA4ODg3IDE5LjAwNzhWNjcuNzM4M0g0Mi4zOTM2VjcyLjUwMjlIMC4zMzg4NjdWMTkuMDA3OEg0LjA4ODg3Wk00Ni4xNDM2IDYyLjk3MjdWNjcuNzM4M0g0Mi4zOTM2VjYyLjk3MjdINDYuMTQzNlpNMTEuNTg4OSAxOS4wMDc4VjU4LjIyMjdINDIuMzkzNlY2Mi45NzI3SDcuODM4ODdWMTkuMDA3OEgxMS41ODg5Wk00OS44OTM2IDYyLjk3MjdINDYuMTQzNlY1OC4yMjI3SDQ5Ljg5MzZWNjIuOTcyN1pNNTMuNjQzNiA1OC4yMjI3SDQ5Ljg5MzZWNTMuNDU3SDUzLjY0MzZWNTguMjIyN1pNNDYuMTQzNiA1My40NTdWNTguMjIyN0g0Mi4zOTM2VjUzLjQ1N0g0Ni4xNDM2Wk00Mi4zOTM2IDE5LjAwNzhWNTMuNDU3SDE1LjM0NjdWMTkuMDA3OEg0Mi4zOTM2Wk00OS44OTM2IDUzLjQ1N0g0Ni4xNDM2VjE0LjI4OTFIMTUuMzQ2N1Y5LjUyMzQ0SDQ5Ljg5MzZWNTMuNDU3Wk01Ny40MDE0IDUzLjQ1N0g1My42NDM2VjQuNzczNDRIMTUuMzQ2N1YwLjAwNzgxMjVINTcuNDAxNFY1My40NTdaTTE1LjM0NjcgMTkuMDA3OEgxMS41ODg5VjE0LjI4OTFIMTUuMzQ2N1YxOS4wMDc4Wk03LjgzODg3IDE5LjAwNzhINC4wODg4N1YxNC4yODkxSDcuODM4ODdWMTkuMDA3OFpNMTEuNTg4OSAxNC4yODkxSDcuODM4ODdWOS41MjM0NEgxMS41ODg5VjE0LjI4OTFaTTE1LjM0NjcgOS41MjM0NEgxMS41ODg5VjQuNzczNDRIMTUuMzQ2N1Y5LjUyMzQ0WiIgZmlsbD0idXJsKCNwYWludDBfbGluZWFyXzI1NDNfMzEyNzApIi8+PHBhdGggZD0iTTEzNS4yNjcgNDYuNjk1M0MxMzcuMzcgNDYuNjk1MyAxMzkuMDg2IDQ4LjM2ODggMTM5LjA4NiA1MC40NzE1QzEzOS4wODYgNTIuNTc0MSAxMzcuMzcgNTQuMzMzNSAxMzUuMjY3IDU0LjMzMzVDMTMzLjE2NSA1NC4zMzM1IDEzMS40NDggNTIuNTc0MSAxMzEuNDQ4IDUwLjQ3MTVDMTMxLjQ0OCA0OC4zNjg4IDEzMy4xNjUgNDYuNjk1MyAxMzUuMjY3IDQ2LjY5NTNaIiBmaWxsPSIjMjE0NDk4Ii8+PHBhdGggZD0iTTEyMC4xNjkgMzkuODI2NEwxMjkuMzA5IDUzLjQ3MkgxMjEuNjcxTDEwMy44MTkgNDAuNDI3MUgxMDMuNzMzVjUzLjQ3Mkg5Ny40MjVWMjEuMTE3MkgxMTUuOTY0QzEyMi4zNTggMjEuMTE3MiAxMjYuNzc4IDIzLjk0OTMgMTI2Ljc3OCAzMC44NThDMTI2Ljc3OCAzNC45Nzc0IDEyNC41MDMgMzkuMDk2OSAxMjAuMTY5IDM5LjgyNjRaTTExMy43MzMgMjYuMjY2NVYzNi4wMDczSDExNC41NDhDMTE4LjAyNCAzNi4wMDczIDEyMC40NyAzNC45Nzc0IDEyMC40NyAzMS4wMjk2QzEyMC40NyAyNy4wMzg5IDExNy45MzggMjYuMjY2NSAxMTQuNTkxIDI2LjI2NjVIMTEzLjczM1oiIGZpbGw9IiMyMTQ0OTgiLz48cGF0aCBkPSJNNzkuNjkwNCA1My40NzJWMjEuMTE3Mkg4OC43MDE3Qzk4LjA1NjMgMjEuMTE3MiAxMDQuMzIxIDI4LjExMTcgMTA0LjMyMSAzNy4zMzc1QzEwNC4zMjEgNDYuNDM0NyA5Ny44ODQ3IDUzLjQ3MiA4OC42NTg4IDUzLjQ3Mkg3OS42OTA0Wk04NS45OTgzIDI2LjYwOThWNDcuOTc5NEg4Ny4wMjgyQzk0Ljc5NTEgNDcuOTc5NCA5Ny43OTg5IDQzLjY4ODQgOTcuNzk4OSAzNy4yOTQ2Qzk3Ljc5ODkgMzAuMjU3MiA5NC4xOTQzIDI2LjYwOTggODcuMDI4MiAyNi42MDk4SDg1Ljk5ODNaIiBmaWxsPSIjMjE0NDk4Ii8+PHBhdGggZD0iTTI0NC45NTIgMzcuMjM0OUMyNDQuOTUyIDQ2Ljc2MTIgMjM4LjgxNiA1NC4zMTM1IDIyOC45NDYgNTQuMzEzNUMyMTkuMDc3IDU0LjMxMzUgMjEyLjk0IDQ2Ljc2MTIgMjEyLjk0IDM3LjIzNDlDMjEyLjk0IDI3LjYyMjkgMjE5LjI5MSAyMC4yNDIyIDIyOC45NDYgMjAuMjQyMkMyMzguNjAxIDIwLjI0MjIgMjQ0Ljk1MiAyNy42MjI5IDI0NC45NTIgMzcuMjM0OVpNMjM4LjQzIDM2Ljk3NzVDMjM4LjQzIDMxLjc0MjMgMjM0LjkxMSAyNi40NjQzIDIyOC45NDYgMjYuNDY0M0MyMjIuOTgyIDI2LjQ2NDMgMjE5LjQ2MyAzMS43NDIzIDIxOS40NjMgMzYuOTc3NUMyMTkuNDYzIDQxLjk1NTEgMjIxLjk1MiA0OC4wOTE0IDIyOC45NDYgNDguMDkxNEMyMzUuOTQxIDQ4LjA5MTQgMjM4LjQzIDQxLjk1NTEgMjM4LjQzIDM2Ljk3NzVaIiBmaWxsPSIjMjE0NDk4Ii8+PHBhdGggZD0iTTIxMC42NzcgMjYuNjAySDIwMC45MzZWMzMuNzI1MkgyMTAuMDc2VjM5LjIxNzhIMjAwLjkzNlY1My40NjQySDE5NC42MjhWMjEuMTA5NEgyMTAuNjc3VjI2LjYwMloiIGZpbGw9IiMyMTQ0OTgiLz48cGF0aCBkPSJNMTYyLjA2NSA1My40NTUzVjIwLjI0MjJIMTY2LjYxNEwxODMuNjUgNDIuODU2M0gxODMuNzM1VjIxLjEwMDRIMTkwLjA0M1Y1NC4wOTg5SDE4NS40OTVMMTY4LjQ1OSAzMS40ODQ5SDE2OC4zNzNWNTMuNDU1M0gxNjIuMDY1WiIgZmlsbD0iIzIxNDQ5OCIvPjxwYXRoIGQ9Ik0xNTcuNDgzIDIxLjEwOTRWNTMuNDY0MkgxNTEuMTc1VjIxLjEwOTRIMTU3LjQ4M1oiIGZpbGw9IiMyMTQ0OTgiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMjU0M18zMTI3MCIgeDE9IjU1Ljg5MTMiIHkxPSItMC42MzI5MjUiIHgyPSIxLjc4OTciIHkyPSI3My4wNDkyIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0iIzlCQjhGRiIvPjxzdG9wIG9mZnNldD0iMC40NTA5OCIgc3RvcC1jb2xvcj0iIzM3NzFGRSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzIxNDQ5OCIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjwvc3ZnPg==" alt="DR. INFO Logo" style="width: 251px; height: 73px;" />
-          </div>
-          
-          <h1 style="text-align: center; color: #1e40af;">Non-Disclosure Agreement</h1>
-          
-          <div style="margin-top: 40px;">
-            <h2 style="color: #1e40af;">1. Parties</h2>
-            <p>
-              Disclosing Party: Synduct GmbH, Bergmannstrasse 58, 80339 Munich, Germany, represented by Managing Director Valentine Emmanuel.<br>
-              Receiving Party: ${formData.firstName} ${formData.lastName} ("you").
-            </p>
-          </div>
-
-          <div style="margin-top: 40px;">
-            <h2 style="color: #1e40af;">2. Purpose</h2>
-            <p>
-              Synduct GmbH will disclose confidential information so you can evaluate and, where applicable, test its AI-enabled content-management platform for the pharmaceutical, biotechnology and medical-technology sectors.
-            </p>
-          </div>
-
-          <div style="margin-top: 40px;">
-            <h2 style="color: #1e40af;">3. Confidential Information</h2>
-            <p>
-              "Confidential Information" includes, without limitation:<br>
-              • business plans, financial data, forecasts, marketing strategies;<br>
-              • product or service roadmaps, customer or supplier details;<br>
-              • technical data, software code, algorithms, designs, processes and trade secrets;<br>
-              • any materials derived from, or that reference, the above.<br><br>
-              Exclusions: information that (a) you already lawfully possessed, (b) becomes public not through your fault, (c) is received from a third party with no duty of confidence, (d) is independently developed without access to the Confidential Information, or (e) must be disclosed by law (provided you give prompt written notice).
-            </p>
-          </div>
-
-          <div style="margin-top: 40px;">
-            <h2 style="color: #1e40af;">4. Your Obligations</h2>
-            <p>
-              • Keep all Confidential Information strictly confidential and apply at least reasonable security measures.<br>
-              • Share it only with staff or advisers bound by equivalent confidentiality and only as needed for the purpose above.<br>
-              • Use it exclusively to evaluate or perform the potential collaboration; no other use is permitted.<br>
-              • Return or securely destroy all Confidential Information (including copies and notes) at Synduct GmbH's request.
-            </p>
-          </div>
-
-          <div style="margin-top: 40px;">
-            <h2 style="color: #1e40af;">5. Breach & Penalties</h2>
-            <p>
-              Unauthorised use or disclosure triggers a liquidated penalty of €100 000, plus compensation for any additional proven loss. Synduct GmbH may also seek injunctive relief. Compliance with all applicable data-protection laws (including GDPR) is mandatory.
-            </p>
-          </div>
-
-          <div style="margin-top: 40px;">
-            <h2 style="color: #1e40af;">6. Term</h2>
-            <p>
-              This Agreement is effective for 10 years from the first disclosure; confidentiality obligations survive indefinitely.
-            </p>
-          </div>
-
-          <div style="margin-top: 40px;">
-            <h2 style="color: #1e40af;">7. Governing Law & Jurisdiction</h2>
-            <p>
-              German law governs. Exclusive venue: Munich, Germany.
-            </p>
-          </div>
-
-          <div style="margin-top: 40px;">
-            <h2 style="color: #1e40af;">8. Online Acceptance</h2>
-            <p>
-              By ticking the checkbox labelled "I agree to the NDA" inside the app, you confirm that you have read, understood and agree to be bound by this Agreement. This electronic acceptance is legally binding and equivalent to a handwritten signature.
-            </p>
-          </div>
-
-          <div style="margin-top: 60px; border-top: 1px solid #ccc; padding-top: 20px;">
-            <p><strong>Digital Signature:</strong> ${ndaData.digitalSignature}</p>
-            <p><strong>Address:</strong> ${ndaData.address}</p>
-            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-          </div>
-        </div>
-      `
-
       // Send NDA PDF via email
       const response = await fetch("/api/send-nda", {
         method: "POST",
@@ -251,7 +181,7 @@ export default function Onboarding() {
         throw new Error(errorData.error || "Failed to send NDA PDF")
       }
 
-      router.push("/dashboard")
+      setRegistrationSuccess(true)
     } catch (err: any) {
       console.error("Error during onboarding:", err)
       setError(err.message || "An error occurred during onboarding")
@@ -271,6 +201,65 @@ export default function Onboarding() {
     )
   }
 
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6 pb-8">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-4">
+            <div className="flex items-center justify-center mb-2">
+              <Image
+                src="/full-icon.svg"
+                alt="DR. INFO Logo"
+                width={200}
+                height={57}
+                className="text-white"
+              />
+            </div>
+            <h2 className="font-semibold text-[#223258] mt-6 mb-6 text-[20px] sm:text-[20px] font-dm-sans">
+              Complete Registration
+            </h2>
+            {/* Step Indicator with both steps checked */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="flex items-center">
+                <div className="flex items-center justify-center rounded-full font-medium transition-all duration-200 border border-[#3771FE]/50 font-dm-sans bg-[#3771FE] text-white w-8 h-8 text-base">
+                  <Check size={20} strokeWidth={3} className="text-white" />
+                </div>
+                <div className="h-0.5 w-10 bg-[#3771FE]" />
+                <div className="flex items-center justify-center rounded-full font-medium transition-all duration-200 border border-[#3771FE]/50 font-dm-sans bg-[#3771FE] text-white w-8 h-8 text-base">
+                  <Check size={20} strokeWidth={3} className="text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-[#F4F7FF] shadow-lg border border-[#3771FE]/50 px-8 py-8 rounded-[8px] text-center">
+            <div className="flex flex-col items-center mb-4">
+              <Image
+                src="/password-success.svg"
+                alt="Success"
+                width={40}
+                height={40}
+                className="mb-2"
+              />
+              <h3 className="text-xl font-semibold text-[#223258] mb-2" style={{ fontFamily: 'DM Sans', fontSize: 20, fontWeight: 550 }}>
+                NDA Signed Successfully!
+              </h3>
+              <p className="text-[#223258] mb-4" style={{ fontFamily: 'DM Sans', fontWeight: 400 }}>
+                A signed copy of your NDA will be sent soon to your registered email address. Please check your inbox for the confirmation.
+              </p>
+            </div>
+            <button
+              className="w-full bg-[#C6D7FF]/50 text-[#3771FE] py-2 px-4 border border-[#3771FE]/50 rounded-[8px] font-dm-sans font-medium hover:bg-[#C6D7FF]/70 transition-colors duration-200"
+              style={{ fontFamily: 'DM Sans', fontSize: 14 }}
+              onClick={() => router.push('/dashboard')}
+            >
+              Let's Get Started...
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6 pb-8">
       <div className="w-full max-w-sm">
@@ -280,31 +269,42 @@ export default function Onboarding() {
             <Image
               src="/full-icon.svg"
               alt="DR. INFO Logo"
-              width={251}
-              height={73}
+              width={200}
+              height={57}
               className="text-white"
             />
           </div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-3">Complete Registration</h2>
+          <h2 className="font-semibold text-[#223258] mt-6 mb-6 text-[20px] sm:text-[20px] font-dm-sans">
+            Complete Registration
+          </h2>
           
           {/* Step Indicator */}
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 1 ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
-            }`}>
-              {currentStep === 1 ? '1' : <Check size={14} />}
-            </div>
-            <div className="w-10 h-0.5 bg-gray-300"></div>
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-500'
-            }`}>
-              2
+          <div className="flex items-center justify-center mb-6">
+            {/* Step 1 */}
+            <div className={`flex items-center`}>
+              <div
+                className={`flex items-center justify-center rounded-full font-medium transition-all duration-200 border border-[#3771FE]/50 font-dm-sans
+                  ${currentStep === 1 ? 'bg-[#4784FD] text-white w-11 h-11 text-lg' : currentStep === 2 ? 'bg-[#3771FE] text-white w-8 h-8 text-base' : 'bg-[#F6F9FF] text-[#3771FE] w-8 h-8 text-base'}
+                `}
+              >
+                {currentStep === 1 ? '1' : currentStep === 2 ? <Check size={20} strokeWidth={3} className="text-white" /> : '1'}
+              </div>
+              {/* Connecting line */}
+              <div className="h-0.5 w-10 bg-[#3771FE]" />
+              {/* Step 2 */}
+              <div
+                className={`flex items-center justify-center rounded-full font-medium transition-all duration-200 border border-[#3771FE]/50 font-dm-sans
+                  ${currentStep === 2 ? 'bg-[#4784FD] text-white w-11 h-11 text-lg' : 'bg-[#F6F9FF] text-[#3771FE] w-8 h-8 text-base'}
+                `}
+              >
+                2
+              </div>
             </div>
           </div>
         </div>
 
         {/* Form Container */}
-        <div className="bg-[#F4F7FF] shadow-lg border-2 border-[#C6D7FF]/50 px-8 py-5 rounded-[8px]">
+        <div className="bg-[#F4F7FF] shadow-lg border border-[#3771FE]/50 px-8 py-5 rounded-[8px]">
           {currentStep === 1 ? (
             // Step 1: Customer Information Form
             <div className="space-y-3">
@@ -358,7 +358,7 @@ export default function Onboarding() {
                     onChange={handleInputChange}
                     className={`px-3 py-2 border ${fieldErrors.gender ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm w-full ${!formData.gender ? 'text-gray-400' : 'text-[#223258]'}`}
                   >
-                    <option value="" disabled style={{ color: '#9ca3af' }}>Select Sex</option>
+                    <option value="" disabled style={{ color: '#9ca3af' }}>Sex</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="other">Other</option>
@@ -376,7 +376,7 @@ export default function Onboarding() {
                   onChange={handleInputChange}
                   className={`w-full px-3 py-2 border ${fieldErrors.occupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.occupation ? 'text-gray-400' : 'text-[#223258]'}`}
                 >
-                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Profession</option>
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Profession</option>
                   <option value="physician">Physician</option>
                   <option value="fellow">Fellow</option>
                   <option value="consultant">Consultant</option>
@@ -414,7 +414,7 @@ export default function Onboarding() {
                   onChange={handleInputChange}
                   className={`w-full px-3 py-2 border ${fieldErrors.experience ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.experience ? 'text-gray-400' : 'text-[#223258]'}`}
                 >
-                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Professional Experience</option>
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Experience</option>
                   <option value="less-than-1">Experience ≤ 1 year</option>
                   <option value="less-than-3">Experience ≤ 3 years</option>
                   <option value="less-than-5">Experience ≤ 5 years</option>
@@ -431,7 +431,7 @@ export default function Onboarding() {
                   onChange={handleInputChange}
                   className={`w-full px-3 py-2 border ${fieldErrors.placeOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.placeOfWork ? 'text-gray-400' : 'text-[#223258]'}`}
                 >
-                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Place of Work</option>
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Place of Work</option>
                   <option value="hospital-clinic">Hospital/Clinic</option>
                   <option value="outpatient-clinic">Outpatient Clinic</option>
                   <option value="private-practice">Private Practice</option>
@@ -476,7 +476,7 @@ export default function Onboarding() {
                   onChange={handleInputChange}
                   className={`w-full px-3 py-2 border ${fieldErrors.country ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.country ? 'text-gray-400' : 'text-[#223258]'}`}
                 >
-                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Country</option>
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Country</option>
                   <option value="afghanistan">Afghanistan</option>
                   <option value="albania">Albania</option>
                   <option value="algeria">Algeria</option>
@@ -688,15 +688,22 @@ export default function Onboarding() {
             </div>
           ) : (
             // Step 2: NDA Agreement
-            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+            <div
+              className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide relative"
+              ref={ndaScrollRef}
+              onScroll={handleNdaScroll}
+            >
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 mb-1">Non-Disclosure Agreement (Online)</h3>
+                <p className="text-xs font-dm-sans text-gray-700 mb-3 text-center">
+                  As part of our early access program we are giving you access to co-develop the solution with us. Please confirm that you agree to our NDA
+                </p>
+                <h1 className="text-[20px] font-semibold mb-1" style={{ fontFamily: 'DM Sans', color: '#223258' }}>Non-Disclosure Agreement (Online)</h1>
               </div>
 
               <div className="text-left space-y-3">
                 <div>
-                  <h4 className="font-bold text-gray-800 mb-1 text-sm">1. Parties</h4>
-                  <p className="text-xs text-gray-700 mb-3">
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>1. Parties</h4>
+                  <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
                     Disclosing Party: Synduct GmbH, Bergmannstrasse 58, 80339<br />
                     Munich, Germany, represented by Managing Director Valentine<br />
                     Emmanuel.<br />
@@ -705,8 +712,8 @@ export default function Onboarding() {
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-gray-800 mb-1 text-sm">2. Purpose</h4>
-                  <p className="text-xs text-gray-700 mb-3">
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>2. Purpose</h4>
+                  <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
                     Synduct GmbH will disclose confidential information so you<br />
                     can evaluate and, where applicable, test its AI-enabled<br />
                     content-management platform for the pharmaceutical,<br />
@@ -715,8 +722,8 @@ export default function Onboarding() {
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-gray-800 mb-1 text-sm">3. Confidential Information</h4>
-                  <p className="text-xs text-gray-700 mb-3">
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>3. Confidential Information</h4>
+                  <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
                     "Confidential Information" includes, without limitation:<br />
                     • business plans, financial data, forecasts, marketing strategies;<br />
                     • product or service roadmaps, customer or supplier details;<br />
@@ -727,8 +734,8 @@ export default function Onboarding() {
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-gray-800 mb-1 text-sm">4. Your Obligations</h4>
-                  <p className="text-xs text-gray-700 mb-3">
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>4. Your Obligations</h4>
+                  <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
                     • Keep all Confidential Information strictly confidential and apply at least reasonable security measures.<br />
                     • Share it only with staff or advisers bound by equivalent confidentiality and only as needed for the purpose above.<br />
                     • Use it exclusively to evaluate or perform the potential collaboration; no other use is permitted.<br />
@@ -737,63 +744,60 @@ export default function Onboarding() {
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-gray-800 mb-1 text-sm">5. Breach & Penalties</h4>
-                  <p className="text-xs text-gray-700 mb-3">
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 600, fontSize: '16px' }}>5. Breach & Penalties</h4>
+                  <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
                     Unauthorised use or disclosure triggers a liquidated penalty of €100 000, plus compensation for any additional proven loss. Synduct GmbH may also seek injunctive relief. Compliance with all applicable data-protection laws (including GDPR) is mandatory.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-gray-800 mb-1 text-sm">6. Term</h4>
-                  <p className="text-xs text-gray-700 mb-3">
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>6. Term</h4>
+                  <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
                     This Agreement is effective for 10 years from the first disclosure; confidentiality obligations survive indefinitely.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-gray-800 mb-1 text-sm">7. Governing Law & Jurisdiction</h4>
-                  <p className="text-xs text-gray-700 mb-3">
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>7. Governing Law & Jurisdiction</h4>
+                  <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
                     German law governs. Exclusive venue: Munich, Germany.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-gray-800 mb-1 text-sm">8. Online Acceptance</h4>
-                  <p className="text-xs text-gray-700 mb-3">
-                    By ticking the checkbox labelled "I agree to the NDA" inside the app, you confirm that you have read, understood and agree to be bound by this Agreement. This electronic acceptance is legally binding and equivalent to a handwritten signature.
-                  </p>
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>8. Online Acceptance</h4>
+                  <div className="flex items-start space-x-2 mb-2">
+                    <input
+                      type="checkbox"
+                      id="nda-agreement"
+                      checked={ndaAgreed}
+                      onChange={(e) => setNdaAgreed(e.target.checked)}
+                      className="mt-0.5 w-2 h-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      style={{ backgroundColor: !ndaAgreed ? '#DEE8FF' : undefined, minWidth: '20px', minHeight: '20px' }}
+                    />
+                    <label htmlFor="nda-agreement" className="cursor-pointer" style={{ fontFamily: 'DM Sans', fontSize: '12px', fontWeight: 400, color: '#000' }}>
+                     "I agree to the NDA" inside the app, you confirm that you have read, understood and agree to be bound by this Agreement. This electronic acceptance is legally binding and equivalent to a handwritten signature.
+                    </label>
+                  </div>
+                  <div className="flex items-start space-x-2 mb-2">
+                    <input
+                      type="checkbox"
+                      id="terms-agreement"
+                      checked={termsAgreed}
+                      onChange={(e) => setTermsAgreed(e.target.checked)}
+                      className="mt-0.5 w-2 h-2 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      style={{ backgroundColor: !termsAgreed ? '#DEE8FF' : undefined, minWidth: '20px', minHeight: '20px' }}
+                    />
+                    <label htmlFor="terms-agreement" className="cursor-pointer" style={{ fontFamily: 'DM Sans', fontSize: '12px', fontWeight: 400, color: '#000' }}>
+                      I agree to the Terms of Use and Privacy Policy
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-2 p-3 bg-blue-50 rounded-lg">
-                <input
-                  type="checkbox"
-                  id="nda-agreement"
-                  checked={ndaAgreed}
-                  onChange={(e) => setNdaAgreed(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="nda-agreement" className="text-xs text-gray-700 cursor-pointer">
-                  I have read and agree to the terms of the Non-Disclosure Agreement
-                </label>
-              </div>
-
-              <div className="flex items-start space-x-2 p-3 bg-blue-50 rounded-lg">
-                <input
-                  type="checkbox"
-                  id="terms-agreement"
-                  checked={termsAgreed}
-                  onChange={(e) => setTermsAgreed(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="terms-agreement" className="text-xs text-gray-700 cursor-pointer">
-                  I agree to the Terms of Use and Privacy Policy
-                </label>
-              </div>
-
               <div className="mt-4">
-                <label htmlFor="digital-signature" className="block text-xs text-gray-700 mb-2">
-                  Digital Signature (Type your full name)
+                <label htmlFor="digital-signature" className="block text-xs text-black-700 mb-2">
+                  Digital Signature (e.g. Thomas Müller)
                 </label>
                 <input
                   type="text"
@@ -801,13 +805,14 @@ export default function Onboarding() {
                   value={ndaData.digitalSignature}
                   onChange={(e) => setNdaData(prev => ({ ...prev, digitalSignature: e.target.value }))}
                   placeholder="Enter your full name"
-                  className="w-full px-3 py-2 border border-indigo-300 rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
+                  style={{ fontFamily: 'DM Sans', fontWeight: 400 }}
                 />
               </div>
 
               <div className="mt-4">
-                <label htmlFor="address" className="block text-xs text-gray-700 mb-2">
-                  Address
+                <label htmlFor="address" className="block text-xs text-black-700 mb-2" style={{ fontFamily: 'DM Sans', fontWeight: 400 }}>
+                  Place (e.g. Munich, Germany)
                 </label>
                 <input
                   type="text"
@@ -815,7 +820,8 @@ export default function Onboarding() {
                   value={ndaData.address}
                   onChange={(e) => setNdaData(prev => ({ ...prev, address: e.target.value }))}
                   placeholder="Enter your address"
-                  className="w-full px-3 py-2 border border-indigo-300 rounded-lg text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
+                  style={{ fontFamily: 'DM Sans', fontWeight: 400 }}
                 />
               </div>
 
@@ -824,10 +830,10 @@ export default function Onboarding() {
               <button
                 onClick={handleCompleteRegistration}
                 disabled={!ndaAgreed || !termsAgreed || !ndaData.digitalSignature || !ndaData.address || loading}
-                className={`w-full py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-sm ${
+                className={`w-full py-2 px-4 rounded-[8px] font-dm-sans font-medium transition-colors duration-200 text-sm ${
                   ndaAgreed && termsAgreed && ndaData.digitalSignature && ndaData.address && !loading
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 hover:bg-[#C6D7FF]/60'
+                    : 'bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 cursor-not-allowed opacity-50'
                 }`}
               >
                 {loading ? "Completing Registration..." : "Complete Registration"}
