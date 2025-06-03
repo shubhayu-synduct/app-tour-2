@@ -174,7 +174,7 @@ export function SignInForm() {
       <div className="flex justify-end">
         <Link 
           href="/forgot-password" 
-          className="text-sm text-[#223258] hover:text-[#223258] font-medium font-['DM_Sans']"
+          className="text-sm text-[#223258] hover:text-[#3771FE] font-medium font-['DM_Sans']"
         >
           Forgot Password?
         </Link>

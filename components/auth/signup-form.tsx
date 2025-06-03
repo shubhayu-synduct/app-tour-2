@@ -230,7 +230,18 @@ export function SignUpForm() {
           </button>
         </div>
 
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded-[10px]">{error}</div>}
+        {/* Error Message */}
+        {error && error.includes("auth/email-already-in-use") ? (
+          <div className="bg-[#EAF1FF] text-[#223258] p-3 rounded-[10px] text-center font-['DM_Sans'] text-[15px]">
+            This email is already registered. Please{' '}
+            <Link href="/login" className="text-[#3771FE] underline font-medium font-['DM_Sans']">
+              Sign In
+            </Link>
+            .
+          </div>
+        ) : error && (
+          <div className="bg-red-50 text-red-600 p-3 rounded-[10px] font-['DM_Sans']">{error}</div>
+        )}
 
         {/* Continue Button */}
         <button

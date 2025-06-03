@@ -66,34 +66,21 @@ export function VerificationModal({ email, onClose }: VerificationModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 modal-overlay">
-      <div className="bg-white rounded-xl shadow-lg border-2 border-blue-200 p-8 max-w-md w-full relative">
+      <div className="bg-[#F4F7FF] rounded-xl shadow-lg border border-[#3771FE80] p-8 max-w-md w-full relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          className="absolute top-4 right-4 text-blue-600 font-bold hover:text-blue-800"
         >
           <X size={20} />
         </button>
-        <div className="text-center">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
-          </div>
+        <div className="text-center flex flex-col items-center">
+          <img src="/login-logo.svg" alt="DR. INFO Logo" width={200} height={57} className="mx-auto mb-4" />
+          <img src="/emailout.svg" alt="Success" width={64} height={64} className="mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             Verify Your Email
           </h3>
           <p className="text-gray-600 mb-4">
-            We've sent a verification link to <span className="font-medium">{email}</span>.
+            We've sent a verification link to <span className="font-medium text-[#3771FE]">{email}</span>.
             Please check your email and click the link to verify your account.
           </p>
           <p className="text-gray-600 mb-4">
@@ -113,13 +100,13 @@ export function VerificationModal({ email, onClose }: VerificationModalProps) {
             <button
               onClick={handleResendVerification}
               disabled={resending}
-              className="w-full bg-blue-50 text-blue-600 border border-blue-200 py-2 px-4 rounded-lg hover:bg-blue-100 transition duration-200 font-medium disabled:opacity-70"
+              className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-blue-200 py-2 px-4 rounded-lg hover:bg-[#C6D7FF] transition duration-200 font-medium disabled:opacity-70"
             >
               {resending ? "Sending..." : "Resend Verification Email"}
             </button>
             <button
               onClick={onClose}
-              className="w-full bg-gray-50 text-gray-600 border border-gray-200 py-2 px-4 rounded-lg hover:bg-gray-100 transition duration-200 font-medium"
+              className="w-full bg-gray-50 text-gray-600 border border-gray-200 py-2 px-4 rounded-lg hover:bg-[#C6D7FF]/50 transition duration-200 font-medium"
             >
               Return to Login
             </button>
