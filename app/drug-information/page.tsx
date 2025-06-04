@@ -336,7 +336,7 @@ export default function DrugInformationPage() {
         </div>
         
         {/* Drug table */}
-        <div className="w-full max-w-[1118px] mx-auto bg-[#F3F6FC] rounded-lg overflow-hidden">
+        <div className="w-full max-w-[1118px] mx-auto rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full table-fixed">
               <colgroup>
@@ -344,7 +344,7 @@ export default function DrugInformationPage() {
                 <col className="w-[35%]" />
               </colgroup>
               <thead>
-                <tr className="bg-[#F3F6FC] border-b border-[#E1E7F0]">
+                <tr className="border-b border-[#E1E7F0]">
                   <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] md:text-[20px] font-['DM_Sans']">
                     Brand Name
                   </th>
@@ -402,7 +402,9 @@ export default function DrugInformationPage() {
 
   return (
     <DashboardLayout>
-      {user && <DrugInformationContent />}
+      <div className="bg-[#F3F6FC] min-h-screen">
+        {user && <DrugInformationContent />}
+      </div>
     </DashboardLayout>
   );
 } 
