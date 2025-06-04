@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { getFirebaseAuth, getFirebaseFirestore } from "@/lib/firebase";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
@@ -13,6 +13,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'profile' | 'subscription' | 'feedback'>('profile');
+  const [showSpecialtiesDropdown, setShowSpecialtiesDropdown] = useState(false);
+  const specialtiesRef = useRef<HTMLDivElement>(null);
 
   // Occupation and Specialties options
   const occupationOptions = [
@@ -53,7 +55,8 @@ export default function ProfilePage() {
       if (docSnap.exists()) {
         setProfile({
           ...docSnap.data().profile || {},
-          email: docSnap.data().email || user.email
+          email: docSnap.data().email || user.email,
+          country: docSnap.data().country || 'United States'
         });
       }
       setLoading(false);
@@ -67,6 +70,16 @@ export default function ProfilePage() {
       return () => clearTimeout(timer);
     }
   }, [success]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (specialtiesRef.current && event.target instanceof Node && !specialtiesRef.current.contains(event.target)) {
+        setShowSpecialtiesDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -196,17 +209,73 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label className="block text-[#000000] mb-1 font-medium">Specialties</label>
-                  <select
-                    name="specialties"
-                    value={profile.specialties || ''}
-                    onChange={handleSelectChange}
-                    className="w-full border border-[#B5C9FC] rounded-[8px] px-4 py-2 bg-white text-[#223258] font-medium outline-none focus:ring-2 focus:ring-[#B5C9FC]"
-                  >
-                    <option value="" disabled>Select Specialties</option>
-                    {specialtiesOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                  <div className="relative" ref={specialtiesRef}>
+                    <div
+                      className={`w-full min-h-[40px] px-2 py-1 border border-[#B5C9FC] rounded-[8px] bg-white flex flex-wrap items-center gap-1 focus-within:ring-2 focus-within:ring-[#B5C9FC] focus-within:border-transparent`}
+                      tabIndex={0}
+                      onClick={() => setShowSpecialtiesDropdown(true)}
+                      style={{ cursor: 'text', position: 'relative' }}
+                    >
+                      {(!profile.specialties || profile.specialties.length === 0) && (
+                        <span className="text-gray-400 text-sm select-none" style={{ fontSize: 11 }}>Select Specialties</span>
+                      )}
+                      {profile.specialties && profile.specialties.map((specialty: string) => (
+                        <span
+                          key={specialty}
+                          className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-[#C6D7FF]/50 text-[#223258] border border-[#3771FE]/50 mr-1 mt-1"
+                        >
+                          {specialty === "other" ? "Other" : (specialtiesOptions.find(opt => opt.value === specialty)?.label || specialty)}
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              setProfile((prev: any) => ({ ...prev, specialties: prev.specialties.filter((s: string) => s !== specialty) }));
+                            }}
+                            className="ml-1 text-[#3771FE] hover:text-[#223258]"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                      <input
+                        type="text"
+                        className="flex-1 outline-none border-none bg-transparent text-sm min-w-[40px]"
+                        style={{ fontSize: 14, padding: 0, margin: 0, minWidth: 0 }}
+                        onFocus={() => setShowSpecialtiesDropdown(true)}
+                        readOnly
+                      />
+                    </div>
+                    {showSpecialtiesDropdown && (
+                      <div className="absolute z-10 left-0 right-0 bg-white border border-[#B5C9FC] rounded-b-[8px] shadow-lg max-h-48 overflow-y-auto mt-1">
+                        {specialtiesOptions.filter(opt => !profile.specialties?.includes(opt.value)).map(opt => (
+                          <div
+                            key={opt.value}
+                            className="px-3 py-2 hover:bg-[#C6D7FF]/30 cursor-pointer text-sm text-[#223258]"
+                            onClick={() => {
+                              setProfile((prev: any) => ({ ...prev, specialties: [...(prev.specialties || []), opt.value] }));
+                              setShowSpecialtiesDropdown(false);
+                            }}
+                          >
+                            {opt.label}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {profile.specialties && profile.specialties.includes("other") && (
+                    <div className="mt-2">
+                      <label className="block text-sm font-medium text-black mb-1">Specify Other Specialty</label>
+                      <input
+                        type="text"
+                        name="otherSpecialty"
+                        placeholder="Please specify your specialty"
+                        value={profile.otherSpecialty || ""}
+                        onChange={e => setProfile((prev: any) => ({ ...prev, otherSpecialty: e.target.value }))}
+                        className="w-full px-3 py-2 border border-[#B5C9FC] rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#B5C9FC] focus:border-transparent text-sm bg-white"
+                        style={{ fontSize: 14 }}
+                      />
+                    </div>
+                  )}
                 </div>
                 {success && <div className="md:col-span-2 font-medium text-right" style={{ color: '#8991AA' }}>Profile updated successfully!</div>}
               </form>
