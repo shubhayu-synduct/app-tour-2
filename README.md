@@ -85,3 +85,24 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 
 # Deploy
+#### Lets se
+
+## Miracales Happen
+
+### mergeing sandy guidelines with ai summary
+# Deploying sandys latest commit 
+## Another commit
+
+##### 
+fix: active substances from api
+### reset password UI
+
+## fix: active substances from api
+
+#### 
+Merge pull request #7 from synductgmbh/dev_sand
+# deploying with new sign in
+## redeploy
+#deploy
+
+## deployed

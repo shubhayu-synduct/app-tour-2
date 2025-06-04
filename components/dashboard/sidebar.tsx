@@ -22,7 +22,6 @@ import {
 import { clearSessionCookie, getSessionCookie } from "@/lib/auth-service"
 import { SidebarHistory } from "./sidebar-history"
 
-
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -64,26 +63,37 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
   return (
     <>
-      {/* Sidebar only rendered when open */}
-      {isOpen && (
-        <aside
-          className="bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-300 ease-in-out font-['DM_Sans'] w-64 fixed md:static z-40"
-        >
+      {/* Sidebar */}
+      <aside
+        className={`bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-300 ease-in-out font-['DM_Sans'] ${
+          isOpen ? "w-64" : "w-20"
+        } ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-40`}
+      >
+        <div className="flex flex-col h-full">
           <div className="p-4">
             {/* Logo */}
-            <div className="flex items-center justify-between mb-8">
+            <div className={`flex ${isOpen ? 'items-center justify-between' : 'flex-col items-center'} mb-8`}>
               <div className="flex items-center">
                 <div className="relative w-8 h-8 mr-2">
                   <img src="/icon.svg" alt="DR. INFO Logo" className="w-8 h-8" />
                 </div>
-                <h1 className="text-2xl font-bold text-[#223258]">DR. INFO</h1>
+                {isOpen && <h1 className="text-2xl font-bold text-[#223258]">DR. INFO</h1>}
               </div>
-              <button
-                className="flex items-center justify-center hover:bg-gray-100 rounded-md"
-                onClick={() => setIsOpen(false)}
-              >
-                <img src="/sidebar_close_icon.svg" alt="Close Sidebar" className="w-7 h-7" />
-              </button>
+              {isOpen ? (
+                <button
+                  className="flex items-center justify-center hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <img src="/sidebar_close_icon.svg" alt="Close Sidebar" className="w-7 h-7" />
+                </button>
+              ) : (
+                <button
+                  className="hidden md:flex items-center justify-center hover:bg-gray-100 rounded-md mt-4"
+                  onClick={() => setIsOpen(true)}
+                >
+                  <img src="/sidebar_open_icon.svg" alt="Open Sidebar" className="w-7 h-7" />
+                </button>
+              )}
             </div>
 
             {/* Navigation */}
@@ -94,7 +104,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   onClick={() => router.push("/dashboard")}
                 >
                   <Plus className="w-5 h-5" />
-                  <span className="ml-3 text-[16px] font-medium text-[#223258]">New Search</span>
+                  {isOpen && <span className="ml-3 text-[16px] font-medium text-[#223258]">New Search</span>}
                 </button>
               </div>
 
@@ -107,7 +117,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 }`}
               >
                 <img src="/home.svg" alt="Home" className="h-5 w-5" />
-                <span className="ml-3">Home</span>
+                {isOpen && <span className="ml-3">Home</span>}
               </Link>
 
               <Link 
@@ -119,7 +129,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 }`}
               >
                 <img src="/guidelines.svg" alt="Guidelines" className="h-5 w-5" />
-                <span className="ml-3">Guidelines</span>
+                {isOpen && <span className="ml-3">Guidelines</span>}
               </Link>
 
               <Link 
@@ -131,7 +141,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 }`}
               >
                 <img src="/drugs.svg" alt="Drug Information" className="h-5 w-5" />
-                <span className="ml-3">Drug Information</span>
+                {isOpen && <span className="ml-3">Drug Information</span>}
               </Link>
               
               <Link 
@@ -143,18 +153,20 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                 }`}
               >
                 <img src="/history.svg" alt="History" className="h-5 w-5" />
-                <span className="ml-3">History</span>
+                {isOpen && <span className="ml-3">History</span>}
               </Link>
             </nav>
           </div>
 
           {/* Sidebar History List - fills available space, scrollable, no overlap */}
-          <div className="flex-1 min-h-0 px-2 pb-2 border-b border-gray-200 overflow-y-auto scrollbar-hide">
-            <SidebarHistory />
-          </div>
+          {isOpen && (
+            <div className="flex-1 min-h-0 px-2 pb-2 border-b border-gray-200 overflow-y-auto scrollbar-hide">
+              <SidebarHistory />
+            </div>
+          )}
 
           {/* Profile Section (always at bottom) */}
-          <div className="w-full p-2 border-t border-gray-200">
+          <div className="mt-auto w-full p-2 border-t border-gray-200">
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -164,16 +176,20 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   <div className="h-8 w-8 rounded-[8px] bg-[#E4ECFF] flex items-center justify-center text-[#223258] font-semibold border border-[#223258]">
                     {user?.displayName?.[0]}
                   </div>
-                  <div className="ml-3 text-left">
-                    <p className="font-semibold text-sm text-[#223258]">{user?.displayName}</p>
-                    <p className="text-xs text-[#223258]/70">Physician</p>
-                  </div>
+                  {isOpen && (
+                    <div className="ml-3 text-left">
+                      <p className="font-semibold text-sm text-[#223258]">{user?.displayName}</p>
+                      <p className="text-xs text-[#223258]/70">Physician</p>
+                    </div>
+                  )}
                 </div>
-                <ChevronDown className={`h-5 w-5 text-[#223258] transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                {isOpen && (
+                  <ChevronDown className={`h-5 w-5 text-[#223258] transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                )}
               </button>
 
               {/* Dropdown Menu */}
-              {isProfileOpen && (
+              {isOpen && isProfileOpen && (
                 <div className="absolute bottom-full left-0 w-full mb-2 bg-white rounded-[10px] shadow-lg border border-[#B5C9FC]">
                   <div className="p-2">
                     {/* Profile Settings */}
@@ -205,17 +221,8 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               )}
             </div>
           </div>
-        </aside>
-      )}
-      {/* Expand button when sidebar is closed */}
-      {!isOpen && (
-        <button
-          className="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md hover:bg-gray-100"
-          onClick={() => setIsOpen(true)}
-        >
-          <img src="/sidebar_open_icon.svg" alt="Open Sidebar" className="w-7 h-7" />
-        </button>
-      )}
+        </div>
+      </aside>
     </>
   )
 }
