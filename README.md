@@ -107,3 +107,6 @@ Merge pull request #7 from synductgmbh/dev_sand
 
 ## deployed
 ## NDA merged
+
+## drug information first iteration
+

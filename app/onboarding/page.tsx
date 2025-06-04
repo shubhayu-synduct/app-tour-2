@@ -23,6 +23,7 @@ export default function Onboarding() {
     occupation: "",
     otherOccupation: "",
     placeOfWork: "",
+    otherPlaceOfWork: "",
     experience: "",
     institution: "",
     specialties: [] as string[],
@@ -183,11 +184,14 @@ export default function Onboarding() {
           address: formData.address,
           yearOfBirth: formData.yearOfBirth,
           gender: formData.gender,
-          occupation: formData.occupation,
-          placeOfWork: formData.placeOfWork,
+          occupation: formData.occupation === "other" ? formData.otherOccupation : formData.occupation,
+          placeOfWork: formData.placeOfWork === "other" ? formData.otherPlaceOfWork : formData.placeOfWork,
           experience: formData.experience,
           institution: formData.institution,
-          specialties: formData.specialties
+          specialties: formData.specialties.map(s => s === "other" ? formData.otherSpecialty : s),
+          otherOccupation: formData.otherOccupation,
+          otherPlaceOfWork: formData.otherPlaceOfWork,
+          otherSpecialty: formData.otherSpecialty,
         }
       }
 
@@ -428,7 +432,7 @@ export default function Onboarding() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Year of Birth</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Date of Birth</label>
                   <input
                     type="date"
                     name="yearOfBirth"
@@ -536,7 +540,13 @@ export default function Onboarding() {
                   <select
                     name="placeOfWork"
                     value={formData.placeOfWork}
-                    onChange={handleInputChange}
+                    onChange={e => {
+                      setFormData(prev => ({
+                        ...prev,
+                        placeOfWork: e.target.value,
+                        ...(e.target.value !== "other" ? { otherPlaceOfWork: "" } : {})
+                      }));
+                    }}
                     className={`w-full px-3 py-2 border ${fieldErrors.placeOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.placeOfWork ? 'text-gray-400' : 'text-[#223258]'}`}
                     style={{ fontSize: formData.placeOfWork ? 14 : 11 }}
                   >
@@ -544,7 +554,26 @@ export default function Onboarding() {
                     <option value="hospital-clinic">Hospital/Clinic</option>
                     <option value="outpatient-clinic">Outpatient Clinic</option>
                     <option value="private-practice">Private Practice</option>
+                    <option value="university">University</option>
+                    <option value="other">Other</option>
                   </select>
+                  {formData.placeOfWork === "other" && (
+                    <div className="mt-2">
+                      <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Specify Place of Work</label>
+                      <input
+                        type="text"
+                        name="otherPlaceOfWork"
+                        placeholder="Please specify your place of work"
+                        value={formData.otherPlaceOfWork || ""}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border ${fieldErrors.otherPlaceOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                        style={{ fontSize: 14 }}
+                      />
+                      {fieldErrors.otherPlaceOfWork && (
+                        <p className="text-red-500 text-xs mt-1">{fieldErrors.otherPlaceOfWork}</p>
+                      )}
+                    </div>
+                  )}
                   {fieldErrors.placeOfWork && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.placeOfWork}</p>
                   )}
@@ -651,11 +680,11 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Address</label>
+                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Address (Street, City, Postal Code)</label>
                 <input
                   type="text"
                   name="address"
-                  placeholder="Address"
+                  placeholder="Address (Street, City, Postal Code)"
                   value={formData.address}
                   onChange={handleInputChange}
                   className={`w-full px-3 py-2 border ${fieldErrors.address ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
@@ -1018,7 +1047,7 @@ export default function Onboarding() {
                   id="address"
                   value={ndaData.address}
                   onChange={(e) => setNdaData(prev => ({ ...prev, address: e.target.value }))}
-                  placeholder="Enter your address"
+                  placeholder="Enter your current location (city, country)"
                   className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
                   style={{ fontSize: 14 }}
                 />
