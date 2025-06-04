@@ -342,17 +342,14 @@ export default function DrugDetailPage() {
             />
             {searchTerm && (
               <button 
-                className="bg-blue-600 hover:bg-blue-700 p-3 text-white"
+                className="hover:bg-blue-700 p-1 text-white flex items-center justify-center"
                 onClick={() => {
                   setSearchTerm('');
                   // Show recommendations when clearing search
                   setShowRecommendations(true);
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="rotate-45">
-                  <path d="M5 12h14"></path>
-                  <path d="M12 5v14"></path>
-                </svg>
+                <Image src="/search.svg" alt="Search" width={32} height={32} />
               </button>
             )}
           </div>
