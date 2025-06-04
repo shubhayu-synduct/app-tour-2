@@ -418,7 +418,7 @@ export default function DrugInformationPage() {
 
   return (
     <DashboardLayout>
-      <div className="bg-[#F3F6FC] min-h-screen">
+      <div className="bg-[#F9FAFB] min-h-screen">
         {user && <DrugInformationContent />}
       </div>
     </DashboardLayout>
