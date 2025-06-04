@@ -932,68 +932,72 @@ export default function Onboarding() {
                 <div>
                   <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>1. Parties</h4>
                   <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
-                    Disclosing Party: Synduct GmbH, Bergmannstrasse 58, 80339<br />
-                    Munich, Germany, represented by Managing Director Valentine<br />
+                  <strong>Disclosing Party:</strong> Synduct GmbH, Bergmannstrasse 58, 80339 Munich, Germany, represented by Managing Director Valentine
                     Emmanuel.<br />
-                    Receiving Party: {formData.firstName} {formData.lastName} ("you").
+                    <strong>Receiving Party:</strong> {formData.firstName} {formData.lastName} ("<strong>you</strong>").
                   </p>
                 </div>
 
                 <div>
                   <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>2. Purpose</h4>
                   <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
-                    Synduct GmbH will disclose confidential information so you<br />
-                    can evaluate and, where applicable, test its AI-enabled<br />
-                    content-management platform for the pharmaceutical,<br />
-                    biotechnology and medical-technology sectors.
+                  Synduct will share non-public product ideas, prototype features, medical content and
+                  usage data so that you can test DrInfo.ai, give feedback and co-develop new clinical
+                  functions. The information is provided solely for that purpose.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>3. Confidential Information</h4>
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>3. What Counts as "Confidential Information"</h4>
                   <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
                     "Confidential Information" includes, without limitation:<br />
-                    • business plans, financial data, forecasts, marketing strategies;<br />
-                    • product or service roadmaps, customer or supplier details;<br />
-                    • technical data, software code, algorithms, designs, processes and trade secrets;<br />
-                    • any materials derived from, or that reference, the above.<br /><br />
-                    Exclusions: information that (a) you already lawfully possessed, (b) becomes public not through your fault, (c) is received from a third party with no duty of confidence, (d) is independently developed without access to the Confidential Information, or (e) must be disclosed by law (provided you give prompt written notice).
+                    • Screens, source code, algorithms, model prompts, datasets, evaluation results;<br />
+                    • Product roadmaps, pricing, commercial or go-to-market plans;<br />
+                    • Any feedback you provide that references internal workings of DrInfo.ai;<br />
+                    • All other non-public materials or knowledge disclosed in the course of this early-access programme until its completion.<br /><br />
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>4. Your Obligations</h4>
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>4. Your Commitments</h4>
                   <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
-                    • Keep all Confidential Information strictly confidential and apply at least reasonable security measures.<br />
-                    • Share it only with staff or advisers bound by equivalent confidentiality and only as needed for the purpose above.<br />
-                    • Use it exclusively to evaluate or perform the potential collaboration; no other use is permitted.<br />
-                    • Return or securely destroy all Confidential Information (including copies and notes) at Synduct GmbH's request.
+                    • Keep it private. You must not publish screenshots, share files or discuss details outside the closed test group consisting solely of Synduct-employees or expressly authorised and identified testers.<br />
+                    • Use only for evaluation. No reverse engineering, no independent commercial exploitation, and no development of competing products.<br />
+                    • Limit sharing. Should you wish to involve a colleague, that person must first complete the same NDA process and receive an individual test account from Synduct.<br />
+                    • Delete on request. Within seven (7) days of Synduct's written request—or upon termination of the testing period—you must delete or return all Confidential Information, including notes and copies.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 600, fontSize: '16px' }}>5. Breach & Penalties</h4>
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 600, fontSize: '16px' }}>5. Data Protection & Patient Safety</h4>
                   <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
-                    Unauthorised use or disclosure triggers a liquidated penalty of €100 000, plus compensation for any additional proven loss. Synduct GmbH may also seek injunctive relief. Compliance with all applicable data-protection laws (including GDPR) is mandatory.
+                  You will not upload identifiable patient data. If you share de-identified cases, you confirm they comply with GDPR and local medical-confidentiality rules. 
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>6. Term</h4>
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>6. Term & Survival</h4>
                   <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
-                    This Agreement is effective for 10 years from the first disclosure; confidentiality obligations survive indefinitely.
+                  The agreement starts when you click "Accept NDA" and lasts 3 years after the beta ends. Key confidentiality obligations survive as long as the information is not public.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>7. Governing Law & Jurisdiction</h4>
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>7. In case of Breach</h4>
                   <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
-                    German law governs. Exclusive venue: Munich, Germany.
+                  Unauthorised use or disclosure triggers a liquidated penalty of EUR 50000 plus compensation for any further proven losses. Synduct GmbH may seek injunctive relief in addition to monetary damages. Full compliance with all applicable data-protection laws, including the GDPR, is mandatory.
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>8. Online Acceptance</h4>
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>8. Governing Law & Venue</h4>
+                  <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
+                    German law applies. Exclusive venue: Munich, Germany.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>9. Online Acceptance</h4>
                   <div className="flex items-start space-x-2 mb-2">
                     <input
                       type="checkbox"
