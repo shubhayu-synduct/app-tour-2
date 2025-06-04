@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Search, BookOpen, ChevronRight, Loader2, ChevronDown, Bookmark, Star, ArrowUpRight } from 'lucide-react'
 import GuidelineSummaryModal from './guideline-summary-modal'
+import GuidelineSummaryMobileModal from './guideline-summary-mobile-modal'
 
 interface Guideline {
   id: number;
@@ -31,6 +32,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['National'])
+  const [isMobile, setIsMobile] = useState(false)
 
   const categoryOrder = ['National', 'Europe', 'International', 'USA'];
 
@@ -122,16 +124,30 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
     }
   }, [selectedGuideline]);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is the md breakpoint in Tailwind
+    };
+
+    // Initial check
+    checkMobile();
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
-    <div className="container mx-auto px-4 py-8 mt-16 max-w-full sm:max-w-2xl md:max-w-4xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 mt-12 sm:mt-16 max-w-full sm:max-w-2xl md:max-w-4xl">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8 text-center">
+        <div className="mb-6 sm:mb-8 text-center">
           <h1
-            className="mb-2"
+            className="mb-2 px-2"
             style={{
               fontFamily: 'DM Sans, sans-serif',
               fontWeight: 600,
-              fontSize: 'clamp(32px, 6vw, 52px)',
+              fontSize: 'clamp(24px, 5vw, 52px)',
               color: '#214498',
               lineHeight: 1.1
             }}
@@ -139,10 +155,11 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
             Know Your Guidelines
           </h1>
           <p
+            className="px-4"
             style={{
               fontFamily: 'DM Sans, sans-serif',
               fontWeight: 400,
-              fontSize: 'clamp(16px, 3vw, 20px)',
+              fontSize: 'clamp(14px, 2.5vw, 20px)',
               color: '#596C99',
               lineHeight: 1.4
             }}
@@ -151,13 +168,13 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
           </p>
         </div>
         
-        <div className="relative mb-8">
+        <div className="relative mb-6 sm:mb-8">
           <div className="relative w-full">
             <input
               type="text"
               placeholder="Search Clinical Guidelines . . ."
-              className="w-full py-3 px-6 rounded-xl border text-gray-600 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-200"
-              style={{ borderColor: '#3771FE', fontSize: 'clamp(15px, 2vw, 20px)' }}
+              className="w-full py-2 sm:py-3 px-4 sm:px-6 border text-gray-600 text-base sm:text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-200"
+              style={{ borderColor: '#3771FE', fontSize: 'clamp(14px, 1.5vw, 20px)', borderRadius: 5 }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
@@ -170,12 +187,13 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
               <button 
                 onClick={handleSearch}
                 disabled={isLoading}
-                className="bg-blue-500 p-2.5 rounded-xl text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-500 p-2 sm:p-2.5 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ borderRadius: 5 }}
               >
                 {isLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                 ) : (
-                  <ArrowUpRight size={24} />
+                  <ArrowUpRight size={20} className="sm:w-6 sm:h-6" />
                 )}
               </button>
             </div>
@@ -183,16 +201,16 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
         </div>
         
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
-            <div className="flex items-center justify-between">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-xl mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
               <div>
                 <p className="font-medium">Error</p>
-                <p>{error}</p>
+                <p className="text-sm sm:text-base">{error}</p>
               </div>
               {retryCount < 3 && (
                 <button
                   onClick={handleRetry}
-                  className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm sm:text-base"
                 >
                   Retry
                 </button>
@@ -201,42 +219,42 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
           </div>
         )}
         
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4" style={{ background: '#EEF3FF', borderRadius: 5 }}>
           {categoryOrder
             .filter(category => groupedGuidelines[category])
             .concat(Object.keys(groupedGuidelines).filter(category => !categoryOrder.includes(category)))
             .map(category => (
-              <div key={category} className="border px-0 pb-4 pt-2" style={{ borderColor: '#A2BDFF', borderWidth: 1, borderStyle: 'solid', background: '#EEF3FF', borderRadius: 12 }}>
+              <div key={category} className="border px-0 pb-2 sm:pb-4 pt-1 sm:pt-2" style={{ borderColor: '#A2BDFF', borderWidth: 1, borderStyle: 'solid', background: '#fff', borderRadius: 5 }}>
               <button
                 onClick={() => toggleCategory(category)}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left"
+                  className="w-full px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between text-left"
                   style={{
-                    background: '#EEF3FF',
-                    borderTopLeftRadius: 12,
-                    borderTopRightRadius: 12,
-                    borderBottomLeftRadius: expandedCategories.includes(category) ? 0 : 12,
-                    borderBottomRightRadius: expandedCategories.includes(category) ? 0 : 12,
+                    background: '#fff',
+                    borderTopLeftRadius: 5,
+                    borderTopRightRadius: 5,
+                    borderBottomLeftRadius: expandedCategories.includes(category) ? 0 : 5,
+                    borderBottomRightRadius: expandedCategories.includes(category) ? 0 : 5,
                   }}
               >
                   <h2 
-                    className="text-lg text-gray-900"
-                    style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 24, fontWeight: 400 }}
+                    className="text-base sm:text-lg lg:text-xl text-gray-900"
+                    style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400 }}
                   >
                     {category === 'Europe' ? 'European' : category} Guidelines
                   </h2>
                 <ChevronDown 
-                  className={`h-5 w-5 text-gray-500 transition-transform ${
+                  className={`h-4 w-4 sm:h-5 sm:w-5 text-gray-500 transition-transform ${
                     expandedCategories.includes(category) ? 'transform rotate-180' : ''
                   }`}
                 />
               </button>
               
               {expandedCategories.includes(category) && (
-                <div className="p-4 space-y-4">
+                <div className="p-2 sm:p-4 space-y-2 sm:space-y-4">
                     {groupedGuidelines[category].map((guideline) => (
                     <div key={guideline.id}>
-                        <div className="rounded-xl p-4 shadow-sm" style={{ background: '#fff' }}>
-                        <div className="space-y-3">
+                        <div className="p-2 sm:p-4 shadow-sm border" style={{ background: '#fff', borderColor: '#A2BDFF', borderRadius: 5 }}>
+                        <div className="space-y-2 sm:space-y-3">
                           {/* Title as a link */}
                           <a 
                             href={guideline.url} 
@@ -247,7 +265,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                                 fontFamily: 'DM Sans, sans-serif',
                                 color: '#214498',
                                 fontWeight: 500,
-                                fontSize: 20,
+                                fontSize: 'clamp(16px, 1.5vw, 20px)',
                                 background: 'none',
                                 border: 'none',
                               }}
@@ -259,7 +277,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                           <div className="flex flex-wrap items-center gap-2">
                             {/* Year badge */}
                               <span 
-                                className="px-3 py-1 text-sm"
+                                className="px-2 sm:px-3 py-1 text-xs sm:text-sm"
                                 style={{
                                   fontFamily: 'DM Sans, sans-serif',
                                   color: '#3771FE',
@@ -276,7 +294,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                             {/* Publisher badge */}
                               {guideline.society && (
                                 <span 
-                                  className="px-3 py-1 text-sm whitespace-nowrap"
+                                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm break-words max-w-full"
                                   style={{
                                     fontFamily: 'DM Sans, sans-serif',
                                     color: '#3771FE',
@@ -284,6 +302,8 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                                     fontWeight: 400,
                                     border: 'none',
                                     borderRadius: 6,
+                                    display: 'inline-block',
+                                    wordBreak: 'break-word'
                                   }}
                                 >
                                   {guideline.society}
@@ -292,10 +312,10 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                           </div>
                           
                           {/* Save and Dive In buttons */}
-                          <div className="flex items-center">
-                            <button className="flex items-center gap-2 text-slate-500 border border-blue-200 rounded-xl px-3 py-1 hover:bg-white bg-blue-50">
-                              <Bookmark size={16} />
-                              <span className="text-sm">Save</span>
+                          <div className="flex flex-row items-center gap-3">
+                            <button className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors text-xs sm:text-sm">
+                              <Bookmark size={16} className="sm:w-5 sm:h-5" />
+                              <span>Save</span>
                             </button>
                             
                             <div className="flex-grow"></div>
@@ -304,7 +324,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                             <button 
                               onClick={() => handleGuidelineClick(guideline)}
                               disabled={!guideline.pdf_saved}
-                                className={`flex items-center gap-1 px-2 py-1 transition-colors 
+                                className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 transition-colors text-xs sm:text-sm
                                 ${guideline.pdf_saved 
                                     ? '' 
                                     : 'cursor-not-allowed'}
@@ -314,17 +334,17 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                                   color: '#fff',
                                   fontFamily: 'DM Sans, sans-serif',
                                   fontWeight: 500,
-                                  fontSize: 15,
                                   border: 'none',
                                   boxShadow: 'none',
-                                  borderRadius: 6,
+                                  borderRadius: 5,
                                   opacity: guideline.pdf_saved ? 1 : 0.5,
+                                  minWidth: '130px'
                                 }}
                             >
                                 Guideline AI Summary
-                                <span className="flex items-center ml-2">
-                                  <ChevronRight size={16} color="#fff" />
-                                  <ChevronRight size={16} style={{marginLeft: -10}} color="#fff" />
+                                <span className="flex items-center ml-1 sm:ml-2">
+                                  <ChevronRight size={14} className="sm:w-4 sm:h-4" color="#fff" />
+                                  <ChevronRight size={14} className="sm:w-4 sm:h-4" style={{marginLeft: -8}} color="#fff" />
                                 </span>
                             </button>
                           </div>
@@ -338,30 +358,42 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
           ))}
           
           {Object.values(groupedGuidelines).flat().length === 0 && !isLoading && !error && (
-            <div className="text-center py-12">
-              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No guidelines found. Try a different search term.</p>
+            <div className="text-center py-8 sm:py-12">
+              <BookOpen className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+              <p className="text-sm sm:text-base text-gray-600">No guidelines found. Try a different search term.</p>
             </div>
           )}
           
           {isLoading && (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+            <div className="flex justify-center py-8 sm:py-12">
+              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 animate-spin" />
             </div>
           )}
         </div>
       </div>
 
       {selectedGuideline && (
-        <GuidelineSummaryModal
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          guidelineId={selectedGuideline.id}
-          guidelineTitle={selectedGuideline.title}
-          year={new Date(selectedGuideline.last_updated).getFullYear().toString()}
-          link={selectedGuideline.link}
-          url={selectedGuideline.url}
-        />
+        isMobile ? (
+          <GuidelineSummaryMobileModal
+            isOpen={isModalOpen}
+            onClose={handleModalClose}
+            guidelineId={selectedGuideline.id}
+            guidelineTitle={selectedGuideline.title}
+            year={new Date(selectedGuideline.last_updated).getFullYear().toString()}
+            link={selectedGuideline.link}
+            url={selectedGuideline.url}
+          />
+        ) : (
+          <GuidelineSummaryModal
+            isOpen={isModalOpen}
+            onClose={handleModalClose}
+            guidelineId={selectedGuideline.id}
+            guidelineTitle={selectedGuideline.title}
+            year={new Date(selectedGuideline.last_updated).getFullYear().toString()}
+            link={selectedGuideline.link}
+            url={selectedGuideline.url}
+          />
+        )
       )}
     </div>
   )
