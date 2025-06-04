@@ -104,7 +104,7 @@ export default function DrugInformationPage() {
       if (data.direct_match) {
         transformedData.push({
           brand_name: data.direct_match.name,
-          active_substance: data.direct_match.active_substance, // Direct matches don't have active substances in the response
+          active_substance: data.direct_match.active_substance,
           inn: [],
           search_type: 'direct_brand'
         });
@@ -191,199 +191,214 @@ export default function DrugInformationPage() {
     };
   }, []);
 
-  const DrugInformationContent = () => (
-    <div className="max-w-4xl mx-auto px-4 py-8 mt-16">
-      <div className="text-center mb-4">
-        <h1 className="text-3xl md:text-4xl lg:text-[52px] font-semibold text-[#214498] mb-2 font-['DM_Sans']">Drug Information</h1>
-        <p className="text-gray-600 text-lg mt-6">European Medicines Agency approved drug information</p>
-      </div>
-      
-      <div className="relative mb-8" ref={searchContainerRef}>
-        <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 rounded-xl bg-white mt-5">
-          <div className="pl-2 flex items-center">
-            <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
-          </div>
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list..."
-            className="w-full py-3 px-2 outline-none text-[#223258] font-['DM_Sans'] font-normal text-[20px] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[16px]"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => {
-              if (searchTerm.trim() !== '') {
-                setShowRecommendations(true);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && searchTerm.trim() !== '') {
-                // Trigger search
-                setShowRecommendations(true);
-              }
-            }}
-            // Prevent blur when clicking on recommendations
-            onBlur={(e) => {
-              // Delay the blur to check if click was on a recommendation
-              setTimeout(() => {
-                if (searchContainerRef.current && !searchContainerRef.current.contains(document.activeElement)) {
-                  setShowRecommendations(false);
-                } else {
-                  // Refocus the input if we're still within the search container
-                  if (searchInputRef.current) {
-                    searchInputRef.current.focus();
-                  }
-                }
-              }, 100);
-            }}
-          />
-          <button 
-            className="w-10 h-10 flex items-center justify-center hover:bg-blue-600 border-none bg-[#3771FE] rounded-[6px] relative ml-2"
-            onClick={() => {
-              if (searchTerm.trim() !== '') {
-                fetchRecommendations(searchTerm);
-              }
-            }}
-          >
-            <svg className="text-white" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 24L24 8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-              <path d="M14 8H24V18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-            </svg>
-          </button>
+  const DrugInformationContent = () => {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8 mt-16 md:mt-16 mt-20 relative">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl md:text-3xl lg:text-[52px] font-semibold text-[#214498] mb-4 font-['DM_Sans']">Drug Information</h1>
+          <p className="text-gray-600 text-base md:text-lg">European Medicines Agency approved drug information</p>
         </div>
         
-        {/* Recommendations dropdown */}
-        {showRecommendations && recommendations.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
-            {recommendations.map((drug, index) => (
-              <Link 
-                key={index}
-                href={`/drug-information/${slugify(drug.brand_name)}`}
-                className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] font-normal text-[20px]"
-                onClick={() => {
-                  setShowRecommendations(false);
-                  // Refocus the input before navigation
-                  if (searchInputRef.current) {
-                    searchInputRef.current.focus();
+        <div className="relative mb-8" ref={searchContainerRef}>
+          <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 bg-white">
+            <div className="pl-4 flex items-center">
+              <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list..."
+              className="w-full py-3 px-3 outline-none text-[#223258] font-['DM_Sans'] font-normal text-[16px] md:text-[18px] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[14px] md:placeholder:text-[16px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => {
+                if (searchTerm.trim() !== '') {
+                  setShowRecommendations(true);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchTerm.trim() !== '') {
+                  setShowRecommendations(true);
+                }
+              }}
+              onBlur={(e) => {
+                setTimeout(() => {
+                  if (searchContainerRef.current && !searchContainerRef.current.contains(document.activeElement)) {
+                    setShowRecommendations(false);
+                  } else {
+                    if (searchInputRef.current) {
+                      searchInputRef.current.focus();
+                    }
                   }
-                }}
-                onMouseDown={(e) => {
-                  // Prevent blur event from firing on the input
-                  e.preventDefault();
-                }}
-              >
-                {drug.search_type !== 'direct_brand' ? (
-                  <>
-                    <b>{drug.active_substance.join(', ')}</b> (<i>Brand Name:</i> <b>{drug.brand_name}</b>)
-                  </>
-                ) : (
-                  <>
-                    <b>{drug.brand_name}</b> (<i>active substances:</i> <b>{drug.active_substance.join(', ')}</b>)
-                  </>
-                )}
-              </Link>
-            ))}
+                }, 100);
+              }}
+            />
+            <button 
+              className="w-10 h-10 flex items-center justify-center hover:bg-blue-600 border-none bg-[#3771FE] rounded-[6px] relative ml-2"
+              onClick={() => {
+                if (searchTerm.trim() !== '') {
+                  fetchRecommendations(searchTerm);
+                }
+              }}
+            >
+              <svg className="text-white" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 24L24 8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M14 8H24V18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+              </svg>
+            </button>
           </div>
-        )}
-      </div>
-      
-      {/* Alphabet bar moved below search bar, no borders, hide scrollbar */}
-      <div className="flex justify-center w-full">
-        <div className="flex items-center mb-6 pb-2 max-w-[1118px] w-full justify-center">
-          <button
-            className={`mr-1 p-0 bg-transparent border-none shadow-none hover:bg-transparent focus:outline-none transition-opacity`}
-            onClick={() => scrollAlphabetBar('left')}
-            aria-label="Scroll left"
-            type="button"
-            // disabled={!canScrollLeft}
-          >
-            <ChevronsLeft size={24} color="#214498" />
-          </button>
-          <div
-            ref={alphabetBarRef}
-            className="flex overflow-x-auto hide-scrollbar"
-            style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', scrollBehavior: 'smooth', minWidth: 0 }}
-          >
-            {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
-              <button
-                key={letter}
-                className={`min-w-[28px] px-0.5 py-1 rounded-lg text-lg font-['DM_Sans'] transition-colors focus:outline-none font-semibold ${selectedLetter === letter ? 'bg-[#214498] text-white' : 'text-[#878787]'}`}
-                style={{ background: selectedLetter === letter ? '#214498' : 'transparent', border: 'none' }}
-                onClick={() => setSelectedLetter(letter)}
-              >
-                {letter}
-              </button>
-            ))}
-          </div>
-          <button
-            className={`ml-1 p-0 bg-transparent border-none shadow-none hover:bg-transparent focus:outline-none transition-opacity`}
-            onClick={() => scrollAlphabetBar('right')}
-            aria-label="Scroll right"
-            type="button"
-            // disabled={!canScrollRight} 
-          >
-            <ChevronsRight size={24} color="#214498" />
-          </button>
+          
+          {/* Recommendations dropdown */}
+          {showRecommendations && recommendations.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-w-[1118px] mx-auto">
+              {recommendations.map((drug, index) => (
+                <Link 
+                  key={index}
+                  href={`/drug-information/${slugify(drug.brand_name)}`}
+                  className="block px-4 py-3 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] font-normal text-[16px] md:text-[18px] border-b border-gray-100 last:border-b-0"
+                  onClick={() => {
+                    setShowRecommendations(false);
+                    if (searchInputRef.current) {
+                      searchInputRef.current.focus();
+                    }
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  {drug.search_type !== 'direct_brand' ? (
+                    <>
+                      <span className="font-semibold">{drug.active_substance.join(', ')}</span> <span className="text-gray-600">(<em>Brand Name:</em> <span className="font-semibold">{drug.brand_name}</span>)</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-semibold">{drug.brand_name}</span> <span className="text-gray-600">(<em>active substances:</em> <span className="font-semibold">{drug.active_substance.join(', ')}</span>)</span>
+                    </>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-      
-      <div
-        className="overflow-x-scroll w-full max-w-[1118px] mx-auto"
-        style={{ scrollbarGutter: 'stable' }}
-      >
-        <table className="min-w-full table-fixed">
-          <colgroup>
-            <col style={{ width: '90%' }} />
-            <col style={{ width: '10%' }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th className="text-left px-4 py-2 font-semibold text-[#223258] text-lg">Brand Name</th>
-              <th className="text-left px-4 py-2 font-semibold text-[#223258] text-lg">Active Substance(s)</th>
-            </tr>
-          </thead>
-          <tbody style={{ minHeight: '300px' }}>
-            {isLoading ? (
-              <tr>
-                <td colSpan={2} className="text-center py-12">
-                  <div className="flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              <>
-                {drugs.map((drug, index) => {
-                  const sortedActiveSubstances = drug.active_substance ? [...drug.active_substance].sort((a, b) => a.localeCompare(b)) : [];
-                  return (
-                    <tr key={index} className="border-b border-gray-100">
-                      <td className="px-4 py-3">
-                        <Link 
-                          href={`/drug-information/${slugify(drug.brand_name)}`} 
-                          className="text-[#223258] font-['DM_Sans'] font-normal text-[20px] hover:text-blue-900"
-                        >
-                          {drug.brand_name}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 text-[#223258] font-['DM_Sans'] text-[20px]">
-                        {sortedActiveSubstances.length > 0 ? sortedActiveSubstances.join(', ') : '-'}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {drugs.length === 0 && (
+        
+        {/* Alphabet navigation bar */}
+        <div className="flex justify-start w-full mb-8">
+          <div className="w-full max-w-[1118px] mx-auto relative">
+            {/* Left fade indicator */}
+            <div className="absolute left-0 top-0 h-full w-4 z-10 pointer-events-none md:hidden" 
+                 style={{ 
+                   background: 'linear-gradient(to right, rgba(249, 250, 251, 0.8), transparent)',
+                   backdropFilter: 'blur(1px)'
+                 }}></div>
+            
+            {/* Right fade indicator */}
+            <div className="absolute right-0 top-0 h-full w-4 z-10 pointer-events-none md:hidden"
+                 style={{ 
+                   background: 'linear-gradient(to left, rgba(249, 250, 251, 0.8), transparent)',
+                   backdropFilter: 'blur(1px)'
+                 }}></div>
+            
+            <div
+              ref={alphabetBarRef}
+              className="flex overflow-x-auto scrollbar-hide px-1"
+              style={{ 
+                WebkitOverflowScrolling: 'touch', 
+                scrollbarWidth: 'none', 
+                msOverflowStyle: 'none', 
+                scrollBehavior: 'smooth',
+                minWidth: 0
+              }}
+            >
+              <style jsx>{`
+                .scrollbar-hide::-webkit-scrollbar {
+                  display: none;
+                }
+                .scrollbar-hide {
+                  -ms-overflow-style: none;
+                  scrollbar-width: none;
+                }
+              `}</style>
+              {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
+                <button
+                  key={letter}
+                  className={`flex-shrink-0 min-w-[32px] px-2 py-2 mx-1 text-[16px] md:text-[20px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
+                    selectedLetter === letter 
+                      ? 'text-[#263969]' 
+                      : 'text-[#878787] hover:text-[#263969]'
+                  }`}
+                  onClick={() => setSelectedLetter(letter)}
+                >
+                  {letter}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* Drug table */}
+        <div className="w-full max-w-[1118px] mx-auto bg-[#F3F6FC] rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full table-fixed">
+              <colgroup>
+                <col className="w-[65%]" />
+                <col className="w-[35%]" />
+              </colgroup>
+              <thead>
+                <tr className="bg-[#F3F6FC] border-b border-[#E1E7F0]">
+                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] md:text-[20px] font-['DM_Sans']">
+                    Brand Name
+                  </th>
+                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] md:text-[20px] font-['DM_Sans']">
+                    Active Substance(s)
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
                   <tr>
-                    <td colSpan={2} className="text-center py-6 text-gray-500">
-                      No drugs found for this letter.
+                    <td colSpan={2} className="text-center py-12">
+                      <div className="flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#214498]"></div>
+                        <span className="ml-3 text-[#263969] font-['DM_Sans']">Loading drugs...</span>
+                      </div>
                     </td>
                   </tr>
+                ) : (
+                  <>
+                    {drugs.map((drug, index) => {
+                      const sortedActiveSubstances = drug.active_substance ? [...drug.active_substance].sort((a, b) => a.localeCompare(b)) : [];
+                      return (
+                        <tr key={index} className="border-b border-[#E1E7F0] hover:bg-[#E8EDF7] transition-colors">
+                          <td className="px-4 md:px-6 py-4">
+                            <Link 
+                              href={`/drug-information/${slugify(drug.brand_name)}`} 
+                              className="text-[#263969] font-['DM_Sans'] font-normal text-[14px] md:text-[20px] hover:text-[#214498] hover:underline transition-colors"
+                            >
+                              {drug.brand_name}
+                            </Link>
+                          </td>
+                          <td className="px-4 md:px-6 py-4 text-[#263969] font-['DM_Sans'] font-normal text-[14px] md:text-[20px]">
+                            {sortedActiveSubstances.length > 0 ? sortedActiveSubstances.join(', ') : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {drugs.length === 0 && (
+                      <tr>
+                        <td colSpan={2} className="text-center py-8 text-[#263969] font-['DM_Sans']">
+                          No drugs found for letter "{selectedLetter}".
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </tbody>
-        </table>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <DashboardLayout>
