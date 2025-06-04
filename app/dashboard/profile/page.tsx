@@ -122,6 +122,13 @@ export default function ProfilePage() {
   if (authLoading || loading) return <div className="flex justify-center items-center h-screen font-['DM_Sans']">Loading...</div>;
   if (!profile) return <div className="flex justify-center items-center h-screen font-['DM_Sans']">Profile not found.</div>;
 
+  // Ensure specialties is always an array
+  const specialtiesArray = Array.isArray(profile.specialties)
+    ? profile.specialties
+    : profile.specialties
+      ? [profile.specialties]
+      : [];
+
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto mt-10 font-['DM_Sans'] px-4 md:px-8 w-full">
@@ -216,10 +223,10 @@ export default function ProfilePage() {
                       onClick={() => setShowSpecialtiesDropdown(true)}
                       style={{ cursor: 'text', position: 'relative' }}
                     >
-                      {(!profile.specialties || profile.specialties.length === 0) && (
+                      {(!specialtiesArray || specialtiesArray.length === 0) && (
                         <span className="text-gray-400 text-sm select-none" style={{ fontSize: 11 }}>Select Specialties</span>
                       )}
-                      {profile.specialties && profile.specialties.map((specialty: string) => (
+                      {specialtiesArray.map((specialty: string) => (
                         <span
                           key={specialty}
                           className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-[#C6D7FF]/50 text-[#223258] border border-[#3771FE]/50 mr-1 mt-1"
@@ -229,7 +236,14 @@ export default function ProfilePage() {
                             type="button"
                             onClick={e => {
                               e.stopPropagation();
-                              setProfile((prev: any) => ({ ...prev, specialties: prev.specialties.filter((s: string) => s !== specialty) }));
+                              setProfile((prev: any) => {
+                                const arr = Array.isArray(prev.specialties)
+                                  ? prev.specialties
+                                  : prev.specialties
+                                    ? [prev.specialties]
+                                    : [];
+                                return { ...prev, specialties: arr.filter((s: string) => s !== specialty) };
+                              });
                             }}
                             className="ml-1 text-[#3771FE] hover:text-[#223258]"
                           >
@@ -247,12 +261,19 @@ export default function ProfilePage() {
                     </div>
                     {showSpecialtiesDropdown && (
                       <div className="absolute z-10 left-0 right-0 bg-white border border-[#B5C9FC] rounded-b-[8px] shadow-lg max-h-48 overflow-y-auto mt-1">
-                        {specialtiesOptions.filter(opt => !profile.specialties?.includes(opt.value)).map(opt => (
+                        {specialtiesOptions.filter(opt => !specialtiesArray.includes(opt.value)).map(opt => (
                           <div
                             key={opt.value}
                             className="px-3 py-2 hover:bg-[#C6D7FF]/30 cursor-pointer text-sm text-[#223258]"
                             onClick={() => {
-                              setProfile((prev: any) => ({ ...prev, specialties: [...(prev.specialties || []), opt.value] }));
+                              setProfile((prev: any) => {
+                                const arr = Array.isArray(prev.specialties)
+                                  ? prev.specialties
+                                  : prev.specialties
+                                    ? [prev.specialties]
+                                    : [];
+                                return { ...prev, specialties: [...arr, opt.value] };
+                              });
                               setShowSpecialtiesDropdown(false);
                             }}
                           >
@@ -262,7 +283,7 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
-                  {profile.specialties && profile.specialties.includes("other") && (
+                  {specialtiesArray.includes("other") && (
                     <div className="mt-2">
                       <label className="block text-sm font-medium text-black mb-1">Specify Other Specialty</label>
                       <input
