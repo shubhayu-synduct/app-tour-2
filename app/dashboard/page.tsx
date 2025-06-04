@@ -178,31 +178,31 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="p-4 md:p-6 h-full flex flex-col relative">
-        <div className="flex flex-col items-center justify-center py-16">
+      <div className="flex items-center justify-center min-h-[calc(100vh-56px)] md:min-h-screen">
+        <div className="w-full max-w-[1200px] px-4 md:px-6 py-8 md:py-16">
           <div className="flex flex-col items-center justify-center">
-            <h1 className="text-[48px] font-semibold text-[#204398] text-center mb-2">
+            <h1 className="text-3xl md:text-4xl lg:text-[48px] font-semibold text-[#204398] text-center mb-2 md:mb-4">
               Redefining How Medicine Finds Answers
             </h1>
-            <p className="text-[20px] text-[#596c98] text-center mb-8">
-                Instant access to evidence-based, trusted sources derived precision information
+            <p className="text-base md:text-lg lg:text-[20px] text-[#596c98] text-center mb-6 md:mb-8 max-w-3xl">
+              Instant access to evidence-based, trusted sources derived precision information
             </p>
             <form onSubmit={handleSearch} className="w-full max-w-2xl">
-              <div ref={searchRef} className="relative mx-auto mt-4">
-                <div className="w-full max-w-[853px] bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-4">
+              <div ref={searchRef} className="relative mx-auto">
+                <div className="w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4">
                   <div className="flex items-center">
                     <Search className="text-gray-400 h-5 w-5 mr-2" />
                     <input
                       type="text"
                       value={query}
-                      className="ml-2 flex-1 text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none"
+                      className="ml-2 flex-1 text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none"
                       onChange={(e) => setQuery(e.target.value)}
                       onFocus={() => {
                         if (query) setShowSuggestions(true)
                       }}
                       placeholder="How to treat atopic dermatitis in adults..?"
                     />
-                    <button type="submit">
+                    <button type="submit" className="flex-shrink-0">
                       {isLoading ? (
                         <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       ) : (
@@ -211,7 +211,7 @@ export default function Dashboard() {
                     </button>
                   </div>
 
-                  <div className="flex space-x-2 mt-1">
+                  <div className="flex space-x-2 mt-2">
                     <button
                       type="button"
                       className={`px-3 py-1 rounded border text-sm flex items-center gap-1 ${
@@ -226,6 +226,22 @@ export default function Dashboard() {
                     </button>
                   </div>
                 </div>
+
+                {/* Suggestions dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                      >
+                        <span className="truncate">{suggestion}</span>
+                        <ArrowRight className="h-4 w-4 text-gray-400" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </form>
           </div>
