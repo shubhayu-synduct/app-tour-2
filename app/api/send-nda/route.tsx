@@ -40,10 +40,10 @@ export async function POST(request: Request) {
       to: userEmail,
       subject: "Your Signed Non-Disclosure Agreement",
       html: `
-        <div style="font-family: 'DM Sans', sans-serif; color: #223258; font-size: 18px; margin-bottom: 32px;">
+        <div style="font-family: 'DM Sans', sans-serif; color: #223258; font-size: 16px; margin-bottom: 32px;">
           <p style="font-weight: 600; font-family: 'DM Sans', sans-serif;">Dear ${userName},</p>
           <p>Thank you for signing up with DR. INFO.<br>
-          Please find below your signed <span style="font-weight: 600; font-family: 'DM Sans', sans-serif;">EARLY-ACCESS CONFIDENTIALITY AGREEMENT</span> for your records. This confirms your acceptance of the terms and commitment to confidentiality.<br>
+          Please find below your signed <span style="font-weight: 600; font-family: 'DM Sans', sans-serif;">Non-Disclosure Agreement</span> for your records. This confirms your acceptance of the terms and commitment to confidentiality.<br>
           We recommend that you save a copy of this for your future reference.</p>
           <p>If you need any assistance, feel free to contact us at <a href="mailto:info@synduct.com" style="color: #3771FE;">info@synduct.com</a> anytime.</p>
           <p>Thank you for shaping the future of evidence-based care with us!</p>
@@ -54,98 +54,118 @@ export async function POST(request: Request) {
             <div style="text-align: center; margin-bottom: 32px;">
               <img src="https://app.drinfo.ai/login-logo.png" alt="Dr. Info Logo" style="max-width: 200px; height: auto;" />
             </div>
-            <h1 style="font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 32px; color: #223258; font-family: 'DM Sans', sans-serif;">
+            <h1 style="font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 4px; color: #223258; font-family: 'DM Sans', sans-serif;">
               Non-Disclosure Agreement (Online)
             </h1>
+            <p style="font-size: 20px; font-style: italic; text-align: center; margin-bottom: 32px; color: #223258; font-family: 'DM Sans', sans-serif;">
+              (for Beta-Testers & Co-Developing Clinicians)
+            </p>
             
             <div style="margin-bottom: 24px;">
-              <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
                 1. Parties
               </h2>
-              <div style=" font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+              <div style=" font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
                 <p>
-                  <span style="font-weight: 500;">Disclosing Party:</span> <a href="https://synduct.com/contact-us/" style="color: #3771FE; text-decoration: underline;" target="_blank" rel="noopener">Synduct GmbH, Bergmannstrasse 58, 80339 Munich, Germany</a>, represented by Managing Director Valentine Emmanuel.
+                  <span style="font-weight: 500;"><strong>Disclosing Party:</strong></span> <a href="https://synduct.com/contact-us/" style="color: #3771FE; text-decoration: underline;" target="_blank" rel="noopener">Synduct GmbH, Bergmannstrasse 58, 80339 Munich, Germany</a>, represented by Managing Director Valentine Emmanuel.
                 </p>
                 <p>
-                  <span style="font-weight: 500;">Receiving Party:</span> ${userName} residing at ${address}.
+                  <span style="font-weight: 500;"><strong>Receiving Party:</strong></span> ${userName} residing at ${address} ("<strong>you</strong>").
                 </p>
               </div>
             </div>
 
             <div style="margin-bottom: 24px;">
-              <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
                 2. Purpose
               </h2>
-              <p style="color: #000000; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
-                Synduct GmbH will disclose confidential information so you can evaluate and, where applicable, test its AI-enabled content-management platform for the pharmaceutical, biotechnology and medical-technology sectors.
+              <p style="color: #000000; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+                Synduct will share non-public product ideas, prototype features, medical content and usage data so that you can test DrInfo.ai, give feedback and co-develop new clinical functions. The information is provided solely for that purpose.
               </p>
             </div>
 
             <div style="margin-bottom: 24px;">
-              <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
-                3. Confidential Information
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+                3.  What Counts as "Confidential Information"
               </h2>
-              <p style="color: #000000; margin-bottom: 12px; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+              <p style="color: #000000; margin-bottom: 12px; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
                 "Confidential Information" includes, without limitation:
               </p>
-              <ul style="list-style-type: disc; padding-left: 24px; color: #000000; margin-bottom: 12px; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
-                <li>business plans, financial data, forecasts, marketing strategies;</li>
-                <li>product or service roadmaps, customer or supplier details;</li>
-                <li>technical data, software code, algorithms, designs, processes and trade secrets;</li>
-                <li>any materials derived from, or that reference, the above.</li>
+              <ul style="list-style-type: disc; padding-left: 24px; color: #000000; margin-bottom: 12px; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+                <li>Screens, source code, algorithms, model prompts, datasets, evaluation results;</li>
+                <li>Product roadmaps, pricing, commercial or go-to-market plans;</li>
+                <li>Any feedback you provide that references internal workings of DrInfo.ai;</li>
+                <li>All other non-public materials or knowledge disclosed in the course of this early-access programme until its completion.</li>
               </ul>
-              <p style="color: #000000; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+              <p style="color: #000000; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
                 <span style="font-weight: 500;">Exclusions:</span> information that (a) you already lawfully possessed, (b) becomes public not through your fault, (c) is received from a third party with no duty of confidence, (d) is independently developed without access to the Confidential Information, or (e) must be disclosed by law (provided you give prompt written notice).
               </p>
             </div>
 
             <div style="margin-bottom: 24px;">
-              <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
-                4. Your Obligations
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+                4. Your Commitments
               </h2>
-              <ul style="list-style-type: disc; padding-left: 24px; color: #000000; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
-                <li>Keep all Confidential Information strictly confidential and apply at least reasonable security measures.</li>
-                <li>Share it only with staff or advisers bound by equivalent confidentiality and only as needed for the purpose above.</li>
-                <li>Use it exclusively to evaluate or perform the potential collaboration; no other use is permitted.</li>
-                <li>Return or securely destroy all Confidential Information (including copies and notes) at Synduct GmbH's request.</li>
+              <ul style="list-style-type: disc; padding-left: 24px; color: #000000; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+                <li><span style="font-weight: 500;">Keep it private.</span> You must not publish screenshots, share files or discuss details outside the closed test group consisting solely of Synduct-employees or expressly authorised and identified testers.</li>
+                <li><span style="font-weight: 500;">Use only for evaluation.</span> No reverse engineering, no independent commercial exploitation, and no development of competing products.</li>
+                <li><span style="font-weight: 500;">Limit sharing.</span> Should you wish to involve a colleague, that person must first complete the same NDA process and receive an individual test account from Synduct.</li>
+                <li><span style="font-weight: 500;">Delete on request.</span> Within seven (7) days of Synduct's written request—or upon termination of the testing period—you must delete or return all Confidential Information, including notes and copies.</li>
               </ul>
             </div>
 
             <div style="margin-bottom: 24px;">
-              <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
-                5. Breach & Penalties
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+                5. Data Protection & Patient Safety 
               </h2>
-              <p style="color: #000000; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
-                Unauthorised use or disclosure triggers a liquidated penalty of €100,000, plus compensation for any additional proven loss. Synduct GmbH may also seek injunctive relief. Compliance with all applicable data-protection laws (including GDPR) is mandatory.
+              <p style="color: #000000; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+                ou will not upload identifiable patient data. If you share de-identified cases, you confirm they comply with GDPR and local medical-confidentiality rules.
               </p>
             </div>
 
             <div style="margin-bottom: 24px;">
-              <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
-                6. Term
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+                6. Term & Survival 
               </h2>
-              <p style="color: #000000; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
-                This Agreement is effective for 10 years from the first disclosure; confidentiality obligations survive indefinitely.
+              <p style="color: #000000; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+                The agreement starts when you click "Accept NDA" and lasts 3 years after the beta ends. Key confidentiality obligations survive as long as the information is not public.
               </p>
             </div>
 
             <div style="margin-bottom: 24px;">
-              <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
-                7. Governing Law & Jurisdiction
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+                7. Breach & Penalties
               </h2>
-              <p style="color: #000000; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
-                German law governs. Exclusive venue: Munich, Germany.
+              <p style="color: #000000; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+               Unauthorised use or disclosure triggers a liquidated penalty of EUR 50000 plus compensation for any further proven losses. Synduct GmbH may seek injunctive relief in addition to monetary damages. Full compliance with all applicable data-protection laws, including the GDPR, is mandatory.
+              </p>
+
+            <div style="margin-bottom: 24px;">
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+                8. Governing Law & Venue
+              </h2>
+              <p style="color: #000000; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+                German law applies; exclusive venue is Munich.
+              </p>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+              <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #223258; font-family: 'DM Sans', sans-serif;">
+                9. Online Acceptance
+              </h2>
+              <p style="color: #000000; font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+                By clicking "I accept" you confirm you have read and agree to this Non-Disclosure Agreement. Your electronic consent is legally binding. 
               </p>
             </div>
 
             <div style="margin-top: 48px; border-top: 1px solid rgba(55, 113, 254, 0.5); padding-top: 24px;">
-              <p style="color: #000000; margin-bottom: 8px; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+              <p style="color: #000000; margin-bottom: 8px; font-size: 16px; font-weight: 500; font-family: 'DM Sans', sans-serif;">
                 <span style="font-weight: 500;">Digital Signature:</span> ${digitalSignature}
               </p>
-              <p style="color: #000000; margin-bottom: 8px; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+              <p style="color: #000000; margin-bottom: 8px; font-size: 16px; font-weight: 500; font-family: 'DM Sans', sans-serif;">
                 <span style="font-weight: 500;">Date:</span> ${currentDate}
               </p>
-              <p style="color: #000000; margin-bottom: 8px; font-size: 18px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
+              <p style="color: #000000; margin-bottom: 8px; font-size: 16px; font-weight: 500; font-family: 'DM Sans', sans-serif;">
                 <span style="font-weight: 500;">Place:</span> ${address}
               </p>
             </div>
