@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
@@ -18,14 +18,14 @@ export default function Onboarding() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    age: "",
+    yearOfBirth: "",
     gender: "",
     occupation: "",
     otherOccupation: "",
     placeOfWork: "",
     experience: "",
     institution: "",
-    specialties: "",
+    specialties: [] as string[],
     otherSpecialty: "",
     address: "",
     country: ""
@@ -43,6 +43,9 @@ export default function Onboarding() {
   const [ndaAtBottom, setNdaAtBottom] = useState(false)
 
   const [registrationSuccess, setRegistrationSuccess] = useState(false)
+
+  const [showSpecialtiesDropdown, setShowSpecialtiesDropdown] = useState(false)
+  const specialtiesRef = useRef<HTMLDivElement>(null)
 
   const handleNdaScroll = () => {
     const el = ndaScrollRef.current
@@ -79,12 +82,13 @@ export default function Onboarding() {
     const requiredFields = {
       firstName: "First Name",
       lastName: "Last Name",
-      age: "Age",
+      yearOfBirth: "Year of Birth",
       gender: "Gender",
       occupation: "Occupation",
       experience: "Experience",
       placeOfWork: "Place of Work",
-      country: "Country"
+      country: "Country",
+      specialties: "Specialties"
     }
 
     const errors: Record<string, string> = {}
@@ -97,14 +101,33 @@ export default function Onboarding() {
       }
     })
 
+    // Age validation: must be at least 18 years old
+    if (formData.yearOfBirth) {
+      const dob = new Date(formData.yearOfBirth)
+      const today = new Date()
+      const age = today.getFullYear() - dob.getFullYear()
+      const m = today.getMonth() - dob.getMonth()
+      const d = today.getDate() - dob.getDate()
+      let is18 = age > 18 || (age === 18 && (m > 0 || (m === 0 && d >= 0)))
+      if (!is18) {
+        errors.yearOfBirth = "You must be at least 18 years old to register."
+        hasErrors = true
+      }
+    }
+
     // Additional validation for "other" fields
     if (formData.occupation === "other" && !formData.otherOccupation) {
       errors.otherOccupation = "Please specify your occupation"
       hasErrors = true
     }
 
-    if (formData.specialties === "other" && !formData.otherSpecialty) {
+    if (formData.specialties.includes("other") && !formData.otherSpecialty) {
       errors.otherSpecialty = "Please specify your specialty"
+      hasErrors = true
+    }
+
+    if (!formData.specialties.length) {
+      errors.specialties = "Please select at least one specialty"
       hasErrors = true
     }
 
@@ -141,7 +164,6 @@ export default function Onboarding() {
 
       // Create user profile data
       const userProfileData = {
-        ...formData,
         email: user.email,
         onboardingCompleted: true,
         ndaAgreed: true,
@@ -150,8 +172,16 @@ export default function Onboarding() {
         updatedAt: new Date().toISOString(),
         // Add additional profile fields
         displayName: `${formData.firstName} ${formData.lastName}`,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        country: formData.country,
         profile: {
-          age: formData.age,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          country: formData.country,
+          email: user.email,
+          address: formData.address,
+          yearOfBirth: formData.yearOfBirth,
           gender: formData.gender,
           occupation: formData.occupation,
           placeOfWork: formData.placeOfWork,
@@ -189,6 +219,61 @@ export default function Onboarding() {
       setLoading(false)
     }
   }
+
+  // Add global styles for placeholder font size
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `input::placeholder, select::placeholder { font-size: 11px !important; }`;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (specialtiesRef.current && event.target instanceof Node && !specialtiesRef.current.contains(event.target)) {
+        setShowSpecialtiesDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const specialtiesOptions = [
+    { value: "family-medicine", label: "Family Medicine" },
+    { value: "internal-medicine", label: "Internal Medicine" },
+    { value: "pediatrics", label: "Pediatrics" },
+    { value: "geriatrics", label: "Geriatrics" },
+    { value: "anesthesiology", label: "Anesthesiology" },
+    { value: "allergy-immunology", label: "Allergy & Immunology" },
+    { value: "cardiology", label: "Cardiology" },
+    { value: "critical-care", label: "Critical Care" },
+    { value: "dermatology", label: "Dermatology" },
+    { value: "emergency-medicine", label: "Emergency Medicine" },
+    { value: "endocrinology", label: "Endocrinology" },
+    { value: "gastroenterology", label: "Gastroenterology" },
+    { value: "hematology", label: "Hematology" },
+    { value: "infectious-disease", label: "Infectious Disease" },
+    { value: "microbiology", label: "Microbiology" },
+    { value: "nephrology", label: "Nephrology" },
+    { value: "neurology", label: "Neurology" },
+    { value: "nuclear-medicine", label: "Nuclear Medicine" },
+    { value: "obstetrics-gynecology", label: "Obstetrics and Gynecology" },
+    { value: "oncology", label: "Oncology" },
+    { value: "ophthalmology", label: "Ophthalmology" },
+    { value: "orthopedics", label: "Orthopedics" },
+    { value: "otolaryngology", label: "Otolaryngology" },
+    { value: "palliative-care", label: "Palliative Care Medicine" },
+    { value: "pathology", label: "Pathology" },
+    { value: "psychiatry", label: "Psychiatry" },
+    { value: "pulmonology", label: "Pulmonology" },
+    { value: "radiology", label: "Radiology" },
+    { value: "reproductive-endocrinology", label: "Reproductive Endocrinology & Infertility" },
+    { value: "rheumatology", label: "Rheumatology" },
+    { value: "sports-medicine", label: "Sports Medicine" },
+    { value: "surgery", label: "Surgery" },
+    { value: "urology", label: "Urology" },
+    { value: "other", label: "Other" },
+  ];
 
   if (authLoading) {
     return (
@@ -231,7 +316,7 @@ export default function Onboarding() {
               </div>
             </div>
           </div>
-          <div className="bg-[#F4F7FF] shadow-lg border border-[#3771FE]/50 px-8 py-8 rounded-[8px] text-center">
+          <div className="bg-[#F4F7FF] shadow-lg border border-[#3771FE]/50 px-8 py-8 rounded-[5px] text-center">
             <div className="flex flex-col items-center mb-4">
               <Image
                 src="/password-success.svg"
@@ -248,7 +333,7 @@ export default function Onboarding() {
               </p>
             </div>
             <button
-              className="w-full bg-[#C6D7FF]/50 text-[#3771FE] py-2 px-4 border border-[#3771FE]/50 rounded-[8px] font-dm-sans font-medium hover:bg-[#C6D7FF]/70 transition-colors duration-200"
+              className="w-full bg-[#C6D7FF]/50 text-[#3771FE] py-2 px-4 border border-[#3771FE]/50 rounded-[5px] font-dm-sans font-medium hover:bg-[#C6D7FF]/70 transition-colors duration-200"
               style={{ fontFamily: 'DM Sans', fontSize: 14 }}
               onClick={() => router.push('/dashboard')}
             >
@@ -304,32 +389,36 @@ export default function Onboarding() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-[#F4F7FF] shadow-lg border border-[#3771FE]/50 px-8 py-5 rounded-[8px]">
+        <div className="bg-[#F4F7FF] shadow-lg border border-[#3771FE]/50 px-8 py-5 rounded-[5px]">
           {currentStep === 1 ? (
             // Step 1: Customer Information Form
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>First Name</label>
                   <input
                     type="text"
                     name="firstName"
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.firstName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
+                    className={`px-3 py-2 border ${fieldErrors.firstName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white`}
+                    style={{ fontSize: 14 }}
                   />
                   {fieldErrors.firstName && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.firstName}</p>
                   )}
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Last Name</label>
                   <input
                     type="text"
                     name="lastName"
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.lastName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
+                    className={`px-3 py-2 border ${fieldErrors.lastName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white`}
+                    style={{ fontSize: 14 }}
                   />
                   {fieldErrors.lastName && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.lastName}</p>
@@ -339,26 +428,31 @@ export default function Onboarding() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Year of Birth</label>
                   <input
-                    type="text"
-                    name="age"
-                    placeholder="Age"
-                    value={formData.age}
+                    type="date"
+                    name="yearOfBirth"
+                    placeholder="Year of Birth"
+                    max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                    value={formData.yearOfBirth}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.age ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full`}
+                    className={`px-3 py-2 border ${fieldErrors.yearOfBirth ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white ${!formData.yearOfBirth ? 'text-gray-400' : 'text-[#223258]'}`}
+                    style={{ fontSize: formData.yearOfBirth ? 14 : 11 }}
                   />
-                  {fieldErrors.age && (
-                    <p className="text-red-500 text-xs mt-1">{fieldErrors.age}</p>
+                  {fieldErrors.yearOfBirth && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.yearOfBirth}</p>
                   )}
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Sex</label>
                   <select
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.gender ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm w-full ${!formData.gender ? 'text-gray-400' : 'text-[#223258]'}`}
+                    className={`px-3 py-2 border ${fieldErrors.gender ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm w-full ${!formData.gender ? 'text-gray-400' : 'text-[#223258]'}`}
+                    style={{ fontSize: formData.gender ? 14 : 11 }}
                   >
-                    <option value="" disabled style={{ color: '#9ca3af' }}>Sex</option>
+                    <option value="" disabled style={{ color: '#9ca3af' }}>Select Sex</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="other">Other</option>
@@ -369,101 +463,203 @@ export default function Onboarding() {
                 </div>
               </div>
 
+              {/* Profession and Years of Experience in one row */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Profession</label>
+                  <select
+                    name="occupation"
+                    value={formData.occupation}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${fieldErrors.occupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.occupation ? 'text-gray-400' : 'text-[#223258]'}`}
+                    style={{ fontSize: formData.occupation ? 14 : 11 }}
+                  >
+                    <option value="" disabled style={{ color: '#9ca3af' }}>Select Profession</option>
+                    <option value="physician">Physician</option>
+                    <option value="fellow">Fellow</option>
+                    <option value="consultant">Consultant</option>
+                    <option value="intern-resident">Intern/Resident</option>
+                    <option value="student">Student</option>
+                    <option value="pharmacist">Pharmacist</option>
+                    <option value="advanced-practice-nurse">Advanced Practice Nurse</option>
+                    <option value="dentist">Dentist</option>
+                    <option value="medical-librarian">Medical Librarian</option>
+                    <option value="other">Other</option>
+                  </select>
+                  {fieldErrors.occupation && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.occupation}</p>
+                  )}
+                  {formData.occupation === "other" && (
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Specify Profession</label>
+                      <input
+                        type="text"
+                        name="otherOccupation"
+                        placeholder="Please specify your profession"
+                        value={formData.otherOccupation || ""}
+                        onChange={handleInputChange}
+                        className={`w-full px-3 py-2 border ${fieldErrors.otherOccupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                        style={{ fontSize: 14 }}
+                      />
+                      {fieldErrors.otherOccupation && (
+                        <p className="text-red-500 text-xs mt-1">{fieldErrors.otherOccupation}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Years of Experience</label>
+                  <select
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${fieldErrors.experience ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.experience ? 'text-gray-400' : 'text-[#223258]'}`}
+                    style={{ fontSize: formData.experience ? 14 : 11 }}
+                  >
+                    <option value="" disabled style={{ color: '#9ca3af' }}>Select Years of Experience</option>
+                    <option value="1-3">1-3 years</option>
+                    <option value="3-7">3-7 years</option>
+                    <option value="7-10">7-10 years</option>
+                    <option value="10-15">10-15 years</option>
+                    <option value="15+">+15 years</option>
+                  </select>
+                  {fieldErrors.experience && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.experience}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Place of Work and Name of your Institution in one row */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Place of Work</label>
+                  <select
+                    name="placeOfWork"
+                    value={formData.placeOfWork}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${fieldErrors.placeOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.placeOfWork ? 'text-gray-400' : 'text-[#223258]'}`}
+                    style={{ fontSize: formData.placeOfWork ? 14 : 11 }}
+                  >
+                    <option value="" disabled style={{ color: '#9ca3af' }}>Select Place of Work</option>
+                    <option value="hospital-clinic">Hospital/Clinic</option>
+                    <option value="outpatient-clinic">Outpatient Clinic</option>
+                    <option value="private-practice">Private Practice</option>
+                  </select>
+                  {fieldErrors.placeOfWork && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.placeOfWork}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Institution</label>
+                  <input
+                    type="text"
+                    name="institution"
+                    placeholder="Name of your Institution"
+                    value={formData.institution}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${fieldErrors.institution ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                    style={{ fontSize: 14 }}
+                  />
+                  {fieldErrors.institution && (
+                    <p className="text-red-500 text-xs mt-1">{fieldErrors.institution}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Add Specialties field before Address */}
               <div>
-                <select
-                  name="occupation"
-                  value={formData.occupation}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.occupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.occupation ? 'text-gray-400' : 'text-[#223258]'}`}
-                >
-                  <option value="" disabled style={{ color: '#9ca3af' }}>Profession</option>
-                  <option value="physician">Physician</option>
-                  <option value="fellow">Fellow</option>
-                  <option value="consultant">Consultant</option>
-                  <option value="intern-resident">Intern/Resident</option>
-                  <option value="student">Student</option>
-                  <option value="pharmacist">Pharmacist</option>
-                  <option value="advanced-practice-nurse">Advanced Practice Nurse</option>
-                  <option value="dentist">Dentist</option>
-                  <option value="medical-librarian">Medical Librarian</option>
-                  <option value="other">Other</option>
-                </select>
-                {fieldErrors.occupation && (
-                  <p className="text-red-500 text-xs mt-1">{fieldErrors.occupation}</p>
+                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Specialties</label>
+                <div className="relative">
+                  <div
+                    className={`w-full min-h-[40px] px-2 py-1 border ${fieldErrors.specialties ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white flex flex-wrap items-center gap-1 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent`}
+                    tabIndex={0}
+                    onClick={() => setShowSpecialtiesDropdown(true)}
+                    style={{ cursor: 'text', position: 'relative' }}
+                  >
+                    {formData.specialties.length === 0 && (
+                      <span className="text-gray-400 text-sm select-none" style={{ fontSize: 11 }}>Select Specialties</span>
+                    )}
+                    {formData.specialties.map((specialty) => (
+                      <span
+                        key={specialty}
+                        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-[#C6D7FF]/50 text-[#223258] border border-[#3771FE]/50 mr-1 mt-1"
+                      >
+                        {specialty === "other" ? "Other" : specialty.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            setFormData(prev => ({
+                              ...prev,
+                              specialties: prev.specialties.filter(s => s !== specialty)
+                            }));
+                          }}
+                          className="ml-1 text-[#3771FE] hover:text-[#223258]"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      className="flex-1 outline-none border-none bg-transparent text-sm min-w-[40px]"
+                      style={{ fontSize: 14, padding: 0, margin: 0, minWidth: 0 }}
+                      onFocus={() => setShowSpecialtiesDropdown(true)}
+                      readOnly
+                    />
+                  </div>
+                  {showSpecialtiesDropdown && (
+                    <div className="absolute z-10 left-0 right-0 bg-white border border-[#3771FE]/50 rounded-b-[5px] shadow-lg max-h-48 overflow-y-auto mt-1">
+                      {specialtiesOptions.filter(opt => !formData.specialties.includes(opt.value)).map(opt => (
+                        <div
+                          key={opt.value}
+                          className="px-3 py-2 hover:bg-[#C6D7FF]/30 cursor-pointer text-sm text-[#223258]"
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              specialties: [...prev.specialties, opt.value]
+                            }));
+                            setShowSpecialtiesDropdown(false);
+                          }}
+                        >
+                          {opt.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {fieldErrors.specialties && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.specialties}</p>
+                )}
+                {formData.specialties.includes("other") && (
+                  <div className="mt-2">
+                    <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Specify Other Specialty</label>
+                    <input
+                      type="text"
+                      name="otherSpecialty"
+                      placeholder="Please specify your specialty"
+                      value={formData.otherSpecialty || ""}
+                      onChange={handleInputChange}
+                      className={`w-full px-3 py-2 border ${fieldErrors.otherSpecialty ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                      style={{ fontSize: 14 }}
+                    />
+                    {fieldErrors.otherSpecialty && (
+                      <p className="text-red-500 text-xs mt-1">{fieldErrors.otherSpecialty}</p>
+                    )}
+                  </div>
                 )}
               </div>
 
-              {formData.occupation === "other" && (
-                <input
-                  type="text"
-                  name="otherOccupation"
-                  placeholder="Please specify your profession"
-                  value={formData.otherOccupation || ""}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.otherOccupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
-                />
-              )}
-              {fieldErrors.otherOccupation && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.otherOccupation}</p>
-              )}
-
               <div>
-                <select
-                  name="experience"
-                  value={formData.experience}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.experience ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.experience ? 'text-gray-400' : 'text-[#223258]'}`}
-                >
-                  <option value="" disabled style={{ color: '#9ca3af' }}>Experience</option>
-                  <option value="less-than-1">Experience ≤ 1 year</option>
-                  <option value="less-than-3">Experience ≤ 3 years</option>
-                  <option value="less-than-5">Experience ≤ 5 years</option>
-                  <option value="more-than-5">Experience {'>'} 5 years</option>
-                </select>
-                {fieldErrors.experience && (
-                  <p className="text-red-500 text-xs mt-1">{fieldErrors.experience}</p>
-                )}
-              </div>
-
-              <div>
-                <select
-                  name="placeOfWork"
-                  value={formData.placeOfWork}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.placeOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.placeOfWork ? 'text-gray-400' : 'text-[#223258]'}`}
-                >
-                  <option value="" disabled style={{ color: '#9ca3af' }}>Place of Work</option>
-                  <option value="hospital-clinic">Hospital/Clinic</option>
-                  <option value="outpatient-clinic">Outpatient Clinic</option>
-                  <option value="private-practice">Private Practice</option>
-                </select>
-                {fieldErrors.placeOfWork && (
-                  <p className="text-red-500 text-xs mt-1">{fieldErrors.placeOfWork}</p>
-                )}
-              </div>
-
-              <div>
-                <input
-                  type="text"
-                  name="institution"
-                  placeholder="Institution (Optional)"
-                  value={formData.institution}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.institution ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
-                />
-                {fieldErrors.institution && (
-                  <p className="text-red-500 text-xs mt-1">{fieldErrors.institution}</p>
-                )}
-              </div>
-
-              <div>
+                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Address</label>
                 <input
                   type="text"
                   name="address"
                   placeholder="Address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.address ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm`}
+                  className={`w-full px-3 py-2 border ${fieldErrors.address ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                  style={{ fontSize: 14 }}
                 />
                 {fieldErrors.address && (
                   <p className="text-red-500 text-xs mt-1">{fieldErrors.address}</p>
@@ -471,13 +667,15 @@ export default function Onboarding() {
               </div>
 
               <div>
+                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Country</label>
                 <select
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.country ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[8px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.country ? 'text-gray-400' : 'text-[#223258]'}`}
+                  className={`w-full px-3 py-2 border ${fieldErrors.country ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.country ? 'text-gray-400' : 'text-[#223258]'}`}
+                  style={{ fontSize: formData.country ? 14 : 11 }}
                 >
-                  <option value="" disabled style={{ color: '#9ca3af' }}>Country</option>
+                  <option value="" disabled style={{ color: '#9ca3af' }}>Select Country</option>
                   <option value="afghanistan">Afghanistan</option>
                   <option value="albania">Albania</option>
                   <option value="algeria">Algeria</option>
@@ -678,11 +876,11 @@ export default function Onboarding() {
                 )}
               </div>
 
-              {error && <div className="bg-red-50 text-red-600 p-2 rounded-[8px] text-sm">{error}</div>}
+              {error && <div className="bg-red-50 text-red-600 p-2 rounded-[5px] text-sm">{error}</div>}
 
               <button
                 onClick={handleNext}
-                className="w-full bg-[#C6D7FF]/50 text-[#3771FE] py-2 px-4 border border-[#3771FE]/50 rounded-[8px] font-medium hover:bg-[#C6D7FF]/70 transition-colors duration-200 mt-4 text-sm"
+                className="w-full bg-[#C6D7FF]/50 text-[#3771FE] py-2 px-4 border border-[#3771FE]/50 rounded-[5px] font-medium hover:bg-[#C6D7FF]/70 transition-colors duration-200 mt-4 text-sm"
               >
                 Next
               </button>
@@ -806,8 +1004,8 @@ export default function Onboarding() {
                   value={ndaData.digitalSignature}
                   onChange={(e) => setNdaData(prev => ({ ...prev, digitalSignature: e.target.value }))}
                   placeholder="Enter your full name"
-                  className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
-                  style={{ fontFamily: 'DM Sans', fontWeight: 400 }}
+                  className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
+                  style={{ fontSize: 14 }}
                 />
               </div>
 
@@ -821,8 +1019,8 @@ export default function Onboarding() {
                   value={ndaData.address}
                   onChange={(e) => setNdaData(prev => ({ ...prev, address: e.target.value }))}
                   placeholder="Enter your address"
-                  className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[8px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
-                  style={{ fontFamily: 'DM Sans', fontWeight: 400 }}
+                  className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
+                  style={{ fontSize: 14 }}
                 />
               </div>
 
@@ -831,7 +1029,7 @@ export default function Onboarding() {
               <button
                 onClick={handleCompleteRegistration}
                 disabled={!ndaAgreed || !termsAgreed || !ndaData.digitalSignature || !ndaData.address || loading}
-                className={`w-full py-2 px-4 rounded-[8px] font-dm-sans font-medium transition-colors duration-200 text-sm ${
+                className={`w-full py-2 px-4 rounded-[5px] font-dm-sans font-medium transition-colors duration-200 text-sm ${
                   ndaAgreed && termsAgreed && ndaData.digitalSignature && ndaData.address && !loading
                     ? 'bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 hover:bg-[#C6D7FF]/60'
                     : 'bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 cursor-not-allowed opacity-50'
