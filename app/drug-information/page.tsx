@@ -284,6 +284,22 @@ export default function DrugInformationPage() {
         {/* Alphabet navigation bar */}
         <div className="flex justify-start w-full mb-8">
           <div className="w-full max-w-[1118px] mx-auto relative">
+            {/* Left scroll button */}
+            <button
+              onClick={() => scrollAlphabetBar('left')}
+              className="absolute -left-2 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm border border-gray-300 rounded-full shadow-sm md:hidden transition-opacity duration-200"
+            >
+              <ChevronLeft className="w-4 h-4 text-[#263969]" />
+            </button>
+
+            {/* Right scroll button */}
+            <button
+              onClick={() => scrollAlphabetBar('right')}
+              className="absolute -right-2 top-1/2 transform -translate-y-1/2 z-20 w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm border border-gray-300 rounded-full shadow-sm md:hidden transition-opacity duration-200"
+            >
+              <ChevronRight className="w-4 h-4 text-[#263969]" />
+            </button>
+
             {/* Left fade indicator */}
             <div className="absolute left-0 top-0 h-full w-4 z-10 pointer-events-none md:hidden" 
                  style={{ 
@@ -300,7 +316,7 @@ export default function DrugInformationPage() {
             
             <div
               ref={alphabetBarRef}
-              className="flex overflow-x-auto scrollbar-hide px-1"
+              className="flex overflow-x-auto scrollbar-hide px-6 md:px-0"
               style={{ 
                 WebkitOverflowScrolling: 'touch', 
                 scrollbarWidth: 'none', 
