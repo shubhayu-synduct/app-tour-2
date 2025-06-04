@@ -193,7 +193,7 @@ export default function DrugInformationPage() {
 
   const DrugInformationContent = () => {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8 mt-16 md:mt-16 mt-20 relative">
+      <div className="max-w-6xl mx-auto px-4 py-8 mt-4 md:mt-16 relative">
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl lg:text-[52px] font-semibold text-[#214498] mb-4 font-['DM_Sans']">Drug Information</h1>
           <p className="text-gray-600 text-base md:text-lg">European Medicines Agency approved drug information</p>
@@ -208,7 +208,7 @@ export default function DrugInformationPage() {
               ref={searchInputRef}
               type="text"
               placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list..."
-              className="w-full py-3 px-3 outline-none text-[#223258] font-['DM_Sans'] font-normal text-[16px] md:text-[18px] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[14px] md:placeholder:text-[16px]"
+              className="w-full py-3 px-3 outline-none text-[#223258] font-['DM_Sans'] font-[400] text-[16px] leading-[100%] tracking-[0%] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[14px] md:placeholder:text-[16px]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => {
@@ -255,7 +255,7 @@ export default function DrugInformationPage() {
                 <Link 
                   key={index}
                   href={`/drug-information/${slugify(drug.brand_name)}`}
-                  className="block px-4 py-3 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] font-normal text-[16px] md:text-[18px] border-b border-gray-100 last:border-b-0"
+                  className="block px-4 py-3 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] font-[400] text-[16px] leading-[100%] tracking-[0%] border-b border-gray-100 last:border-b-0"
                   onClick={() => {
                     setShowRecommendations(false);
                     if (searchInputRef.current) {
