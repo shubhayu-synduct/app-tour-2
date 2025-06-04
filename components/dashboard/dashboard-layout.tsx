@@ -53,13 +53,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Mobile Top Navbar */}
-    <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-40 flex items-center px-4">
-        <button
-          className="p-2 hover:bg-gray-100 rounded-md"
-          onClick={() => setIsOpen(true)}
-        >
-          <img src="/sidebar_open_icon.svg" alt="Open Sidebar" className="w-7 h-7" />
-        </button>
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-40 flex items-center px-4">
+        {isOpen ? (
+          <button
+            className="p-2 hover:bg-gray-100 rounded-md"
+            onClick={() => setIsOpen(false)}
+          >
+            <img src="/sidebar_close_icon.svg" alt="Close Sidebar" className="w-7 h-7" />
+          </button>
+        ) : (
+          <button
+            className="p-2 hover:bg-gray-100 rounded-md"
+            onClick={() => setIsOpen(true)}
+          >
+            <img src="/sidebar_open_icon.svg" alt="Open Sidebar" className="w-7 h-7" />
+          </button>
+        )}
       </div>
       
       {/* Sidebar */}
