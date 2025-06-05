@@ -126,7 +126,12 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               <div className="mb-6">
                 <button
                   className="flex items-center justify-center w-full rounded-md p-2 border border-solid border-[#cecece] hover:bg-gray-50"
-                  onClick={() => router.push("/dashboard")}
+                  onClick={() => {
+                    router.push("/dashboard");
+                    if (window.innerWidth < 768) {
+                      setIsOpen(false);
+                    }
+                  }}
                 >
                   <Plus className="w-5 h-5" />
                   {isOpen && <span className="ml-3 text-[16px] font-medium text-[#223258]">New Search</span>}
@@ -135,6 +140,11 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
               <Link
                 href="/dashboard"
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    setIsOpen(false);
+                  }
+                }}
                 className={`flex items-center px-3 py-2 rounded-lg font-medium ${
                   isActive('/dashboard') 
                     ? 'text-[#223258] bg-blue-50' 
@@ -147,6 +157,11 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
               <Link 
                 href="/guidelines"
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    setIsOpen(false);
+                  }
+                }}
                 className={`flex items-center px-3 py-2 rounded-lg ${
                   isActive('/guidelines') 
                     ? 'text-[#223258] bg-blue-50 font-medium' 
@@ -159,6 +174,11 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
               <Link 
                 href="/drug-information"
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    setIsOpen(false);
+                  }
+                }}
                 className={`flex items-center px-3 py-2 rounded-lg ${
                   isActive('/drug-information') 
                     ? 'text-[#223258] bg-blue-50 font-medium' 
@@ -171,6 +191,11 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               
               <Link 
                 href="/dashboard/history"
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    setIsOpen(false);
+                  }
+                }}
                 className={`flex items-center px-3 py-2 rounded-lg ${
                   isActive('/dashboard/history') 
                     ? 'text-[#223258] bg-blue-50 font-medium' 
@@ -220,7 +245,13 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     {/* Profile Settings */}
                     <button
                       className="flex items-center w-full px-3 py-2 rounded-[8px] bg-[#E4ECFF] text-[#223258] font-semibold mb-1"
-                      onClick={() => router.push("/dashboard/profile")}
+                      onClick={() => {
+                        router.push("/dashboard/profile");
+                        if (window.innerWidth < 768) {
+                          setIsOpen(false);
+                          setIsProfileOpen(false);
+                        }
+                      }}
                     >
                       <svg className="mr-3 h-5 w-5" fill="none" stroke="#223258" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                       Profile Settings
