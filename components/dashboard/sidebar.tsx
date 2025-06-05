@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import {
@@ -32,6 +32,27 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const user = getSessionCookie()
+  const sidebarRef = useRef<HTMLElement>(null)
+
+  // Add click outside handler
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        // Only close on mobile view
+        if (window.innerWidth < 768) {
+          setIsOpen(false)
+        }
+      }
+    }
+
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside)
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [setIsOpen])
 
   const handleSignOut = async () => {
     try {
@@ -65,6 +86,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     <>
       {/* Sidebar */}
       <aside
+        ref={sidebarRef}
         className={`bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-300 ease-in-out font-['DM_Sans'] ${
           isOpen ? "w-64" : "w-20"
         } ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-40`}
