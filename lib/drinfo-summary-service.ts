@@ -2,7 +2,7 @@
 
 // API base URL for DrInfo summary service
  const DRINFO_API_URL = "https://ai-summary-stage.duckdns.org/chat/stream";
-//const DRINFO_API_URL = "http://localhost:8000/chat/stream";
+// const DRINFO_API_URL = "http://localhost:8000/chat/stream";
 export interface Citation {
   title: string;
   url: string;
@@ -26,6 +26,14 @@ export interface StreamingResponse {
   data?: string | DrInfoSummaryData;
 }
 
+interface DrInfoSummaryOptions {
+  sessionId?: string;
+  userId?: string;
+  is_follow_up?: boolean;
+  mode?: string;
+  country?: string;
+}
+
 /**
  * Fetches medical information from the AI info summary API with streaming support
  */
@@ -34,7 +42,7 @@ export async function fetchDrInfoSummary(
   onChunk: (chunk: string) => void,
   onStatus: (status: string, message?: string) => void,
   onComplete: (data: DrInfoSummaryData) => void,
-  options?: { sessionId?: string, userId?: string, is_follow_up?: boolean, mode?: string }
+  options?: DrInfoSummaryOptions
 ): Promise<void> {
   console.log("[API] Initiating API request for query:", query);
   
@@ -54,6 +62,7 @@ export async function fetchDrInfoSummary(
         is_follow_up: options?.is_follow_up || false,
         userId: options?.userId || "",
         language: "string",
+        country: options?.country || "",
         ...(options?.mode ? { mode: options.mode } : {})
       })
     });

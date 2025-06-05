@@ -132,6 +132,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const [hasFetched, setHasFetched] = useState(false)
   const [lastQuestion, setLastQuestion] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [userCountry, setUserCountry] = useState<string>('')
   const router = useRouter()
   const pathname = usePathname()
   const [activeMode, setActiveMode] = useState<'instant' | 'research'>(initialMode);
@@ -172,6 +173,31 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       setMessages(chatHistory);
     }
   }, [isChatLoading, chatHistory]);
+
+  // Add useEffect to fetch user's country when component mounts
+  useEffect(() => {
+    const fetchUserCountry = async () => {
+      if (user) {
+        try {
+          const db = getFirebaseFirestore();
+          const userId = user.uid || user.id;
+          const userDoc = await getDoc(doc(db, "users", userId));
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const country = userData?.profile?.country;
+            if (country) {
+              setUserCountry(country);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user country:", error);
+        }
+      }
+    };
+
+    fetchUserCountry();
+  }, [user]);
 
   const loadChatSession = async (sessionId: string) => {
     setIsChatLoading(true);
@@ -753,6 +779,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       setIsLoading(false);
       return;
     }
+
     // Add user message
     const tempThreadId = Date.now().toString();
     setMessages(prev => [
@@ -846,7 +873,13 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
           setIsLoading(false);
         }
       },
-      { sessionId: sessionId, userId, is_follow_up: isFollowUp, mode: activeMode === 'instant' ? 'swift' : 'study' }
+      { 
+        sessionId: sessionId, 
+        userId, 
+        is_follow_up: isFollowUp, 
+        mode: activeMode === 'instant' ? 'swift' : 'study',
+        country: userCountry // Add country to the options
+      }
     );
   };
 
