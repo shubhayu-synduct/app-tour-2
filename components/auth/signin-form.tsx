@@ -139,7 +139,7 @@ export function SignInForm() {
   }
 
   return (
-    <form className="space-y-4 font-['DM_Sans']" onSubmit={handleSubmit}>
+    <form className="space-y-3 sm:space-y-4 font-['DM_Sans']" onSubmit={handleSubmit}>
       {/* Email Input */}
       <div>
         <input
@@ -147,7 +147,7 @@ export function SignInForm() {
           placeholder="Enter your email address..."
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 border border-[#3771FE]/50 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-[#8997BA] font-['DM_Sans']"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-[#3771FE]/50 rounded-[5px] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-[#8997BA] font-['DM_Sans']"
           required
         />
       </div>
@@ -159,40 +159,44 @@ export function SignInForm() {
           placeholder="Enter your password..."
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-3 border border-[#3771FE]/50 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-[#8997BA] pr-12 font-['DM_Sans']"
+          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-[#3771FE]/50 rounded-[5px] focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent placeholder-[#8997BA] pr-10 sm:pr-12 font-['DM_Sans']"
           required
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
         >
-          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          {showPassword ? <EyeOff size={18} className="sm:w-5 sm:h-5" /> : <Eye size={18} className="sm:w-5 sm:h-5" />}
         </button>
       </div>
 
       <div className="flex justify-end">
         <Link 
           href="/forgot-password" 
-          className="text-sm text-[#223258] hover:text-[#3771FE] font-medium font-['DM_Sans']"
+          className="text-xs sm:text-sm text-[#223258] hover:text-[#3771FE] font-medium font-['DM_Sans']"
         >
           Forgot Password?
         </Link>
       </div>
 
-      {error && <div className="bg-red-50 text-red-600 p-3 rounded-[10px] font-['DM_Sans']">{error}</div>}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-2 sm:p-3 text-sm sm:text-base rounded-[5px] font-['DM_Sans']">
+          {error}
+        </div>
+      )}
 
       {/* Continue Button */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
+        className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 py-2.5 sm:py-3 px-4 text-sm sm:text-base rounded-[5px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
       >
         {loading ? "Signing in..." : "Sign in"}
       </button>
 
       {/* Sign Up Link */}
-      <div className="text-center">
+      <div className="text-center text-sm sm:text-base">
         <span className="text-black-600 font-['DM_Sans']">Don't have an account? </span>
         <Link href="/signup" className="text-[#3771FE] hover:text-[#3771FE] font-medium font-['DM_Sans']">
           Create an account
@@ -200,32 +204,32 @@ export function SignInForm() {
       </div>
 
       {/* OR Divider */}
-      <div className="flex items-center my-6">
+      <div className="flex items-center my-4 sm:my-6">
         <div className="flex-1 h-[1px] bg-gradient-to-r from-white to-black"></div>
-        <span className="px-4 text-[#000000] text-sm font-['DM_Sans']">OR</span>
+        <span className="px-3 sm:px-4 text-[#000000] text-xs sm:text-sm font-['DM_Sans']">OR</span>
         <div className="flex-1 h-[1px] bg-gradient-to-l from-white to-black"></div>
       </div>
 
       {/* Social Sign In Buttons */}
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center bg-white text-[#223258] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
+          className="w-full flex items-center justify-center bg-white text-[#223258] border border-[#3771FE]/50 py-2.5 sm:py-3 px-3 sm:px-4 text-sm sm:text-base rounded-[5px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
         >
           <GoogleIcon />
-          Sign in with Google
+          <span className="whitespace-nowrap">Sign in with Google</span>
         </button>
 
         <button
           type="button"
           onClick={handleMicrosoftSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center bg-white text-[#223258] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
+          className="w-full flex items-center justify-center bg-white text-[#223258] border border-[#3771FE]/50 py-2.5 sm:py-3 px-3 sm:px-4 text-sm sm:text-base rounded-[5px] hover:bg-[#C6D7FF]/50 transition duration-200 font-medium disabled:opacity-70 font-['DM_Sans']"
         >
           <MicrosoftIcon />
-          Sign in with Microsoft
+          <span className="whitespace-nowrap">Sign in with Microsoft</span>
         </button>
       </div>
     </form>
