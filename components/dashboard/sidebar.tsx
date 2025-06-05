@@ -104,7 +104,10 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               {isOpen ? (
                 <button
                   className="flex items-center justify-center hover:bg-gray-100 rounded-md"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsProfileOpen(false);
+                  }}
                 >
                   <img src="/sidebar_close_icon.svg" alt="Close Sidebar" className="w-7 h-7" />
                 </button>
@@ -211,8 +214,8 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               </button>
 
               {/* Dropdown Menu */}
-              {isOpen && isProfileOpen && (
-                <div className="absolute bottom-full left-0 w-full mb-2 bg-white rounded-[10px] shadow-lg border border-[#B5C9FC]">
+              {isProfileOpen && (
+                <div className={`absolute ${isOpen ? 'bottom-full left-0 w-full' : 'bottom-0 left-full ml-2 w-48'} mb-2 bg-white rounded-[10px] shadow-lg border border-[#B5C9FC]`}>
                   <div className="p-2">
                     {/* Profile Settings */}
                     <button
@@ -222,14 +225,6 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                       <svg className="mr-3 h-5 w-5" fill="none" stroke="#223258" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                       Profile Settings
                     </button>
-                    {/* Mode Preferences */}
-                    <div className="px-3 py-2 text-sm text-[#223258]">
-                      <label htmlFor="mode-select" className="font-semibold block mb-1">Mode Preferences</label>
-                      <select id="mode-select" className="w-full rounded-[8px] border border-[#B5C9FC] px-2 py-1 text-[#223258] font-semibold focus:outline-none focus:ring-2 focus:ring-[#E4ECFF] bg-white">
-                        <option value="default">Default</option>
-                        <option value="acute">Acute</option>
-                      </select>
-                    </div>
                     {/* Sign Out */}
                     <button
                       onClick={handleSignOut}
