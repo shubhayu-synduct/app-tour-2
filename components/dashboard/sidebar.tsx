@@ -116,7 +116,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   className="hidden md:flex items-center justify-center hover:bg-gray-100 rounded-md mt-4"
                   onClick={() => setIsOpen(true)}
                 >
-                  <img src="/sidebar_open_icon.svg" alt="Open Sidebar" className="w-7 h-7" />
+                  <img src="/open-sidebar.svg" alt="Open Sidebar" className="w-7 h-7" />
                 </button>
               )}
             </div>
@@ -133,7 +133,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     }
                   }}
                 >
-                  <Plus className="w-5 h-5" />
+                  <img src="/new-search.svg" alt="New Search" className="w-5 h-5" />
                   {isOpen && <span className="ml-3 text-[16px] font-medium text-[#223258]">New Search</span>}
                 </button>
               </div>

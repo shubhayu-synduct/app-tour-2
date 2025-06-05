@@ -48,39 +48,68 @@ export function SignUpForm() {
   const [error, setError] = useState("")
   const [showVerificationModal, setShowVerificationModal] = useState(false)
 
+  const parseFirebaseError = (error: any) => {
+    if (!error) return "";
+    
+    // Handle Firebase error messages
+    if (error.message) {
+      // Password requirements error
+      if (error.message.includes("password-does-not-meet-requirements")) {
+        const requirements = error.message.match(/\[(.*?)\]/);
+        if (requirements && requirements[1]) {
+          return requirements[1];
+        }
+      }
+      
+      // Email already in use
+      if (error.message.includes("email-already-in-use")) {
+        return "This email is already registered. Please sign in or use a different email.";
+      }
+      
+      // Invalid email
+      if (error.message.includes("invalid-email")) {
+        return "Please enter a valid email address.";
+      }
+      
+      // Weak password
+      if (error.message.includes("weak-password")) {
+        return "Password is too weak. Please use a stronger password.";
+      }
+      
+      // Too many requests
+      if (error.message.includes("too-many-requests")) {
+        return "Too many attempts. Please try again later.";
+      }
+      
+      // Default error message - remove Firebase prefix and auth code
+      return error.message
+        .replace("Firebase: ", "")
+        .replace(/\(auth\/.*?\)/, "")
+        .trim();
+    }
+    
+    return "An error occurred. Please try again.";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
 
     try {
-      const auth = getAuth()
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-      const user = userCredential.user
+      const { getFirebaseAuth } = await import("@/lib/firebase")
+      const { createUserWithEmailAndPassword } = await import("firebase/auth")
 
-      // Create user document in Firestore
-      const db = await getFirebaseFirestore()
-      if (!db) throw new Error("Firestore not initialized")
+      const auth = await getFirebaseAuth()
+      if (!auth) {
+        throw new Error("Firebase not initialized")
+      }
 
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
-        emailVerified: false,
-        createdAt: new Date().toISOString(),
-        onboardingCompleted: false
-      })
-
-      // Send email verification
-      await sendEmailVerification(user, {
-        url: `${window.location.origin}/verify-email`,
-        handleCodeInApp: true
-      })
-
-      // Sign out immediately and show verification modal
-      await auth.signOut()
-      setShowVerificationModal(true)
+      await createUserWithEmailAndPassword(auth, email, password)
+      router.push("/onboarding")
     } catch (err: any) {
       console.error("Error during sign up:", err)
-      setError(err.message || "An error occurred during sign up")
+      setError(parseFirebaseError(err))
     } finally {
       setLoading(false)
     }
@@ -231,19 +260,7 @@ export function SignUpForm() {
         </div>
 
         {/* Error Message */}
-        {error && error.includes("auth/email-already-in-use") ? (
-          <div className="bg-[#EAF1FF] text-[#223258] p-2 sm:p-3 text-sm sm:text-base rounded-[5px] text-center font-['DM_Sans']">
-            This email is already registered. Please{' '}
-            <Link href="/login" className="text-[#3771FE] underline font-medium font-['DM_Sans']">
-              Sign In
-            </Link>
-            .
-          </div>
-        ) : error && (
-          <div className="bg-red-50 text-red-600 p-2 sm:p-3 text-sm sm:text-base rounded-[5px] font-['DM_Sans']">
-            {error}
-          </div>
-        )}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
         {/* Continue Button */}
         <button

@@ -997,37 +997,43 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                 <div ref={inputAnchorRef} style={{ marginBottom: '80px sm:100px' }} />
                 <div className="sticky bottom-0 bg-gray-50 pt-2 pb-4">
                   <div className="max-w-3xl mx-auto px-2 sm:px-4">
-                    <div className="relative w-full bg-white border rounded-xl shadow-[0px_0px_11px_#0000000c] p-3 sm:p-4">
-                      <div className="flex items-center">
-                        <Search className="text-slate-400 h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                        <input
-                          type="text"
+                    <div className="relative w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4">
+                      <div className="relative">
+                        <Search className="text-gray-400 h-5 w-5 absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <textarea
                           value={followUpQuestion}
-                          onChange={(e) => setFollowUpQuestion(e.target.value)}
+                          onChange={(e) => {
+                            setFollowUpQuestion(e.target.value);
+                            // Auto-resize the textarea
+                            e.target.style.height = 'auto';
+                            e.target.style.height = e.target.scrollHeight + 'px';
+                          }}
                           placeholder="Ask a follow-up question..."
-                         className="ml-2 flex-1 text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none border-none bg-transparent h-12"
+                          className="w-full pl-7 text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
                           onKeyDown={(e) => e.key === 'Enter' && handleFollowUpQuestion(e as any)}
+                          rows={1}
+                          style={{ height: '24px' }}
                         />
-                        <button onClick={handleFollowUpQuestion} className="ml-2 h-10 sm:h-12 flex items-center" disabled={isLoading}>
-                          {isLoading ? (
-                            <div className="h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <img src="/search.svg" alt="Search" width={24} height={24} className="sm:w-[30px] sm:h-[30px]" />
-                          )}
-                        </button>
                       </div>
-                      <div className="flex space-x-2 mt-2">
+                      <div className="flex justify-between items-center mt-2">
                         <button
                           type="button"
-                          className={`px-2 sm:px-3 py-1 rounded border text-xs sm:text-sm flex items-center gap-1 ${
+                          className={`px-3 py-1 rounded border text-sm flex items-center gap-1 ${
                             activeMode === 'instant'
                               ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
                               : 'bg-white text-gray-500 border-gray-300'
                           }`}
                           onClick={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
                         >
-                          <img src="/instant.svg" alt="Instant Mode Icon" className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <img src="/instant.svg" alt="Instant Mode Icon" className="w-4 h-4" />
                           Acute
+                        </button>
+                        <button onClick={handleFollowUpQuestion} className="flex-shrink-0" disabled={isLoading}>
+                          {isLoading ? (
+                            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <img src="/search.svg" alt="Search" width={30} height={30} />
+                          )}
                         </button>
                       </div>
                     </div>
