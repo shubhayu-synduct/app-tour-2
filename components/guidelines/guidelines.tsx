@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { Search, BookOpen, ChevronRight, Loader2, ChevronDown, Bookmark, Star, ArrowUpRight } from 'lucide-react'
 import GuidelineSummaryModal from './guideline-summary-modal'
 import GuidelineSummaryMobileModal from './guideline-summary-mobile-modal'
+import { useAuth } from '@/hooks/use-auth'
+import { getFirebaseFirestore } from '@/lib/firebase'
+import { doc, getDoc } from 'firebase/firestore'
 
 interface Guideline {
   id: number;
@@ -33,6 +36,8 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
   const [retryCount, setRetryCount] = useState(0)
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['National'])
   const [isMobile, setIsMobile] = useState(false)
+  const [userCountry, setUserCountry] = useState<string>('')
+  const { user } = useAuth()
 
   const categoryOrder = ['National', 'Europe', 'International', 'USA'];
 
@@ -54,6 +59,30 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
     );
   };
 
+  useEffect(() => {
+    const fetchUserCountry = async () => {
+      if (user) {
+        try {
+          const db = getFirebaseFirestore();
+          const userId = user.uid;
+          const userDoc = await getDoc(doc(db, "users", userId));
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const country = userData?.profile?.country;
+            if (country) {
+              setUserCountry(country);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user country:", error);
+        }
+      }
+    };
+
+    fetchUserCountry();
+  }, [user]);
+
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
       setGuidelines(initialGuidelines || [])
@@ -70,7 +99,8 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: searchTerm
+          query: searchTerm,
+          country: userCountry || 'None' // Pass the user's country or default to 'International'
         })
       })
       
@@ -201,28 +231,30 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
         </div>
         
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-xl mb-4 sm:mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div>
-                <p className="font-medium">Error</p>
-                <p className="text-sm sm:text-base">{error}</p>
+          <div
+            className="px-3 sm:px-4 py-2 sm:py-3 rounded-xl mb-4 sm:mb-6"
+            style={{
+              background: '#EEF3FF',
+              border: '1px solid #A2BDFF',
+              color: '#214498',
+              fontFamily: 'DM Sans, sans-serif'
+            }}
+          >
+            <div className="flex flex-col items-center justify-center gap-2">
+              <div className="w-full">
+                {/* <p className="font-medium" style={{ color: '#214498' }}>Notice</p> */}
+                <p className="text-sm sm:text-base text-center" style={{ color: '#214498' }}>
+                  {error === "Failed to connect to guidelines API service"
+                    ? "Our servers are experiencing high demand. Please try again in a moment."
+                    : error}
+                </p>
               </div>
-              {retryCount < 3 && (
-                <button
-                  onClick={handleRetry}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm sm:text-base"
-                >
-                  Retry
-                </button>
-              )}
             </div>
           </div>
         )}
         
         <div className="space-y-3 sm:space-y-4 p-3 sm:p-4" style={{ background: '#EEF3FF', borderRadius: 5 }}>
           {categoryOrder
-            .filter(category => groupedGuidelines[category])
-            .concat(Object.keys(groupedGuidelines).filter(category => !categoryOrder.includes(category)))
             .map(category => (
               <div key={category} className="border px-0 pb-2 sm:pb-4 pt-1 sm:pt-2" style={{ borderColor: '#A2BDFF', borderWidth: 1, borderStyle: 'solid', background: '#fff', borderRadius: 5 }}>
               <button
@@ -251,7 +283,22 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
               
               {expandedCategories.includes(category) && (
                 <div className="p-2 sm:p-4 space-y-2 sm:space-y-4">
-                    {groupedGuidelines[category].map((guideline) => (
+                    {(groupedGuidelines[category]?.filter(guideline => 
+                        guideline.id && 
+                        guideline.title && 
+                        guideline.description && 
+                        guideline.category && 
+                        guideline.last_updated
+                      ).length ?? 0) > 0 ? (
+                      groupedGuidelines[category]
+                        .filter(guideline => 
+                          guideline.id && 
+                          guideline.title && 
+                          guideline.description && 
+                          guideline.category && 
+                          guideline.last_updated
+                        )
+                        .map((guideline) => (
                     <div key={guideline.id}>
                         <div className="p-2 sm:p-4 shadow-sm border" style={{ background: '#fff', borderColor: '#A2BDFF', borderRadius: 5 }}>
                         <div className="space-y-2 sm:space-y-3">
@@ -351,18 +398,34 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                         </div>
                       </div>
                     </div>
-                  ))}
+                  ))
+                    ) : (
+                      <div className="text-center py-8 sm:py-12">
+                        <BookOpen className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                        <p 
+                          className="text-sm sm:text-base text-gray-600"
+                          style={{ fontFamily: 'DM Sans, sans-serif' }}
+                        >
+                          {`No ${category === 'Europe' ? 'European' : category} guidelines found`}
+                        </p>
+                      </div>
+                    )}
                 </div>
               )}
             </div>
           ))}
           
-          {Object.values(groupedGuidelines).flat().length === 0 && !isLoading && !error && (
+          {/* {Object.values(groupedGuidelines).flat().length === 0 && !isLoading && !error && (
             <div className="text-center py-8 sm:py-12">
               <BookOpen className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
-              <p className="text-sm sm:text-base text-gray-600">No guidelines found. Try a different search term.</p>
+              <p 
+                className="text-sm sm:text-base text-gray-600"
+                style={{ fontFamily: 'DM Sans, sans-serif' }}
+              >
+                No guidelines found. Try a different search term.
+              </p>
             </div>
-          )}
+          )} */}
           
           {isLoading && (
             <div className="flex justify-center py-8 sm:py-12">
