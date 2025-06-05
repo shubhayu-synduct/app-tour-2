@@ -294,7 +294,7 @@ export default function Onboarding() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6 pb-8">
         <div className="w-full max-w-sm">
-          <div className="text-center mb-4">
+          <div className="text-center mb-4 ">
             <div className="flex items-center justify-center mb-2">
               <Image
                 src="/full-icon.svg"
@@ -350,40 +350,40 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6 pb-8">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 pb-4 sm:pb-8">
+      <div className="w-full max-w-[95%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-[600px]">
         {/* Header */}
         <div className="text-center mb-4">
-          <div className="flex items-center justify-center mb-2">
+          <div className="flex items-center justify-center mb-2 pt-6 sm:pt-8 md:pt-10 mt-6 sm:mt-8 md:mt-10">
             <Image
               src="/full-icon.svg"
               alt="DR. INFO Logo"
-              width={200}
-              height={57}
-              className="text-white"
+              width={150}
+              height={43}
+              className="text-white sm:w-[180px] md:w-[200px]"
             />
           </div>
-          <h2 className="font-semibold text-[#223258] mt-6 mb-6 text-[20px] sm:text-[20px] font-dm-sans">
+          <h2 className="font-semibold text-[#223258] mt-4 sm:mt-6 mb-4 sm:mb-6 text-[24px] sm:text-[28px] font-dm-sans">
             Complete Registration
           </h2>
           
           {/* Step Indicator */}
-          <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center justify-center mb-4 sm:mb-6">
             {/* Step 1 */}
             <div className={`flex items-center`}>
               <div
                 className={`flex items-center justify-center rounded-full font-medium transition-all duration-200 border border-[#3771FE]/50 font-dm-sans
-                  ${currentStep === 1 ? 'bg-[#4784FD] text-white w-11 h-11 text-lg' : currentStep === 2 ? 'bg-[#3771FE] text-white w-8 h-8 text-base' : 'bg-[#F6F9FF] text-[#3771FE] w-8 h-8 text-base'}
+                  ${currentStep === 1 ? 'bg-[#4784FD] text-white w-9 h-9 sm:w-11 sm:h-11 text-base sm:text-lg' : currentStep === 2 ? 'bg-[#3771FE] text-white w-7 h-7 sm:w-8 sm:h-8 text-sm sm:text-base' : 'bg-[#F6F9FF] text-[#3771FE] w-7 h-7 sm:w-8 sm:h-8 text-sm sm:text-base'}
                 `}
               >
-                {currentStep === 1 ? '1' : currentStep === 2 ? <Check size={20} strokeWidth={3} className="text-white" /> : '1'}
+                {currentStep === 1 ? '1' : currentStep === 2 ? <Check size={18} strokeWidth={3} className="text-white" /> : '1'}
               </div>
               {/* Connecting line */}
-              <div className="h-0.5 w-10 bg-[#3771FE]" />
+              <div className="h-0.5 w-8 sm:w-10 bg-[#3771FE]" />
               {/* Step 2 */}
               <div
                 className={`flex items-center justify-center rounded-full font-medium transition-all duration-200 border border-[#3771FE]/50 font-dm-sans
-                  ${currentStep === 2 ? 'bg-[#4784FD] text-white w-11 h-11 text-lg' : 'bg-[#F6F9FF] text-[#3771FE] w-8 h-8 text-base'}
+                  ${currentStep === 2 ? 'bg-[#4784FD] text-white w-9 h-9 sm:w-11 sm:h-11 text-base sm:text-lg' : 'bg-[#F6F9FF] text-[#3771FE] w-7 h-7 sm:w-8 sm:h-8 text-sm sm:text-base'}
                 `}
               >
                 2
@@ -393,20 +393,20 @@ export default function Onboarding() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-[#F4F7FF] shadow-lg border border-[#3771FE]/50 px-8 py-5 rounded-[5px]">
+        <div className="bg-[#F4F7FF] border border-[#3771FE]/50 px-4 sm:px-6 md:px-8 py-4 sm:py-5 rounded-[5px]">
           {currentStep === 1 ? (
             // Step 1: Customer Information Form
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>First Name</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>First Name</label>
                   <input
                     type="text"
                     name="firstName"
                     placeholder="First Name"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.firstName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white`}
+                    className={`px-3 py-2 sm:py-2.5 border ${fieldErrors.firstName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white`}
                     style={{ fontSize: 14 }}
                   />
                   {fieldErrors.firstName && (
@@ -414,14 +414,14 @@ export default function Onboarding() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Last Name</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Last Name</label>
                   <input
                     type="text"
                     name="lastName"
                     placeholder="Last Name"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.lastName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white`}
+                    className={`px-3 py-2 sm:py-2.5 border ${fieldErrors.lastName ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white`}
                     style={{ fontSize: 14 }}
                   />
                   {fieldErrors.lastName && (
@@ -430,9 +430,9 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Date of Birth</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Date of Birth</label>
                   <input
                     type="date"
                     name="yearOfBirth"
@@ -440,7 +440,7 @@ export default function Onboarding() {
                     max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                     value={formData.yearOfBirth}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.yearOfBirth ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white ${!formData.yearOfBirth ? 'text-gray-400' : 'text-[#223258]'}`}
+                    className={`px-3 py-2 sm:py-2.5 border ${fieldErrors.yearOfBirth ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full bg-white ${!formData.yearOfBirth ? 'text-gray-400' : 'text-[#223258]'}`}
                     style={{ fontSize: formData.yearOfBirth ? 14 : 11 }}
                   />
                   {fieldErrors.yearOfBirth && (
@@ -448,12 +448,12 @@ export default function Onboarding() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Sex</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Sex</label>
                   <select
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
-                    className={`px-3 py-2 border ${fieldErrors.gender ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm w-full ${!formData.gender ? 'text-gray-400' : 'text-[#223258]'}`}
+                    className={`px-3 py-2 sm:py-2.5 border ${fieldErrors.gender ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm w-full ${!formData.gender ? 'text-gray-400' : 'text-[#223258]'}`}
                     style={{ fontSize: formData.gender ? 14 : 11 }}
                   >
                     <option value="" disabled style={{ color: '#9ca3af' }}>Select Sex</option>
@@ -468,14 +468,14 @@ export default function Onboarding() {
               </div>
 
               {/* Profession and Years of Experience in one row */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Profession</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Profession</label>
                   <select
                     name="occupation"
                     value={formData.occupation}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${fieldErrors.occupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.occupation ? 'text-gray-400' : 'text-[#223258]'}`}
+                    className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.occupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.occupation ? 'text-gray-400' : 'text-[#223258]'}`}
                     style={{ fontSize: formData.occupation ? 14 : 11 }}
                   >
                     <option value="" disabled style={{ color: '#9ca3af' }}>Select Profession</option>
@@ -494,15 +494,15 @@ export default function Onboarding() {
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.occupation}</p>
                   )}
                   {formData.occupation === "other" && (
-                    <div>
-                      <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Specify Profession</label>
+                    <div className="mt-2">
+                      <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Specify Profession</label>
                       <input
                         type="text"
                         name="otherOccupation"
                         placeholder="Please specify your profession"
                         value={formData.otherOccupation || ""}
                         onChange={handleInputChange}
-                        className={`w-full px-3 py-2 border ${fieldErrors.otherOccupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                        className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.otherOccupation ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
                         style={{ fontSize: 14 }}
                       />
                       {fieldErrors.otherOccupation && (
@@ -512,12 +512,12 @@ export default function Onboarding() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Years of Experience</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Years of Experience</label>
                   <select
                     name="experience"
                     value={formData.experience}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${fieldErrors.experience ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.experience ? 'text-gray-400' : 'text-[#223258]'}`}
+                    className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.experience ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.experience ? 'text-gray-400' : 'text-[#223258]'}`}
                     style={{ fontSize: formData.experience ? 14 : 11 }}
                   >
                     <option value="" disabled style={{ color: '#9ca3af' }}>Select Years of Experience</option>
@@ -534,9 +534,9 @@ export default function Onboarding() {
               </div>
 
               {/* Place of Work and Name of your Institution in one row */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Place of Work</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Place of Work</label>
                   <select
                     name="placeOfWork"
                     value={formData.placeOfWork}
@@ -547,7 +547,7 @@ export default function Onboarding() {
                         ...(e.target.value !== "other" ? { otherPlaceOfWork: "" } : {})
                       }));
                     }}
-                    className={`w-full px-3 py-2 border ${fieldErrors.placeOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.placeOfWork ? 'text-gray-400' : 'text-[#223258]'}`}
+                    className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.placeOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.placeOfWork ? 'text-gray-400' : 'text-[#223258]'}`}
                     style={{ fontSize: formData.placeOfWork ? 14 : 11 }}
                   >
                     <option value="" disabled style={{ color: '#9ca3af' }}>Select Place of Work</option>
@@ -559,14 +559,14 @@ export default function Onboarding() {
                   </select>
                   {formData.placeOfWork === "other" && (
                     <div className="mt-2">
-                      <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Specify Place of Work</label>
+                      <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Specify Place of Work</label>
                       <input
                         type="text"
                         name="otherPlaceOfWork"
                         placeholder="Please specify your place of work"
                         value={formData.otherPlaceOfWork || ""}
                         onChange={handleInputChange}
-                        className={`w-full px-3 py-2 border ${fieldErrors.otherPlaceOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                        className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.otherPlaceOfWork ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
                         style={{ fontSize: 14 }}
                       />
                       {fieldErrors.otherPlaceOfWork && (
@@ -579,14 +579,14 @@ export default function Onboarding() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Institution</label>
+                  <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Institution</label>
                   <input
                     type="text"
                     name="institution"
                     placeholder="Name of your Institution"
                     value={formData.institution}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${fieldErrors.institution ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                    className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.institution ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
                     style={{ fontSize: 14 }}
                   />
                   {fieldErrors.institution && (
@@ -597,7 +597,7 @@ export default function Onboarding() {
 
               {/* Add Specialties field before Address */}
               <div>
-                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Specialties</label>
+                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Specialties</label>
                 <div className="relative">
                   <div
                     className={`w-full min-h-[40px] px-2 py-1 border ${fieldErrors.specialties ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white flex flex-wrap items-center gap-1 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent`}
@@ -662,14 +662,14 @@ export default function Onboarding() {
                 )}
                 {formData.specialties.includes("other") && (
                   <div className="mt-2">
-                    <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Specify Other Specialty</label>
+                    <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Specify Other Specialty</label>
                     <input
                       type="text"
                       name="otherSpecialty"
                       placeholder="Please specify your specialty"
                       value={formData.otherSpecialty || ""}
                       onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border ${fieldErrors.otherSpecialty ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                      className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.otherSpecialty ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
                       style={{ fontSize: 14 }}
                     />
                     {fieldErrors.otherSpecialty && (
@@ -680,14 +680,14 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Address (Street, City, Postal Code)</label>
+                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Address (Street, City, Postal Code)</label>
                 <input
                   type="text"
                   name="address"
                   placeholder="Address (Street, City, Postal Code)"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.address ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
+                  className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.address ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white`}
                   style={{ fontSize: 14 }}
                 />
                 {fieldErrors.address && (
@@ -696,12 +696,12 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans' }}>Country</label>
+                <label className="block text-sm font-medium text-black mb-1" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>Country</label>
                 <select
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${fieldErrors.country ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.country ? 'text-gray-400' : 'text-[#223258]'}`}
+                  className={`w-full px-3 py-2 sm:py-2.5 border ${fieldErrors.country ? 'border-red-500' : 'border-[#3771FE]/50'} rounded-[5px] bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-sm ${!formData.country ? 'text-gray-400' : 'text-[#223258]'}`}
                   style={{ fontSize: formData.country ? 14 : 11 }}
                 >
                   <option value="" disabled style={{ color: '#9ca3af' }}>Select Country</option>
@@ -909,7 +909,7 @@ export default function Onboarding() {
 
               <button
                 onClick={handleNext}
-                className="w-full bg-[#C6D7FF]/50 text-[#3771FE] py-2 px-4 border border-[#3771FE]/50 rounded-[5px] font-medium hover:bg-[#C6D7FF]/70 transition-colors duration-200 mt-4 text-sm"
+                className="w-full bg-[#C6D7FF]/50 text-[#3771FE] py-2 sm:py-2.5 px-4 border border-[#3771FE]/50 rounded-[5px] font-medium hover:bg-[#C6D7FF]/70 transition-colors duration-200 mt-4 text-sm"
               >
                 Next
               </button>
@@ -917,7 +917,7 @@ export default function Onboarding() {
           ) : (
             // Step 2: NDA Agreement
             <div
-              className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide relative"
+              className="space-y-4 max-h-[500px] sm:max-h-[600px] overflow-y-auto pr-2 scrollbar-hide relative"
               ref={ndaScrollRef}
               onScroll={handleNdaScroll}
             >
@@ -925,7 +925,7 @@ export default function Onboarding() {
                 <p className="text-xs font-dm-sans text-gray-700 mb-3 text-center">
                   As part of our early access program we are giving you access to co-develop the solution with us. Please confirm that you agree to our NDA
                 </p>
-                <h1 className="text-[20px] font-semibold mb-1" style={{ fontFamily: 'DM Sans', color: '#223258' }}>Non-Disclosure Agreement (Online)</h1>
+                <h1 className="text-[18px] sm:text-[20px] font-semibold mb-1" style={{ fontFamily: 'DM Sans', color: '#223258' }}>Non-Disclosure Agreement (Online)</h1>
               </div>
 
               <div className="text-left space-y-3">
@@ -1028,7 +1028,7 @@ export default function Onboarding() {
               </div>
 
               <div className="mt-4">
-                <label htmlFor="digital-signature" className="block text-xs text-black-700 mb-2">
+                <label htmlFor="digital-signature" className="block text-xs text-black-700 mb-2" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>
                   Digital Signature (e.g. Thomas Müller)
                 </label>
                 <input
@@ -1037,13 +1037,13 @@ export default function Onboarding() {
                   value={ndaData.digitalSignature}
                   onChange={(e) => setNdaData(prev => ({ ...prev, digitalSignature: e.target.value }))}
                   placeholder="Enter your full name"
-                  className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
+                  className="w-full px-3 py-2 sm:py-2.5 border border-[#3771FE]/50 rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
                   style={{ fontSize: 14 }}
                 />
               </div>
 
               <div className="mt-4">
-                <label htmlFor="address" className="block text-xs text-black-700 mb-2" style={{ fontFamily: 'DM Sans', fontWeight: 400 }}>
+                <label htmlFor="address" className="block text-xs text-black-700 mb-2" style={{ fontFamily: 'DM Sans', fontWeight: 200 }}>
                   Place (e.g. Munich, Germany)
                 </label>
                 <input
@@ -1052,17 +1052,17 @@ export default function Onboarding() {
                   value={ndaData.address}
                   onChange={(e) => setNdaData(prev => ({ ...prev, address: e.target.value }))}
                   placeholder="Enter your current location (city, country)"
-                  className="w-full px-3 py-2 border border-[#3771FE]/50 rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
+                  className="w-full px-3 py-2 sm:py-2.5 border border-[#3771FE]/50 rounded-[5px] text-[#223258] placeholder-gray-400 focus:outline-none text-sm"
                   style={{ fontSize: 14 }}
                 />
               </div>
 
-              {error && <div className="bg-red-50 text-red-600 p-2 rounded-lg text-sm">{error}</div>}
+              {error && <div className="bg-red-50 text-red-600 p-2 rounded-[5px] text-sm">{error}</div>}
 
               <button
                 onClick={handleCompleteRegistration}
                 disabled={!ndaAgreed || !termsAgreed || !ndaData.digitalSignature || !ndaData.address || loading}
-                className={`w-full py-2 px-4 rounded-[5px] font-dm-sans font-medium transition-colors duration-200 text-sm ${
+                className={`w-full py-2 sm:py-2.5 px-4 rounded-[5px] font-dm-sans font-medium transition-colors duration-200 text-sm ${
                   ndaAgreed && termsAgreed && ndaData.digitalSignature && ndaData.address && !loading
                     ? 'bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 hover:bg-[#C6D7FF]/60'
                     : 'bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 cursor-not-allowed opacity-50'
