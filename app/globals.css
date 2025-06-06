@@ -2,7 +2,6 @@
 @import '@fontsource/dm-sans/500.css';
 @import '@fontsource/dm-sans/700.css';
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,10 +12,16 @@
   --background-end-rgb: 255, 255, 255;
 }
 
+@layer base {
+  html {
+    font-family: 'DM Sans', system-ui, sans-serif;
+  }
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: white;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
 }
 
 @layer utilities {
