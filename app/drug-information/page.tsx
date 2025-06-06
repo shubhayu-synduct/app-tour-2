@@ -193,7 +193,7 @@ export default function DrugInformationPage() {
 
   const DrugInformationContent = () => {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-4 md:py-8 mt-0 md:mt-16 relative">
+      <div className="max-w-5xl mx-auto px-4 py-4 md:py-8 mt-0 md:mt-16 relative">
         <div className="text-center mb-0 md:mb-[20px]">
           <h1 className="hidden md:block text-[36px] font-semibold text-[#214498] mb-[4px] mt-0 font-['DM_Sans'] font-[600]">Drug Information</h1>
           <p className="hidden md:block text-gray-600 text-[16px] mt-0">European Medicines Agency approved drug information</p>
@@ -337,7 +337,7 @@ export default function DrugInformationPage() {
               {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
                 <button
                   key={letter}
-                  className={`flex-shrink-0 min-w-[32px] px-2 py-2 mx-1 text-[16px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
+                  className={`flex-shrink-0 min-w-[28px] px-2 py-2 mx-1 text-[16px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
                     selectedLetter === letter 
                       ? 'text-[#263969]' 
                       : 'text-[#878787] hover:text-[#263969]'

@@ -88,7 +88,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       <aside
         ref={sidebarRef}
         className={`bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-300 ease-in-out font-['DM_Sans'] ${
-          isOpen ? "w-64" : "w-20"
+          isOpen ? "w-72" : "w-20"
         } ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-40`}
       >
         <div className="flex flex-col h-full">
@@ -96,10 +96,13 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             {/* Logo */}
             <div className={`flex ${isOpen ? 'items-center justify-between' : 'flex-col items-center'} mb-8`}>
               <div className="flex items-center">
-                <div className="relative w-8 h-8 mr-2">
-                  <img src="/icon.svg" alt="DR. INFO Logo" className="w-8 h-8" />
-                </div>
-                {isOpen && <h1 className="text-2xl font-bold text-[#223258]">DR. INFO</h1>}
+                {isOpen ? (
+                  <img src="/login-logo.svg" alt="DR. INFO Logo" className="h-8" />
+                ) : (
+                  <div className="relative w-8 h-8">
+                    <img src="/icon.svg" alt="DR. INFO Logo" className="w-8 h-8" />
+                  </div>
+                )}
               </div>
               {isOpen ? (
                 <button
