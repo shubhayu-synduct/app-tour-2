@@ -38,23 +38,78 @@ export function SignInForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  const parseFirebaseError = (error: any) => {
+    if (!error) return "";
+    
+    // Handle Firebase error messages
+    if (error.message) {
+      // Password requirements error
+      if (error.message.includes("password-does-not-meet-requirements")) {
+        const requirements = error.message.match(/\[(.*?)\]/);
+        if (requirements && requirements[1]) {
+          return requirements[1];
+        }
+      }
+      
+      // Email already in use
+      if (error.message.includes("email-already-in-use")) {
+        return "This email is already registered. Please sign in or use a different email.";
+      }
+      
+      // Invalid email
+      if (error.message.includes("invalid-email")) {
+        return "Please enter a valid email address.";
+      }
+      
+      // Invalid credentials (wrong email or password)
+      if (error.message.includes("invalid-credential") || error.code === "auth/invalid-credential") {
+        return "Incorrect email or password. Please try again.";
+      }
+      
+      // Wrong password
+      if (error.message.includes("wrong-password") || error.code === "auth/wrong-password") {
+        return "Incorrect password. Please try again.";
+      }
+      
+      // User not found
+      if (error.message.includes("user-not-found") || error.code === "auth/user-not-found") {
+        return "No account found with this email. Please sign up first.";
+      }
+      
+      // Too many requests
+      if (error.message.includes("too-many-requests")) {
+        return "Too many attempts. Please try again later.";
+      }
+      
+      // Default error message - remove Firebase prefix and auth code
+      return error.message
+        .replace("Firebase: ", "")
+        .replace(/\(auth\/.*?\)/, "")
+        .trim();
+    }
+    
+    return "An error occurred. Please try again.";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError("")
+    setLoading(true)
 
     try {
-      const auth = getFirebaseAuth()
+      const { getFirebaseAuth } = await import("@/lib/firebase")
+      const { signInWithEmailAndPassword } = await import("firebase/auth")
+
+      const auth = await getFirebaseAuth()
       if (!auth) {
-        throw new Error("Firebase auth not initialized")
+        throw new Error("Firebase not initialized")
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      await setSessionCookie(userCredential.user)
+      await signInWithEmailAndPassword(auth, email, password)
       router.push("/dashboard")
     } catch (err: any) {
-      console.error("Error during signin:", err)
-      setError(err.message || "An error occurred during sign in")
+      console.error("Error during sign in:", err)
+      setError(parseFirebaseError(err))
     } finally {
       setLoading(false)
     }
@@ -181,7 +236,7 @@ export function SignInForm() {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-2 sm:p-3 text-sm sm:text-base rounded-[5px] font-['DM_Sans']">
+        <div className="text-red-500 text-sm">
           {error}
         </div>
       )}
