@@ -54,7 +54,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )
     } else if (pathname === '/guidelines') {
-      return 'Guidelines'
+      return (
+        <div className="flex flex-col items-center">
+          <h1 className="text-[#204398] font-semibold text-lg">Guidelines</h1>
+        </div>
+      )
     } else if (pathname === '/drug-information') {
       return 'Drug Information'
     }
