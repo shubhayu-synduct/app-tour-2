@@ -169,11 +169,11 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
   }, []);
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 mt-12 sm:mt-16 max-w-full sm:max-w-2xl md:max-w-4xl">
+    <div className="container mx-auto px-6 sm:px-2 lg:px-0 py-4 sm:py-6 lg:py-8 mt-0 sm:mt-16 max-w-full sm:max-w-2xl md:max-w-4xl">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 sm:mb-8 text-center">
           <h1
-            className="mb-2 px-2"
+            className="mb-2 px-2 hidden sm:block"
             style={{
               fontFamily: 'DM Sans, sans-serif',
               fontWeight: 600,
@@ -185,7 +185,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
             Guidelines
           </h1>
           <p
-            className="px-4"
+            className="px-4 hidden sm:block"
             style={{
               fontFamily: 'DM Sans, sans-serif',
               fontWeight: 500,
@@ -204,7 +204,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
               type="text"
               placeholder="Search Clinical Guidelines . . ."
               className="w-full py-2 sm:py-3 px-4 sm:px-6 border text-gray-600 text-base sm:text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-200"
-              style={{ borderColor: '#3771FE', fontSize: 'clamp(14px, 1.5vw, 16px)', borderRadius: 5 }}
+              style={{ borderColor: 'rgba(55, 113, 254, 0.5)', fontSize: 'clamp(14px, 1.5vw, 16px)', borderRadius: 5 }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
@@ -213,15 +213,15 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                 }
               }}
             />
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+            <div className="absolute right-1.5 sm:right-2 md:right-2 top-1/2 transform -translate-y-1/2">
               <button 
                 onClick={handleSearch}
                 disabled={isLoading}
-                className="bg-blue-500 p-2 sm:p-2.5 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-500 p-1.5 sm:p-2 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 style={{ borderRadius: 5 }}
               >
                 {isLoading ? (
-                  <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
+                  <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" />
                 ) : (
                   <ArrowUpRight size={20} className="sm:w-6 sm:h-6" />
                 )}
