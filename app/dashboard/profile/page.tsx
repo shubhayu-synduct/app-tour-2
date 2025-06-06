@@ -105,7 +105,7 @@ export default function ProfilePage() {
       const db = getFirebaseFirestore();
       const docRef = doc(db, "users", user.uid);
       // Update only the specified fields inside the 'profile' object using dot notation
-      const { firstName, lastName, occupation, institution, specialties, placeOfWork } = profile;
+      const { firstName, lastName, occupation, institution, specialties, placeOfWork, country } = profile;
       await updateDoc(docRef, {
         "profile.firstName": firstName,
         "profile.lastName": lastName,
@@ -113,6 +113,7 @@ export default function ProfilePage() {
         "profile.institution": institution,
         "profile.specialties": specialties,
         "profile.placeOfWork": placeOfWork,
+        "profile.country": country,
       });
       setSuccess(true);
     }
@@ -180,7 +181,12 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label className="block text-[#000000] mb-1 font-medium">Country</label>
-                  <input value={profile?.country || 'United States'} disabled className="w-full border border-[#B5C9FC] rounded-[8px] px-4 py-2 bg-white text-[#223258] font-medium outline-none cursor-not-allowed opacity-60" />
+                  <input 
+                    name="country" 
+                    value={profile?.country || 'United States'} 
+                    onChange={handleChange}
+                    className="w-full border border-[#B5C9FC] rounded-[8px] px-4 py-2 bg-white text-[#223258] font-medium outline-none focus:ring-2 focus:ring-[#B5C9FC]" 
+                  />
                 </div>
                 <div>
                   <label className="block text-[#000000] mb-1 font-medium">Occupation</label>

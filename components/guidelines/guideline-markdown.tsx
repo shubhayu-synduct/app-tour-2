@@ -155,7 +155,7 @@ export const GuidelineMarkdown = ({
           justify-content: center;
           cursor: pointer;
           font-weight: 500;
-          font-size: 0.75rem;
+          font-size: 0.6rem;
           font-family: 'DM Sans', sans-serif;
           border-radius: 50%;
           width: 18px;
