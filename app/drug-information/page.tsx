@@ -200,15 +200,15 @@ export default function DrugInformationPage() {
         </div>
         
         <div className="relative mb-4 md:mb-8" ref={searchContainerRef}>
-          <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 bg-white">
-            <div className="pl-4 flex items-center">
-              <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
+          <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[56px] md:h-[69px] w-full max-w-[1118px] mx-auto pr-3 md:pr-4 bg-white">
+            <div className="pl-3 md:pl-4 flex items-center">
+              <Search className="text-[#9599A8] stroke-[1.5] w-[18px] h-[18px] md:w-[20px] md:h-[20px]" fill="none" />
             </div>
             <input
               ref={searchInputRef}
               type="text"
               placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list..."
-              className="w-full py-3 px-3 outline-none text-[#223258] font-['DM_Sans'] font-[400] text-[16px] leading-[100%] tracking-[0%] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[14px] md:placeholder:text-[16px]"
+              className="w-full py-2 md:py-3 px-2 md:px-3 outline-none text-[#223258] font-['DM_Sans'] font-[400] text-[14px] md:text-[16px] leading-[100%] tracking-[0%] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[14px] md:placeholder:text-[16px]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => {
@@ -234,14 +234,14 @@ export default function DrugInformationPage() {
               }}
             />
             <button 
-              className="w-10 h-10 flex items-center justify-center hover:bg-blue-600 border-none bg-[#3771FE] rounded-[6px] relative ml-2"
+              className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center hover:bg-blue-600 border-none bg-[#3771FE] rounded-[6px] relative ml-1 md:ml-2"
               onClick={() => {
                 if (searchTerm.trim() !== '') {
                   fetchRecommendations(searchTerm);
                 }
               }}
             >
-              <svg className="text-white" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="text-white w-[24px] h-[24px] md:w-[28px] md:h-[28px]" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M8 24L24 8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
                 <path d="M14 8H24V18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
               </svg>
