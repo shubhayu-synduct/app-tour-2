@@ -106,10 +106,6 @@ export function SidebarHistory() {
                   >
                     {session.title}
                   </Link>
-                  {/* Gradient line, except after the last item */}
-                  {idx !== sessions.length - 1 && (
-                    <div className="h-px w-full bg-gradient-to-r from-[#9599AB] to-white my-1" />
-                  )}
                 </React.Fragment>
               ))}
             </div>
