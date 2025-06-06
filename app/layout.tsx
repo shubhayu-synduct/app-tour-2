@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Poppins } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "@/providers/auth-provider"
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ["latin"] })
 const poppins = Poppins({ 
@@ -16,8 +17,20 @@ export const metadata: Metadata = {
   description: "Get instant access to evidence-based, trusted medical information",
   generator: 'v0.dev',
   icons: {
-    icon: '/favicon.png',
-    apple: '/favicon.png',
+    icon: [
+      {
+        url: '/favicon.png',
+        sizes: 'any',
+        type: 'image/png',
+      }
+    ],
+    apple: [
+      {
+        url: '/favicon.png',
+        sizes: 'any',
+        type: 'image/png',
+      }
+    ],
   }
 }
 
@@ -30,6 +43,7 @@ export default function RootLayout({
     <html lang="en" className="font-['DM_Sans']">
       <body className={`${inter.className} ${poppins.variable}`}>
         <AuthProvider>{children}</AuthProvider>
+        <Analytics />
       </body>
     </html>
   )

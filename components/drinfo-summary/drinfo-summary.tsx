@@ -949,7 +949,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                           {msg.content && (
                             <div className="mb-4 sm:mb-6">
                               <div
-                                className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-sm sm:text-base"
+                                className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-base sm:text-base prose-h2:text-base prose-h2:font-semibold prose-h3:text-base prose-h3:font-semibold"
                                 style={{ fontFamily: 'DM Sans, sans-serif' }}
                                 dangerouslySetInnerHTML={{
                                   __html:

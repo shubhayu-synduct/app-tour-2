@@ -182,7 +182,7 @@ export default function Dashboard() {
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full max-w-[1200px] px-4 md:px-6 py-8 md:py-16">
             <div className="flex flex-col items-center justify-center">
-              <h1 className="text-[20px] md:text-[28px] lg:text-[36px] font-semibold text-[#204398] text-center mb-5 mx-1 md:mb-8">
+              <h1 className="text-[24px] md:text-[28px] lg:text-[36px] font-semibold text-[#204398] text-center mb-5 mx-1 md:mb-8">
                 Redefining How <br/> Medicine Finds Answers
               </h1>
               <form onSubmit={handleSearch} className="w-full max-w-2xl">
@@ -198,6 +198,12 @@ export default function Dashboard() {
                             // Auto-resize the textarea
                             e.target.style.height = 'auto';
                             e.target.style.height = e.target.scrollHeight + 'px';
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSearch(e);
+                            }
                           }}
                           onFocus={() => {
                             if (query) setShowSuggestions(true)
