@@ -125,20 +125,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               />
             </button>
           )}
-          <h1 className="text-[#204398] font-semibold text-lg">{getPageTitle()}</h1>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="p-2 hover:bg-gray-100 rounded-md"
-          >
-            <Image 
-              src="/new-search.svg" 
-              alt="New Search" 
-              width={28}
-              height={28}
-              className="w-7 h-7"
-              priority
-            />
-          </button>
+          <div className="flex-1 flex justify-center">
+            <h1 className="text-[#204398] font-semibold text-lg">{getPageTitle()}</h1>
+          </div>
+          {pathname !== '/dashboard' && (
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="p-2 hover:bg-gray-100 rounded-md"
+            >
+              <Image 
+                src="/new-search.svg" 
+                alt="New Search" 
+                width={28}
+                height={28}
+                className="w-7 h-7"
+                priority
+              />
+            </button>
+          )}
+          {pathname === '/dashboard' && <div className="w-11" />}
         </div>
       </div>
       

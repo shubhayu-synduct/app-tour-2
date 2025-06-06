@@ -14,6 +14,7 @@ import { ReferenceGrid } from "@/components/references/ReferenceGrid"
 import { formatWithCitations, formatWithDummyCitations } from '@/lib/formatWithCitations'
 import { createCitationTooltip } from '@/lib/citationTooltipUtils'
 import { marked } from 'marked'
+import Link from 'next/link'
 
 interface DrInfoSummaryProps {
   user: any;
@@ -941,7 +942,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                 <span className="text-gray-500 italic text-sm sm:text-base">{getStatusMessage(status as StatusType)}</span>
                               ) : (
                                 msg.type === 'assistant' && msg.content && (
-                                  <span className="font-semibold text-blue-900 text-sm sm:text-base">Answer</span>
+                                  <span className="font-semibold text-blue-900 font-['DM_Sans'] mt-1 text-base">Answer</span>
                                 )
                               )}
                             </div>
@@ -994,7 +995,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
 
             {(searchPosition === "bottom" || chatHistory.length > 0 || streamedContent.mainSummary) && (
               <>
-                <div ref={inputAnchorRef} style={{ marginBottom: '80px sm:100px' }} />
+                <div ref={inputAnchorRef} style={{ marginBottom: '120px sm:140px' }} />
                 <div className="sticky bottom-0 bg-gray-50 pt-2 pb-4">
                   <div className="max-w-4xl mx-auto px-2 sm:px-4">
                     <div className="relative w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4">
@@ -1035,6 +1036,12 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                           )}
                         </button>
                       </div>
+                    </div>
+                    <div className="w-full py-3 text-center text-[14px] text-gray-400">
+                      <p>Dr.info can make mistakes, please double check. Do not enter patients information.</p>
+                      <Link href="/terms" className="text-black hover:underline inline-block">
+                        Terms and Conditions
+                      </Link>
                     </div>
                   </div>
                 </div>
