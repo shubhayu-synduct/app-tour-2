@@ -193,13 +193,13 @@ export default function DrugInformationPage() {
 
   const DrugInformationContent = () => {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8 mt-4 md:mt-16 relative">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl lg:text-[52px] font-semibold text-[#214498] mb-4 font-['DM_Sans']">Drug Information</h1>
-          <p className="text-gray-600 text-base md:text-lg">European Medicines Agency approved drug information</p>
+      <div className="max-w-6xl mx-auto px-4 py-4 md:py-8 mt-0 md:mt-16 relative">
+        <div className="text-center mb-0 md:mb-8">
+          <h1 className="hidden md:block text-2xl md:text-3xl lg:text-[52px] font-semibold text-[#214498] mb-4 font-['DM_Sans']">Drug Information</h1>
+          <p className="hidden md:block text-gray-600 text-base md:text-lg">European Medicines Agency approved drug information</p>
         </div>
         
-        <div className="relative mb-8" ref={searchContainerRef}>
+        <div className="relative mb-4 md:mb-8" ref={searchContainerRef}>
           <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 bg-white">
             <div className="pl-4 flex items-center">
               <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
