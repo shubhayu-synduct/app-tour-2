@@ -361,21 +361,23 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
         <div className="flex border-b border-gray-200">
           <button
             onClick={() => setActiveTab('summary')}
-            className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 px-6 py-3 text-[16px] font-medium transition-colors ${
               activeTab === 'summary'
-                ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#F4F7FF]'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#D3DFFE]'
+                : 'text-[#263969] hover:text-gray-800'
             }`}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
           >
             Guideline Summary
           </button>
           <button
             onClick={() => setActiveTab('original')}
-            className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 px-6 py-3 text-[16px] font-medium transition-colors ${
               activeTab === 'original'
-                ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#F4F7FF]'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#D3DFFE]'
+                : 'text-[#263969] hover:text-gray-800'
             }`}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
           >
             Original Source
           </button>
@@ -430,7 +432,7 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                         )}
                         {message.answer && (
                           <>
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 mb-2 sticky top-0 bg-white z-10 py-2">
                               <div className="flex items-center text-[#3771FE]">
                                 <Image
                                   src="/answer-icon.svg"
@@ -444,7 +446,7 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                                 {message.type === 'main' ? 'Summary' : 'Answer'}
                               </span>
                             </div>
-                            <div>
+                            <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
                               <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
                                 <GuidelineMarkdown 
                                   content={message.answer}

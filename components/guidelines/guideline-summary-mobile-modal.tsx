@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, Search, ExternalLink, FileText } from 'lucide-react';
+import { ArrowLeft, ExternalLink, FileText } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { GuidelineMarkdown } from './guideline-markdown';
 
 interface Citation {
@@ -58,6 +59,7 @@ export default function GuidelineSummaryMobileModal({
   link,
   url 
 }: GuidelineSummaryMobileModalProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('summary');
   const [summary, setSummary] = useState<Summary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -348,6 +350,10 @@ export default function GuidelineSummaryMobileModal({
     return processedText;
   };
 
+  const handleSearchClick = () => {
+    router.push("/dashboard");
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -358,35 +364,89 @@ export default function GuidelineSummaryMobileModal({
           <div className="flex items-center gap-3">
             <button 
               onClick={onClose}
-              className="p-2 bg-[#214498] text-white rounded-lg hover:bg-[#1B3B8B] transition-colors"
+              className="w-8 h-8 flex items-center justify-center bg-[#002B77] text-white rounded-[5px] hover:bg-[#1B3B8B] transition-colors"
+              style={{ borderRadius: 5 }}
             >
-              <ArrowLeft size={20} />
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 34 35"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ display: 'block',pointerEvents: 'none' }}
+                aria-hidden="true"
+              >
+                <path d="M16.5781 22.5L11.5781 17.5L16.5781 12.5" stroke="white" strokeWidth="1.9"/>
+                <path d="M22.4218 22.5L17.4219 17.5L22.4219 12.5" stroke="white" strokeWidth="1.8" />
+              </svg>
             </button>
-            <h1 className="text-xl font-semibold text-gray-800">Guideline Summary</h1>
+            <h1 
+              className="text-xl font-semibold absolute left-1/2 transform -translate-x-1/2"
+              style={{ fontFamily: 'DM Sans, sans-serif', color: '#214498', textAlign: 'center', width: '100%', fontSize: '20px' }}
+            >
+              Guideline Summary
+            </h1>
           </div>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Search size={20} className="text-gray-600" />
-          </button>
+          <div 
+            role="button"
+            tabIndex={0}
+            onClick={handleSearchClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleSearchClick();
+              }
+            }}
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer select-none"
+            style={{ touchAction: 'manipulation' }}
+          >
+            <div className="w-full h-full flex items-center justify-center">
+              <svg 
+                width="28" 
+                height="28" 
+                viewBox="0 0 28 28" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                className="pointer-events-none"
+                aria-hidden="true"
+              >
+                <g clipPath="url(#clip0_3494_13766)">
+                  <g clipPath="url(#clip1_3494_13766)">
+                    <path d="M19.5841 19.9241L22.2746 22.6164M21.1977 15.6164C21.1977 12.3452 18.5459 9.69336 15.2746 9.69336C12.0034 9.69336 9.35156 12.3452 9.35156 15.6164C9.35156 18.8877 12.0034 21.5395 15.2746 21.5395C18.5459 21.5395 21.1977 18.8877 21.1977 15.6164Z" stroke="#223258" strokeWidth="1.61538" strokeLinecap="square"/>
+                    <path d="M6.65595 22.6151H2.88672V18.8459V10.7689V3.23047H6.65595H18.5021H22.2713V6.9997" stroke="#223258" strokeWidth="1.61538" strokeLinecap="square"/>
+                  </g>
+                </g>
+                <defs>
+                  <clipPath id="clip0_3494_13766">
+                    <rect width="28" height="28" fill="white"/>
+                  </clipPath>
+                  <clipPath id="clip1_3494_13766">
+                    <rect width="28" height="28" fill="white" transform="translate(-0.339844)"/>
+                  </clipPath>
+                </defs>
+              </svg>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
         <div className="flex border-b border-gray-200">
           <button
             onClick={() => setActiveTab('summary')}
-            className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 px-6 py-3 text-[16px] font-medium transition-colors ${
               activeTab === 'summary'
-                ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#F4F7FF]'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#D3DFFE]'
+                : 'text-[#263969] hover:text-gray-800'
             }`}
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
           >
             Guideline Summary
           </button>
           <button
             onClick={() => setActiveTab('original')}
-            className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 px-6 py-3 text-[16px] font-medium transition-colors ${
               activeTab === 'original'
-                ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#F4F7FF]'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#D3DFFE]'
+                : 'text-[#263969] hover:text-gray-800'
             }`}
           >
             Original Source
@@ -437,7 +497,7 @@ export default function GuidelineSummaryMobileModal({
                         )}
                         {message.answer && (
                           <>
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 mb-2 sticky top-0 bg-white z-10 py-2">
                               <div className="flex items-center text-[#3771FE]">
                                 <Image
                                   src="/answer-icon.svg"
@@ -451,7 +511,7 @@ export default function GuidelineSummaryMobileModal({
                                 {message.type === 'main' ? 'Summary' : 'Answer'}
                               </span>
                             </div>
-                            <div>
+                            <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
                               <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
                                 <GuidelineMarkdown 
                                   content={message.answer}
@@ -478,7 +538,22 @@ export default function GuidelineSummaryMobileModal({
                 {(!isLoading && summary) && (
                   <div className="relative mt-4 sm:mt-6">
                     <div className="flex items-center border-2 border-[#3771FE] rounded-lg p-2 sm:p-4 bg-[#F4F7FF]">
-                      <Search size={18} className="text-gray-400 mr-2 sm:mr-3" />
+                      <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400 mr-2 sm:mr-3">
+                        <g clipPath="url(#clip0_3494_13766)">
+                          <g clipPath="url(#clip1_3494_13766)">
+                            <path d="M19.5841 19.9241L22.2746 22.6164M21.1977 15.6164C21.1977 12.3452 18.5459 9.69336 15.2746 9.69336C12.0034 9.69336 9.35156 12.3452 9.35156 15.6164C9.35156 18.8877 12.0034 21.5395 15.2746 21.5395C18.5459 21.5395 21.1977 18.8877 21.1977 15.6164Z" stroke="currentColor" strokeWidth="1.61538" strokeLinecap="square"/>
+                            <path d="M6.65595 22.6151H2.88672V18.8459V10.7689V3.23047H6.65595H18.5021H22.2713V6.9997" stroke="currentColor" strokeWidth="1.61538" strokeLinecap="square"/>
+                          </g>
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_3494_13766">
+                            <rect width="28" height="28" fill="white"/>
+                          </clipPath>
+                          <clipPath id="clip1_3494_13766">
+                            <rect width="28" height="28" fill="white" transform="translate(-0.339844)"/>
+                          </clipPath>
+                        </defs>
+                      </svg>
                       <input
                         ref={questionInputRef}
                         type="text"

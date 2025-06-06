@@ -438,7 +438,7 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
           style={{ border: '1px solid #3771FE' }}
           onClick={onClose}
         >
-          <span style={{ fontSize: '1rem', lineHeight: 1 }}>&laquo;</span> Back
+          <span style={{ fontSize: '1rem', lineHeight: 1 }}>&laquo;</span>
         </button>
         {/* Summary Panel */}
         <div
