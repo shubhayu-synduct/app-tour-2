@@ -449,11 +449,17 @@ export default function GuidelineSummaryModal({
       <div className="bg-white rounded-lg shadow-lg w-[90%] h-full flex overflow-hidden relative">
         {/* Back Button above modal */}
         <button
-          className="absolute left-6 top-4 bg-[#214498] text-white font-medium rounded px-3 py-1 text-sm flex items-center gap-1 shadow z-50"
-          style={{ border: '1px solid #3771FE' }}
+          className="absolute left-6 top-2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-[5px] hover:opacity-80 transition-colors z-50"
           onClick={onClose}
         >
-          <span style={{ fontSize: '1rem', lineHeight: 1 }}>&laquo;</span>
+          <Image
+            src="/double_back.svg"
+            alt="Back"
+            width={32}
+            height={32}
+            className="w-6 h-6 sm:w-8 sm:h-8"
+            priority
+          />
         </button>
         {/* Summary Panel */}
         <div
@@ -465,7 +471,7 @@ export default function GuidelineSummaryModal({
             <div className={isCitationPanelOpen ? 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 px-8 pt-6' : 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 px-8 pt-6'}>
               <div className="flex justify-between items-center" style={{ minHeight: 0, paddingTop: 0, paddingBottom: 0}}>
                 <div className="ml-10 w-full">
-                  <h2 className="font-medium text-gray-800" style={{ fontSize: '28px', margin: 0 }}>Guideline Summary</h2>
+                  <h2 className="font-medium" style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, color: '#263969', fontSize: '24px', margin: 0 }}>Guideline Summary</h2>
                   <div>
                     <h1 
                       className="mb-4"
@@ -473,7 +479,7 @@ export default function GuidelineSummaryModal({
                         fontFamily: 'DM Sans, sans-serif',
                         fontWeight: 600,
                         color: '#273561',
-                        fontSize: '24px',
+                        fontSize: '20px',
                         lineHeight: 1.2
                       }}
                     >
