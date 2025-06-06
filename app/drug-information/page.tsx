@@ -234,17 +234,18 @@ export default function DrugInformationPage() {
               }}
             />
             <button 
-              className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center hover:bg-blue-600 border-none bg-[#3771FE] rounded-[6px] relative ml-1 md:ml-2"
+              className="flex items-center justify-center border-none bg-transparent relative ml-1 md:ml-2 hover:opacity-80 transition-opacity"
               onClick={() => {
                 if (searchTerm.trim() !== '') {
                   fetchRecommendations(searchTerm);
                 }
               }}
             >
-              <svg className="text-white w-[24px] h-[24px] md:w-[28px] md:h-[28px]" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 24L24 8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                <path d="M14 8H24V18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-              </svg>
+              <img 
+                src="/search.svg" 
+                alt="Search" 
+                className="w-[40px] h-[40px] md:w-[48px] md:h-[48px]"
+              />
             </button>
           </div>
           

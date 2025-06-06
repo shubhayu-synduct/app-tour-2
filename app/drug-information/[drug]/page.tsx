@@ -316,7 +316,7 @@ export default function DrugDetailPage() {
               ref={searchInputRef}
               type="text"
               placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list.."
-              className="w-full py-3 px-2 outline-none text-[#223258] font-['DM_Sans'] text-[18px] placeholder:text-[#9599A8]"
+              className="w-full py-3 px-2 outline-none text-[#223258] font-['DM_Sans'] text-[16px] placeholder:text-[#9599A8]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => {
@@ -361,7 +361,7 @@ export default function DrugDetailPage() {
                 <Link 
                   key={index}
                   href={`/drug-information/${slugify(rec.brand_name)}`}
-                  className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] text-[18px]"
+                  className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] text-[16px]"
                   onClick={() => {
                     setShowRecommendations(false);
                     // Refocus the input before navigation
