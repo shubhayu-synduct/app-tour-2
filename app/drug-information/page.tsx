@@ -337,7 +337,7 @@ export default function DrugInformationPage() {
               {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
                 <button
                   key={letter}
-                  className={`flex-shrink-0 min-w-[32px] px-2 py-2 mx-1 text-[16px] md:text-[20px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
+                  className={`flex-shrink-0 min-w-[32px] px-2 py-2 mx-1 text-[16px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
                     selectedLetter === letter 
                       ? 'text-[#263969]' 
                       : 'text-[#878787] hover:text-[#263969]'
@@ -347,6 +347,17 @@ export default function DrugInformationPage() {
                   {letter}
                 </button>
               ))}
+              <button
+                key="#"
+                className={`flex-shrink-0 min-w-[32px] px-2 py-2 mx-1 text-[16px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
+                  selectedLetter === '#' 
+                    ? 'text-[#263969]' 
+                    : 'text-[#878787] hover:text-[#263969]'
+                }`}
+                onClick={() => setSelectedLetter('#')}
+              >
+                #
+              </button>
             </div>
           </div>
         </div>
