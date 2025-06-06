@@ -200,7 +200,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                         onClick={() => handleDrugClick(citation)}
                       >
                         <span className="text-white font-regular text-xs sm:text-sm md:text-base" style={{ fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
-                          More Information
+                          Clinical Particulars
                         </span>
                         <svg width="16" height="16" className="sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="7 12 11 8 7 4" />

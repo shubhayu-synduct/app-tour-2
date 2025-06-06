@@ -949,7 +949,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                           {msg.content && (
                             <div className="mb-4 sm:mb-6">
                               <div
-                                className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-sm sm:text-base"
+                                className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-base sm:text-base prose-h2:text-base prose-h2:font-semibold prose-h3:text-base prose-h3:font-semibold"
                                 style={{ fontFamily: 'DM Sans, sans-serif' }}
                                 dangerouslySetInnerHTML={{
                                   __html:
@@ -999,7 +999,6 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                   <div className="max-w-3xl mx-auto px-2 sm:px-4">
                     <div className="relative w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4">
                       <div className="relative">
-                        <Search className="text-gray-400 h-5 w-5 absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <textarea
                           value={followUpQuestion}
                           onChange={(e) => {
@@ -1009,7 +1008,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                             e.target.style.height = e.target.scrollHeight + 'px';
                           }}
                           placeholder="Ask a follow-up question..."
-                          className="w-full pl-7 text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
+                          className="w-full text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
                           onKeyDown={(e) => e.key === 'Enter' && handleFollowUpQuestion(e as any)}
                           rows={1}
                           style={{ height: '24px' }}

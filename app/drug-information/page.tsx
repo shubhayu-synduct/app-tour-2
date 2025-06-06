@@ -193,22 +193,22 @@ export default function DrugInformationPage() {
 
   const DrugInformationContent = () => {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8 mt-4 md:mt-16 relative">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl lg:text-[52px] font-semibold text-[#214498] mb-4 font-['DM_Sans']">Drug Information</h1>
-          <p className="text-gray-600 text-base md:text-lg">European Medicines Agency approved drug information</p>
+      <div className="max-w-6xl mx-auto px-4 py-4 md:py-8 mt-0 md:mt-16 relative">
+        <div className="text-center mb-0 md:mb-[20px]">
+          <h1 className="hidden md:block text-[36px] font-semibold text-[#214498] mb-[4px] mt-0 font-['DM_Sans'] font-[600]">Drug Information</h1>
+          <p className="hidden md:block text-gray-600 text-[16px] mt-0">European Medicines Agency approved drug information</p>
         </div>
         
-        <div className="relative mb-8" ref={searchContainerRef}>
-          <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 bg-white">
-            <div className="pl-4 flex items-center">
-              <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
+        <div className="relative mb-4 md:mb-8" ref={searchContainerRef}>
+          <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[56px] md:h-[69px] w-full max-w-[1118px] mx-auto pr-3 md:pr-4 bg-white">
+            <div className="pl-3 md:pl-4 flex items-center">
+              <Search className="text-[#9599A8] stroke-[1.5] w-[18px] h-[18px] md:w-[20px] md:h-[20px]" fill="none" />
             </div>
             <input
               ref={searchInputRef}
               type="text"
               placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list..."
-              className="w-full py-3 px-3 outline-none text-[#223258] font-['DM_Sans'] font-[400] text-[16px] leading-[100%] tracking-[0%] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[14px] md:placeholder:text-[16px]"
+              className="w-full py-2 md:py-3 px-2 md:px-3 outline-none text-[#223258] font-['DM_Sans'] font-[400] text-[14px] md:text-[16px] leading-[100%] tracking-[0%] placeholder-[#9599A8] placeholder:font-['DM_Sans'] placeholder:text-[14px] md:placeholder:text-[16px]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => {
@@ -234,14 +234,14 @@ export default function DrugInformationPage() {
               }}
             />
             <button 
-              className="w-10 h-10 flex items-center justify-center hover:bg-blue-600 border-none bg-[#3771FE] rounded-[6px] relative ml-2"
+              className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center hover:bg-blue-600 border-none bg-[#3771FE] rounded-[6px] relative ml-1 md:ml-2"
               onClick={() => {
                 if (searchTerm.trim() !== '') {
                   fetchRecommendations(searchTerm);
                 }
               }}
             >
-              <svg className="text-white" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="text-white w-[24px] h-[24px] md:w-[28px] md:h-[28px]" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M8 24L24 8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
                 <path d="M14 8H24V18" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
               </svg>
@@ -337,7 +337,7 @@ export default function DrugInformationPage() {
               {Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)).map(letter => (
                 <button
                   key={letter}
-                  className={`flex-shrink-0 min-w-[32px] px-2 py-2 mx-1 text-[16px] md:text-[20px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
+                  className={`flex-shrink-0 min-w-[32px] px-2 py-2 mx-1 text-[16px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
                     selectedLetter === letter 
                       ? 'text-[#263969]' 
                       : 'text-[#878787] hover:text-[#263969]'
@@ -347,6 +347,17 @@ export default function DrugInformationPage() {
                   {letter}
                 </button>
               ))}
+              <button
+                key="#"
+                className={`flex-shrink-0 min-w-[32px] px-2 py-2 mx-1 text-[16px] font-['DM_Sans'] font-medium transition-colors duration-200 focus:outline-none border-none bg-transparent ${
+                  selectedLetter === '#' 
+                    ? 'text-[#263969]' 
+                    : 'text-[#878787] hover:text-[#263969]'
+                }`}
+                onClick={() => setSelectedLetter('#')}
+              >
+                #
+              </button>
             </div>
           </div>
         </div>
@@ -361,10 +372,10 @@ export default function DrugInformationPage() {
               </colgroup>
               <thead>
                 <tr className="border-b border-[#E1E7F0]">
-                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] md:text-[20px] font-['DM_Sans']">
+                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] font-['DM_Sans'] font-[600]">
                     Brand Name
                   </th>
-                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] md:text-[20px] font-['DM_Sans']">
+                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] font-['DM_Sans'] font-[600]">
                     Active Substance(s)
                   </th>
                 </tr>
@@ -388,12 +399,12 @@ export default function DrugInformationPage() {
                           <td className="px-4 md:px-6 py-4">
                             <Link 
                               href={`/drug-information/${slugify(drug.brand_name)}`} 
-                              className="text-[#263969] font-['DM_Sans'] font-normal text-[14px] md:text-[20px] hover:text-[#214498] hover:underline transition-colors"
+                              className="text-[#263969] font-['DM_Sans'] font-normal text-[16px] hover:text-[#214498] hover:underline transition-colors"
                             >
                               {drug.brand_name}
                             </Link>
                           </td>
-                          <td className="px-4 md:px-6 py-4 text-[#263969] font-['DM_Sans'] font-normal text-[14px] md:text-[20px]">
+                          <td className="px-4 md:px-6 py-4 text-[#263969] font-['DM_Sans'] font-normal text-[16px]">
                             {sortedActiveSubstances.length > 0 ? sortedActiveSubstances.join(', ') : '-'}
                           </td>
                         </tr>

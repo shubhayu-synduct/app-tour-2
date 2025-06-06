@@ -182,28 +182,33 @@ export default function Dashboard() {
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full max-w-[1200px] px-4 md:px-6 py-8 md:py-16">
             <div className="flex flex-col items-center justify-center">
-              <h1 className="text-3xl md:text-4xl lg:text-[48px] font-semibold text-[#204398] text-center mb-5 mx-1 md:mb-8">
-                Redefining How Medicine Finds Answers
+              <h1 className="text-[24px] md:text-[28px] lg:text-[36px] font-semibold text-[#204398] text-center mb-5 mx-1 md:mb-8">
+                Redefining How <br/> Medicine Finds Answers
               </h1>
               <form onSubmit={handleSearch} className="w-full max-w-2xl">
                 <div ref={searchRef} className="relative mx-auto">
                   <div className="w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4">
                     <div className="flex items-center">
                       <div className="relative flex-1">
-                        <Search className="text-gray-400 h-5 w-5 absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <textarea
                           value={query}
-                          className="w-full pl-7 text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
+                          className="w-full text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
                           onChange={(e) => {
                             setQuery(e.target.value);
                             // Auto-resize the textarea
                             e.target.style.height = 'auto';
                             e.target.style.height = e.target.scrollHeight + 'px';
                           }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSearch(e);
+                            }
+                          }}
                           onFocus={() => {
                             if (query) setShowSuggestions(true)
                           }}
-                          placeholder="How to treat atopic dermatitis in adults..?"
+                          placeholder="Ask Your Medical Query..."
                           rows={1}
                           style={{ height: 'auto' }}
                         />
