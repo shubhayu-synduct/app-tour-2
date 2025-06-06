@@ -364,21 +364,16 @@ export default function GuidelineSummaryMobileModal({
           <div className="flex items-center gap-3">
             <button 
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center bg-[#002B77] text-white rounded-[5px] hover:bg-[#1B3B8B] transition-colors"
-              style={{ borderRadius: 5 }}
+              className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-[#214498] rounded-[5px] hover:bg-[#1B3B8B] transition-colors"
             >
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 34 35"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ display: 'block',pointerEvents: 'none' }}
-                aria-hidden="true"
-              >
-                <path d="M16.5781 22.5L11.5781 17.5L16.5781 12.5" stroke="white" strokeWidth="1.9"/>
-                <path d="M22.4218 22.5L17.4219 17.5L22.4219 12.5" stroke="white" strokeWidth="1.8" />
-              </svg>
+              <Image
+                src="/double_back.svg"
+                alt="Back"
+                width={32}
+                height={32}
+                className="w-6 h-6 sm:w-8 sm:h-8"
+                priority
+              />
             </button>
             <h1 
               className="text-xl font-semibold absolute left-1/2 transform -translate-x-1/2"

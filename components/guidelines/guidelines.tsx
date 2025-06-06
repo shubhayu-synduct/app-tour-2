@@ -169,27 +169,27 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
   }, []);
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 mt-12 sm:mt-16 max-w-full sm:max-w-2xl md:max-w-4xl">
+    <div className="container mx-auto px-6 sm:px-2 lg:px-0 py-4 sm:py-6 lg:py-8 mt-0 sm:mt-16 max-w-full sm:max-w-2xl md:max-w-4xl">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 sm:mb-8 text-center">
           <h1
-            className="mb-2 px-2"
+            className="mb-2 px-2 hidden sm:block"
             style={{
               fontFamily: 'DM Sans, sans-serif',
               fontWeight: 600,
-              fontSize: 'clamp(24px, 5vw, 52px)',
+              fontSize: 'clamp(24px, 5vw, 36px)',
               color: '#214498',
               lineHeight: 1.1
             }}
           >
-            Know Your Guidelines
+            Guidelines
           </h1>
           <p
-            className="px-4"
+            className="px-4 hidden sm:block"
             style={{
               fontFamily: 'DM Sans, sans-serif',
-              fontWeight: 400,
-              fontSize: 'clamp(14px, 2.5vw, 20px)',
+              fontWeight: 500,
+              fontSize: 'clamp(14px, 2.5vw, 16px)',
               color: '#596C99',
               lineHeight: 1.4
             }}
@@ -204,7 +204,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
               type="text"
               placeholder="Search Clinical Guidelines . . ."
               className="w-full py-2 sm:py-3 px-4 sm:px-6 border text-gray-600 text-base sm:text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-200"
-              style={{ borderColor: '#3771FE', fontSize: 'clamp(14px, 1.5vw, 20px)', borderRadius: 5 }}
+              style={{ borderColor: 'rgba(55, 113, 254, 0.5)', fontSize: 'clamp(14px, 1.5vw, 16px)', borderRadius: 5 }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
@@ -213,15 +213,15 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                 }
               }}
             />
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+            <div className="absolute right-1.5 sm:right-2 md:right-2 top-1/2 transform -translate-y-1/2">
               <button 
                 onClick={handleSearch}
                 disabled={isLoading}
-                className="bg-blue-500 p-2 sm:p-2.5 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-500 p-1.5 sm:p-2 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 style={{ borderRadius: 5 }}
               >
                 {isLoading ? (
-                  <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
+                  <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" />
                 ) : (
                   <ArrowUpRight size={20} className="sm:w-6 sm:h-6" />
                 )}
@@ -270,7 +270,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
               >
                   <h2 
                     className="text-base sm:text-lg lg:text-xl text-gray-900"
-                    style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 400 }}
+                    style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 500, color: '#263969' }}
                   >
                     {category === 'Europe' ? 'European' : category} Guidelines
                   </h2>
@@ -312,7 +312,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                                 fontFamily: 'DM Sans, sans-serif',
                                 color: '#214498',
                                 fontWeight: 500,
-                                fontSize: 'clamp(16px, 1.5vw, 20px)',
+                                fontSize: 'clamp(14px, 1.5vw, 16px)',
                                 background: 'none',
                                 border: 'none',
                               }}
@@ -360,7 +360,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                           
                           {/* Save and Dive In buttons */}
                           <div className="flex flex-row items-center gap-3">
-                            <button className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors text-xs sm:text-sm">
+                            <button className="flex items-center gap-1 text-slate-500 hover:text-blue-500 transition-colors" style={{ fontSize: 'clamp(12px, 1.5vw, 14px)' }}>
                               <Bookmark size={16} className="sm:w-5 sm:h-5" />
                               <span>Save</span>
                             </button>
@@ -385,13 +385,14 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                                   boxShadow: 'none',
                                   borderRadius: 5,
                                   opacity: guideline.pdf_saved ? 1 : 0.5,
-                                  minWidth: '130px'
+                                  minWidth: '10px',
+                                  fontSize: 'clamp(12px, 1.5vw, 14px)'
                                 }}
                             >
                                 Guideline AI Summary
                                 <span className="flex items-center ml-1 sm:ml-2">
-                                  <ChevronRight size={14} className="sm:w-4 sm:h-4" color="#fff" />
-                                  <ChevronRight size={14} className="sm:w-4 sm:h-4" style={{marginLeft: -8}} color="#fff" />
+                                  <ChevronRight size={14} className="sm:w-4 sm:h-4" style={{marginLeft: -10}} color="#fff" />
+                                  <ChevronRight size={14} className="sm:w-4 sm:h-4" style={{marginLeft: -10}} color="#fff" />
                                 </span>
                             </button>
                           </div>
@@ -406,7 +407,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                           className="text-sm sm:text-base text-gray-600"
                           style={{ fontFamily: 'DM Sans, sans-serif' }}
                         >
-                          {`No ${category === 'Europe' ? 'European' : category} guidelines found`}
+                          {`No ${category === 'Europe' ? 'European' : category} guidelines found, Try a different search term.`}
                         </p>
                       </div>
                     )}
