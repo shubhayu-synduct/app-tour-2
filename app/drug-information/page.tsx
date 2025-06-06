@@ -194,9 +194,9 @@ export default function DrugInformationPage() {
   const DrugInformationContent = () => {
     return (
       <div className="max-w-6xl mx-auto px-4 py-4 md:py-8 mt-0 md:mt-16 relative">
-        <div className="text-center mb-0 md:mb-8">
-          <h1 className="hidden md:block text-2xl md:text-3xl lg:text-[52px] font-semibold text-[#214498] mb-4 font-['DM_Sans']">Drug Information</h1>
-          <p className="hidden md:block text-gray-600 text-base md:text-lg">European Medicines Agency approved drug information</p>
+        <div className="text-center mb-0 md:mb-[20px]">
+          <h1 className="hidden md:block text-[36px] font-semibold text-[#214498] mb-[4px] mt-0 font-['DM_Sans'] font-[600]">Drug Information</h1>
+          <p className="hidden md:block text-gray-600 text-[16px] mt-0">European Medicines Agency approved drug information</p>
         </div>
         
         <div className="relative mb-4 md:mb-8" ref={searchContainerRef}>
@@ -361,10 +361,10 @@ export default function DrugInformationPage() {
               </colgroup>
               <thead>
                 <tr className="border-b border-[#E1E7F0]">
-                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] md:text-[20px] font-['DM_Sans']">
+                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] font-['DM_Sans'] font-[600]">
                     Brand Name
                   </th>
-                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] md:text-[20px] font-['DM_Sans']">
+                  <th className="text-left px-4 md:px-6 py-4 font-semibold text-[#263969] text-[16px] font-['DM_Sans'] font-[600]">
                     Active Substance(s)
                   </th>
                 </tr>
@@ -388,12 +388,12 @@ export default function DrugInformationPage() {
                           <td className="px-4 md:px-6 py-4">
                             <Link 
                               href={`/drug-information/${slugify(drug.brand_name)}`} 
-                              className="text-[#263969] font-['DM_Sans'] font-normal text-[14px] md:text-[20px] hover:text-[#214498] hover:underline transition-colors"
+                              className="text-[#263969] font-['DM_Sans'] font-normal text-[16px] hover:text-[#214498] hover:underline transition-colors"
                             >
                               {drug.brand_name}
                             </Link>
                           </td>
-                          <td className="px-4 md:px-6 py-4 text-[#263969] font-['DM_Sans'] font-normal text-[14px] md:text-[20px]">
+                          <td className="px-4 md:px-6 py-4 text-[#263969] font-['DM_Sans'] font-normal text-[16px]">
                             {sortedActiveSubstances.length > 0 ? sortedActiveSubstances.join(', ') : '-'}
                           </td>
                         </tr>

@@ -25,7 +25,7 @@ export function ContentLayout({ title, description, user, children }: ContentLay
 
       {/* Section header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
+        <h1 className="text-[36px] font-semibold text-gray-800 font-[600]">{title}</h1>
         {description && <p className="text-gray-600 mt-2">{description}</p>}
       </div>
 
