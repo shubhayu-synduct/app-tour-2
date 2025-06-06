@@ -14,7 +14,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Dr. Info - Medical AI Assistant",
   description: "Get instant access to evidence-based, trusted medical information",
-    generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  }
 }
 
 export default function RootLayout({
