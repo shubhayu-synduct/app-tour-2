@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, Search, ExternalLink, FileText } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import Image from 'next/image';
+import { GuidelineMarkdown } from './guideline-markdown';
 
 interface Citation {
   title: string;
@@ -349,52 +348,6 @@ export default function GuidelineSummaryMobileModal({
     return processedText;
   };
 
-  const MarkdownWithReferences = ({ content }: { content: string }) => {
-    const processedContent = content
-      .replace(/\r\n/g, '\n')
-      .replace(/__REF_(\d+)_(\d+)__/g, ' __REF_$1_$2__');
-      
-    const paragraphs = processedContent.split('\n\n');
-    
-    return (
-      <div id="markdown-content">
-        {paragraphs.map((paragraph, paragraphIndex) => {
-          const isHeading = paragraph.match(/^#+\s/);
-          const parts = paragraph.split(/__REF_(\d+)_(\d+)__/g);
-          const blockClassName = isHeading 
-            ? `heading-${paragraph.match(/^(#+)\s/)?.[1].length || 1}` 
-            : 'markdown-paragraph';
-          
-          return (
-            <div key={paragraphIndex} className={blockClassName}>
-              {parts.map((part, index) => {
-                if (index % 3 === 0) {
-                  return <ReactMarkdown key={`text-${index}`} remarkPlugins={[remarkGfm]}>{part}</ReactMarkdown>;
-                } else if (index % 3 === 1) {
-                  const refNumber = part;
-                  const occurrenceIndex = parseInt(parts[index + 1]);
-                  
-                  return (
-                    <span
-                      key={`ref-${index}`}
-                      className="reference-number"
-                      data-ref-number={refNumber}
-                      data-occurrence-index={occurrenceIndex}
-                      onClick={() => handleReferenceClick(refNumber, occurrenceIndex)}
-                    >
-                      {refNumber}
-                    </span>
-                  );
-                }
-                return null;
-              })}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -500,7 +453,12 @@ export default function GuidelineSummaryMobileModal({
                             </div>
                             <div>
                               <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
-                                <MarkdownWithReferences content={processMarkdown(message.answer)} />
+                                <GuidelineMarkdown 
+                                  content={message.answer}
+                                  sources={message.sources || null}
+                                  pageReferences={message.page_references || null}
+                                  onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
+                                />
                               </div>
                             </div>
                           </>
