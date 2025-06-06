@@ -112,3 +112,5 @@ Merge pull request #7 from synductgmbh/dev_sand
 
 # Push
 # color push ### ###### #### ## ###
+
+merged changes guideline and layout
