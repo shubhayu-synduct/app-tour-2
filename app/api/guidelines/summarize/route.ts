@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // The URL for the external guidelines API
-const GUIDELINES_API_URL = 'https://guidelines-stage/.duckdns.org/summarize';
+const GUIDELINES_API_URL = 'https://guidelines-stage.duckdns.org/summarize';
 // const GUIDELINES_API_URL = 'http://localhost:8001/summarize';
 
 export async function POST(request: NextRequest) {
