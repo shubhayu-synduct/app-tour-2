@@ -123,6 +123,7 @@ merged changes guideline and layout
 ### deploy from sandy
 ### deploy from subh##
 ### deploy
+## deploy
 ### commiting with all major issues
 
 ### Praying to deploy gods
