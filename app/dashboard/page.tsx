@@ -10,6 +10,7 @@ import { getFirebaseFirestore } from '@/lib/firebase'
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { ArrowRight, X, Search } from "lucide-react"
 import { v4 as uuidv4 } from 'uuid'
+import { GoogleGenAI } from '@google/genai'
 
 // Define the interface for the message structure
 interface ChatMessage {
@@ -19,6 +20,13 @@ interface ChatMessage {
   timestamp: number;
   questionType?: 'main' | 'follow-up';
 }
+
+// Initialize the Google AI
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+if (!GEMINI_API_KEY) {
+  throw new Error('NEXT_PUBLIC_GEMINI_API_KEY is not defined');
+}
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 export default function Dashboard() {
   const router = useRouter()
@@ -30,21 +38,156 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
+  const suggestionTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+  const lastQueryRef = useRef<string>("")
+  const lastWordRef = useRef<string>("")
 
-  // Handle clicks outside the search component
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false)
-      }
+  // Check if there's a meaningful change in the query
+  const hasMeaningfulChange = (newQuery: string) => {
+    const lastQuery = lastQueryRef.current;
+    
+    // If query is empty, no meaningful change
+    if (!newQuery.trim()) return false;
+    
+    // Check word count - don't send API queries if more than 49 words
+    const wordCount = newQuery.trim().split(/\s+/).length;
+    if (wordCount > 49) return false;
+    
+    // If this is the first query, it's meaningful
+    if (!lastQuery) {
+      lastQueryRef.current = newQuery;
+      return true;
     }
     
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+    // Normalize both queries for comparison (trim and lowercase)
+    const normalizedNewQuery = newQuery.trim().toLowerCase();
+    const normalizedLastQuery = lastQuery.trim().toLowerCase();
+    
+    // If the new query is exactly the same as the last query, no change
+    if (normalizedNewQuery === normalizedLastQuery) {
+      return false;
     }
-  }, [])
+    
+    // If the new query is just a subset of the last query (user is deleting), no change
+    if (normalizedLastQuery.startsWith(normalizedNewQuery)) {
+      return false;
+    }
+    
+    // If the new query is just adding one character to the last query, no change
+    if (normalizedNewQuery.startsWith(normalizedLastQuery) && 
+        normalizedNewQuery.length - normalizedLastQuery.length <= 1) {
+      return false;
+    }
+    
+    // If we get here, there's a meaningful change
+    lastQueryRef.current = newQuery;
+    return true;
+  };
+
+  // Generate AI-powered suggestions
+  const generateAISuggestions = async (input: string) => {
+    if (!input.trim() || input.length < 3) return;
+    
+    try {
+      const prompt = `Given this medical question: "${input}", suggest 3 possible ways to complete this question. 
+      Return ONLY a JSON array of strings, where each string is a complete question that starts with the exact input text.
+      Example: if input is "What are the", return ["What are the symptoms of diabetes?", "What are the treatment options?", "What are the risk factors?"]`;
+      
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash-001',
+        contents: prompt,
+      });
+      
+      const text = response.text;
+      if (!text) {
+        console.error("No text received from AI response");
+        return;
+      }
+      
+      try {
+        // Clean the response text by removing markdown formatting
+        const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+        const aiSuggestions = JSON.parse(cleanText);
+        if (Array.isArray(aiSuggestions)) {
+          // Get previous queries suggestions that start with the current input
+          const matchingQueries = previousQueries.filter(prevQuery => 
+            prevQuery.toLowerCase().startsWith(input.toLowerCase())
+          ).sort();
+          
+          // Combine and update suggestions in a single state update
+          setSuggestions([...matchingQueries, ...aiSuggestions].slice(0, 5));
+        }
+      } catch (e) {
+        console.error("Error parsing AI suggestions:", e);
+        // Fallback to simple array if JSON parsing fails
+        const fallbackSuggestions = text
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line && !line.startsWith('```'))
+          .slice(0, 3);
+
+        // Get previous queries suggestions that start with the current input
+        const matchingQueries = previousQueries.filter(prevQuery => 
+          prevQuery.toLowerCase().startsWith(input.toLowerCase())
+        ).sort();
+        
+        // Combine and update suggestions in a single state update
+        setSuggestions([...matchingQueries, ...fallbackSuggestions].slice(0, 5));
+      }
+    } catch (error) {
+      console.error("Error generating AI suggestions:", error);
+    }
+  };
+
+  // Handle suggestions with debounce
+  useEffect(() => {
+    if (query.trim().length > 0) {
+      // Clear any existing timeout
+      if (suggestionTimeoutRef.current) {
+        clearTimeout(suggestionTimeoutRef.current);
+      }
+
+      // Set a new timeout
+      suggestionTimeoutRef.current = setTimeout(() => {
+        // Only generate new suggestions if there's a meaningful change
+        if (hasMeaningfulChange(query)) {
+          console.log("Generating new suggestions for:", query);
+          generateAISuggestions(query);
+        } else {
+          console.log("Using existing suggestions for:", query);
+          // Keep showing existing suggestions that match
+          const matchingQueries = previousQueries
+            .filter(prevQuery => prevQuery.toLowerCase().startsWith(query.toLowerCase()))
+            .sort()
+            .slice(0, 5);
+          
+          // Only update suggestions if we have matching queries
+          if (matchingQueries.length > 0) {
+            setSuggestions(matchingQueries);
+          }
+          // If no matching queries, keep the current suggestions
+        }
+      }, 300); // 300ms debounce
+
+      // Always show suggestions if we have them
+      if (suggestions.length > 0) {
+        setShowSuggestions(true);
+      }
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      lastQueryRef.current = "";
+    }
+
+    // Cleanup timeout on unmount or when query changes
+    return () => {
+      if (suggestionTimeoutRef.current) {
+        clearTimeout(suggestionTimeoutRef.current);
+      }
+    };
+  }, [query, previousQueries]);
 
   // Fetch previous questions from Firebase to populate suggestions
   useEffect(() => {
@@ -83,31 +226,37 @@ export default function Dashboard() {
     fetchPreviousQueries();
   }, [user]);
 
-  // Generate suggestions based on search term
+  // Add event listeners for user activity
   useEffect(() => {
-    if (query.trim().length > 0) {
-      // Filter previous queries that match the current query
-      const matchingQueries = previousQueries.filter(prevQuery => 
-        prevQuery.toLowerCase().includes(query.toLowerCase())
-      );
-      
-      // Find queries that start with the search term first
-      const exactMatches = matchingQueries.filter(q => 
-        q.toLowerCase().startsWith(query.toLowerCase())
-      ).sort();
-      
-      // Then add other matches
-      const otherMatches = matchingQueries.filter(q => 
-        !q.toLowerCase().startsWith(query.toLowerCase())
-      ).sort();
-      
-      setSuggestions([...exactMatches, ...otherMatches].slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
+    const handleUserActivity = () => {
+      // No need for activity tracking anymore
+    };
+
+    // Remove these event listeners as they're no longer needed
+    // document.addEventListener('mousemove', handleUserActivity);
+    // document.addEventListener('keydown', handleUserActivity);
+    // document.addEventListener('click', handleUserActivity);
+
+    return () => {
+      // document.removeEventListener('mousemove', handleUserActivity);
+      // document.removeEventListener('keydown', handleUserActivity);
+      // document.removeEventListener('click', handleUserActivity);
+    };
+  }, []);
+
+  // Handle clicks outside the search component
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+      }
     }
-  }, [query, previousQueries]);
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -169,6 +318,18 @@ export default function Dashboard() {
   const handleSuggestionClick = (suggestion: string) => {
     setQuery(suggestion);
     setShowSuggestions(false);
+    
+    // Force textarea to expand after state update
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+      // First reset to minimum height
+      textarea.style.height = '24px';
+      // Force a reflow
+      void textarea.offsetHeight;
+      // Then set to the actual content height
+      const newHeight = Math.max(24, textarea.scrollHeight);
+      textarea.style.height = `${newHeight}px`;
+    }
   };
 
   const clearSearch = () => {
@@ -192,12 +353,14 @@ export default function Dashboard() {
                       <div className="relative flex-1">
                         <textarea
                           value={query}
-                          className="w-full text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
+                          className="w-full text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] whitespace-pre-wrap break-words"
                           onChange={(e) => {
                             setQuery(e.target.value);
                             // Auto-resize the textarea
-                            e.target.style.height = 'auto';
-                            e.target.style.height = e.target.scrollHeight + 'px';
+                            const textarea = e.target;
+                            textarea.style.height = '24px'; // Reset height
+                            const scrollHeight = textarea.scrollHeight;
+                            textarea.style.height = `${Math.max(24, scrollHeight)}px`;
                           }}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -205,12 +368,17 @@ export default function Dashboard() {
                               handleSearch(e);
                             }
                           }}
-                          onFocus={() => {
-                            if (query) setShowSuggestions(true)
+                          onFocus={(e) => {
+                            if (query) setShowSuggestions(true);
+                            // Resize on focus if there's content
+                            const textarea = e.target;
+                            textarea.style.height = '24px';
+                            const scrollHeight = textarea.scrollHeight;
+                            textarea.style.height = `${Math.max(24, scrollHeight)}px`;
                           }}
                           placeholder="Ask Your Medical Query..."
                           rows={1}
-                          style={{ height: 'auto' }}
+                          style={{ height: '24px' }}
                         />
                       </div>
                     </div>
@@ -244,16 +412,18 @@ export default function Dashboard() {
 
                   {/* Suggestions dropdown */}
                   {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                    <div className="absolute top-full left-0 right-0 bg-white rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto z-50">
                       {suggestions.map((suggestion, index) => (
-                        <button
+                        <div
                           key={index}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between"
-                          onClick={() => handleSuggestionClick(suggestion)}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-[16px] text-[#223258]"
+                          onClick={() => {
+                            setQuery(suggestion);
+                            setShowSuggestions(false);
+                          }}
                         >
-                          <span className="truncate">{suggestion}</span>
-                          <ArrowRight className="h-4 w-4 text-gray-400" />
-                        </button>
+                          {suggestion}
+                        </div>
                       ))}
                     </div>
                   )}
