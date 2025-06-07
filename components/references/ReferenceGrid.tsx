@@ -17,7 +17,7 @@ interface ReferenceGridProps {
 
 export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowAll, getCitationCount }) => {
   return (
-    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-1">
+    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 w-full">
       {(() => {
         const entries = Object.entries(citations);
         const showAll = getCitationCount(citations) > 3;
@@ -26,12 +26,11 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
         const mobileItems = entries.slice(0, 1).map(([key, citation]) => (
           <div
             key={`mobile-citation-${key}`}
-            className="sm:hidden rounded-xl p-4 cursor-pointer hover:bg-blue-50 transition-colors h-[90px] md:h-[100px] lg:h-[120px]"
+            className="sm:hidden rounded-xl p-3 sm:p-4 cursor-pointer hover:bg-blue-50 transition-colors h-[95px] md:h-[105px] lg:h-[125px]"
             style={{
               background: "#EEF3FF",
               border: "1px solid #3771FE",
-              width: "100%",
-              maxWidth: "220px"
+              width: "100%"
             }}
             onClick={() => onShowAll(citations)}
           >
@@ -41,7 +40,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 fontWeight: 500,
                 fontFamily: "DM Sans, sans-serif",
                 display: "block",
-                marginBottom: "2px",
+                marginBottom: "4px",
                 fontSize: "12px",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
@@ -60,13 +59,13 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 color: "#273561",
                 fontWeight: 600,
                 fontFamily: "DM Sans, sans-serif",
-                lineHeight: "1.4",
+                lineHeight: "1.3",
                 margin: 0,
                 overflow: "hidden",
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
-                maxHeight: "calc(100% - 24px)"
+                maxHeight: "calc(100% - 28px)"
               }}
               className="text-sm sm:text-base md:text-lg"
             >
@@ -79,12 +78,11 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
         const desktopItems = entries.slice(0, 2).map(([key, citation]) => (
           <div
             key={`desktop-citation-${key}`}
-            className="hidden sm:block rounded-xl p-4 cursor-pointer hover:bg-blue-50 transition-colors h-[90px] md:h-[100px] lg:h-[120px]"
+            className="hidden sm:block rounded-xl p-3 sm:p-4 cursor-pointer hover:bg-blue-50 transition-colors h-[95px] md:h-[105px] lg:h-[125px]"
             style={{
               background: "#EEF3FF",
               border: "1px solid #3771FE",
-              width: "100%",
-              maxWidth: "220px"
+              width: "100%"
             }}
             onClick={() => onShowAll(citations)}
           >
@@ -94,7 +92,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 fontWeight: 500,
                 fontFamily: "DM Sans, sans-serif",
                 display: "block",
-                marginBottom: "2px",
+                marginBottom: "4px",
                 fontSize: "12px",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
@@ -113,13 +111,13 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 color: "#273561",
                 fontWeight: 600,
                 fontFamily: "DM Sans, sans-serif",
-                lineHeight: "1.4",
+                lineHeight: "1.3",
                 margin: 0,
                 overflow: "hidden",
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
-                maxHeight: "calc(100% - 24px)"
+                maxHeight: "calc(100% - 28px)"
               }}
               className="text-sm sm:text-base md:text-lg"
             >
@@ -134,10 +132,11 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
           items.push(
             <div 
               key="show-all"
-              className="rounded-xl p-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 show-all-citations-btn h-[90px] md:h-[100px] lg:h-[120px]"
+              className="rounded-xl p-3 sm:p-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 show-all-citations-btn h-[95px] md:h-[105px] lg:h-[125px]"
               style={{
                 background: "#EEF3FF",
                 border: "1px solid #3771FE",
+                width: "100%"
               }}
               onClick={() => onShowAll(citations)}
             >

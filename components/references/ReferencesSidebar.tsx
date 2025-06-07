@@ -176,7 +176,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                   <div className="flex justify-end mt-4 pr-4 pb-4">
                     {citation.source_type === 'guideline_database' && (
                       <button
-                        className="flex flex-row items-center justify-center rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors shadow-lg gap-2 w-auto min-w-[100px] sm:min-w-[140px] md:min-w-[160px]"
+                        className="flex flex-row items-center justify-between rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors shadow-lg w-[240px]"
                         style={{
                           border: "none"
                         }}
@@ -193,7 +193,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                     )}
                     {citation.source_type === 'drug_database' && (
                       <button
-                        className="flex flex-row items-center justify-center rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors shadow-lg gap-2 w-auto min-w-[100px] sm:min-w-[140px] md:min-w-[160px]"
+                        className="flex flex-row items-center justify-between rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors shadow-lg w-[240px]"
                         style={{
                           border: "none"
                         }}
