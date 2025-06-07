@@ -647,6 +647,44 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       .answer-fade.answer-fade-out {
         opacity: 0.5;
       }
+
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        /* Hide follow-up bar and branding */
+        .sticky.bottom-0,
+        .w-full.py-3.text-center,
+        .flex.justify-between.items-center.mt-2 {
+          display: none !important;
+        }
+        /* Hide sidebar/modal references in print */
+        .citations-sidebar, .modal, .sidebar, .ReferencesSidebar {
+          display: none !important;
+        }
+        /* Show print-only reference list */
+        .print-reference-list {
+          display: block !important;
+          margin-top: 2em;
+          font-size: 1em;
+          color: #222;
+        }
+        /* Ensure all main content prints, not just visible area */
+        .overflow-auto,
+        .flex-1,
+        .max-w-4xl,
+        .h-full {
+          overflow: visible !important;
+          height: auto !important;
+          max-height: none !important;
+        }
+      }
+      @media screen {
+        .print-reference-list {
+          display: none !important;
+        }
+      }
     `;
     document.head.appendChild(style);
     
@@ -1016,18 +1054,23 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                         />
                       </div>
                       <div className="flex justify-between items-center mt-2">
-                        <button
-                          type="button"
-                          className={`px-3 py-1 rounded border text-sm flex items-center gap-1 ${
-                            activeMode === 'instant'
-                              ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
-                              : 'bg-white text-gray-500 border-gray-300'
-                          }`}
-                          onClick={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
-                        >
-                          <img src="/instant.svg" alt="Instant Mode Icon" className="w-4 h-4" />
-                          Acute
-                        </button>
+                        {/* Toggle switch for Acute/Research mode */}
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={activeMode === 'instant'}
+                            onChange={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
+                            className="toggle-checkbox hidden"
+                          />
+                          <span className={`w-10 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${activeMode === 'instant' ? 'bg-blue-500' : 'bg-gray-300'}`}
+                                style={{ transition: 'background 0.3s' }}>
+                            <span className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${activeMode === 'instant' ? 'translate-x-4' : ''}`}></span>
+                          </span>
+                          <span className={`text-sm font-medium ${activeMode === 'instant' ? 'text-[#3771FE]' : 'text-gray-500'}`}
+                                style={{ fontSize: '16px', fontFamily: 'DM Sans, sans-serif' }}>
+                            Acute
+                          </span>
+                        </label>
                         <button onClick={handleFollowUpQuestion} className="flex-shrink-0" disabled={isLoading}>
                           {isLoading ? (
                             <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1056,6 +1099,27 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         citations={activeCitations}
         onClose={() => setShowCitationsSidebar(false)}
       />
+      {/* Print-only reference list at the bottom */}
+      {activeCitations && Object.keys(activeCitations).length > 0 && (
+        <div className="print-reference-list">
+          <h3>References</h3>
+          <ol>
+            {Object.values(activeCitations).map((citation, idx) => (
+              <li key={idx}>
+                {citation.title}
+                {citation.authors ? `, ${Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors}` : ''}
+                {citation.year ? `, ${citation.year}` : ''}
+                {citation.url ? (
+                  <>
+                    {', '}
+                    <span style={{wordBreak: 'break-all'}}>{citation.url}</span>
+                  </>
+                ) : ''}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </div>
   )
 } 
