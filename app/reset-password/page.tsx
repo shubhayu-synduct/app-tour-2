@@ -28,7 +28,7 @@ function ResetPasswordContent() {
     setLoading(true)
     try {
       const { confirmPasswordReset } = await import("firebase/auth")
-      const auth = getFirebaseAuth()
+      const auth = await getFirebaseAuth()
       await confirmPasswordReset(auth, oobCode, password)
       setSuccess(true)
     } catch (err: any) {

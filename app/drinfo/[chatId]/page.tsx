@@ -8,16 +8,21 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/use-auth'
 
 interface DrInfoChatPageProps {
-  params: {
+  params: Promise<{
     chatId: string;
-  };
+  }>;
 }
 
-export default function DrInfoChatPage({ params }: DrInfoChatPageProps) {
+export default async function DrInfoChatPage({ params }: DrInfoChatPageProps) {
+  const { chatId } = await params
+  
+  return <DrInfoChatPageClient chatId={chatId} />
+}
+
+function DrInfoChatPageClient({ chatId }: { chatId: string }) {
   const [showSidebar, setShowSidebar] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const { user } = useAuth() // Use centralized auth instead of duplicate listener
-  const { chatId } = params
   const router = useRouter()
   
   const toggleSidebar = () => {

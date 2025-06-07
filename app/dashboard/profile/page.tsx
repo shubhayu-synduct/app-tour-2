@@ -103,7 +103,7 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     setSuccess(false);
-    const auth = getFirebaseAuth();
+    const auth = await getFirebaseAuth();
     const user = auth.currentUser;
     if (user) {
       const db = getFirebaseFirestore();
