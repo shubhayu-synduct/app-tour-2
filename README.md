@@ -123,3 +123,4 @@ merged changes guideline and layout
 ### deploy from sandy
 ### deploy from subh##
 ### deploy
+### commiting with all major issues
