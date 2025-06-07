@@ -216,18 +216,22 @@ export default function Dashboard() {
                     </div>
 
                     <div className="flex justify-between items-center mt-2">
-                      <button
-                        type="button"
-                        className={`px-3 py-1 rounded border text-sm flex items-center gap-1 ${
-                          activeMode === 'instant'
-                            ? 'bg-[#eef4ff] text-[#003ecb] border-[#003ecb]'
-                            : 'bg-white text-gray-500 border-gray-300'
-                        }`}
-                        onClick={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
-                      >
-                        <img src="instant.svg" alt="Instant Mode Icon" className="w-4 h-4" />
-                        Acute
-                      </button>
+                      {/* Toggle switch for Acute/Research mode */}
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={activeMode === 'instant'}
+                          onChange={() => setActiveMode(activeMode === 'instant' ? 'research' : 'instant')}
+                          className="toggle-checkbox hidden"
+                        />
+                        <span className={`w-10 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${activeMode === 'instant' ? 'bg-[#3771FE]' : 'bg-gray-300'}`}
+                              style={{ transition: 'background 0.3s' }}>
+                          <span className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${activeMode === 'instant' ? 'translate-x-4' : ''}`}></span>
+                        </span>
+                        <span className={`font-medium`} style={{ fontSize: '16px', color: activeMode === 'instant' ? '#3771FE' : '#6B7280', fontFamily: 'DM Sans, sans-serif' }}>
+                          Acute
+                        </span>
+                      </label>
                       <button type="submit" className="flex-shrink-0">
                         {isLoading ? (
                           <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
