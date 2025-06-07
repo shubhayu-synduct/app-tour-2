@@ -1,32 +1,15 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { DrInfoSummary } from '@/components/drinfo-summary/drinfo-summary'
 import { ChatHistory } from '@/components/chat-history/chat-history'
 import { Menu, X } from 'lucide-react'
-import { getFirebaseAuth } from '@/lib/firebase'
-import { User } from 'firebase/auth'
+import { useAuth } from '@/hooks/use-auth'
 
 export default function DrInfoPage() {
   const [showSidebar, setShowSidebar] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
-  const [user, setUser] = useState<User | null>(null)
-  
-  // Listen for auth state changes
-  useEffect(() => {
-    const auth = getFirebaseAuth()
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-      console.log("Auth state changed:", authUser ? "User logged in" : "No user");
-      if (authUser) {
-        console.log("User ID:", authUser.uid);
-        setUser(authUser);
-      } else {
-        setUser(null);
-      }
-    });
-    
-    return () => unsubscribe();
-  }, []);
+  const { user } = useAuth() // Use centralized auth instead of duplicate listener
   
   const toggleSidebar = () => {
     setShowSidebar(prev => !prev)

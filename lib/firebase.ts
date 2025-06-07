@@ -1,11 +1,9 @@
 "use client"
 
-import { getApp, getApps, initializeApp } from "firebase/app"
-import { getFirestore, Firestore } from "firebase/firestore"
-import { getAuth, GoogleAuthProvider, OAuthProvider, Auth } from "firebase/auth"
-import type { FirebaseApp } from "firebase/app"
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app"
+import { getFirestore, type Firestore } from "firebase/firestore"
+import { getAuth, type Auth, GoogleAuthProvider, OAuthProvider } from "firebase/auth"
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -16,82 +14,108 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 }
 
-// Log config for debugging (without sensitive values)
 console.log("Firebase config loaded:", {
   apiKey: firebaseConfig.apiKey ? "present" : "missing",
   authDomain: firebaseConfig.authDomain,
   projectId: firebaseConfig.projectId,
 })
 
-// Initialize Firebase app only once
-let app: FirebaseApp | undefined
-let firestoreDB: Firestore | undefined
-let firestoreAuth: Auth | undefined
-let googleProvider: GoogleAuthProvider | undefined
-let microsoftProvider: OAuthProvider | undefined
-
-// Create Google Authentication Provider
-const createGoogleProvider = (): GoogleAuthProvider => {
-  if (!googleProvider) {
-    googleProvider = new GoogleAuthProvider()
-    googleProvider.setCustomParameters({
-      prompt: 'select_account'
-    })
-    console.log("Google Auth Provider initialized")
-  }
-  return googleProvider
+// Declare global variables for TypeScript
+declare global {
+  // eslint-disable-next-line no-var
+  var __firebaseApp: FirebaseApp | undefined
+  // eslint-disable-next-line no-var
+  var __firebaseDB: Firestore | undefined
+  // eslint-disable-next-line no-var
+  var __firebaseAuth: Auth | undefined
+  // eslint-disable-next-line no-var
+  var __googleProvider: GoogleAuthProvider | undefined
+  // eslint-disable-next-line no-var
+  var __microsoftProvider: OAuthProvider | undefined
+  // eslint-disable-next-line no-var
+  var __authPersistenceSet: boolean | undefined
 }
 
-// Create Microsoft Authentication Provider
-const createMicrosoftProvider = (): OAuthProvider => {
-  if (!microsoftProvider) {
-    microsoftProvider = new OAuthProvider('microsoft.com')
-    microsoftProvider.setCustomParameters({
-      prompt: 'select_account'
-    })
-    console.log("Microsoft Auth Provider initialized")
+
+// Singleton getters for Firebase services
+// These functions ensure that Firebase is initialized only once.
+// In development, they use globalThis to persist instances across hot reloads.
+
+function getFirebaseApp(): FirebaseApp {
+  if (process.env.NODE_ENV === "development") {
+    if (!globalThis.__firebaseApp) {
+      console.log("Initializing Firebase app for development...")
+      globalThis.__firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
+    }
+    return globalThis.__firebaseApp
   }
-  return microsoftProvider
+
+  // In production, we don't need to use globalThis
+  return getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
 }
 
-export const getFirebaseApp = (): FirebaseApp => {
-  if (!app) {
-    if (!getApps().length) {
-      app = initializeApp(firebaseConfig)
-      console.log("Firebase initialized")
-    } else {
-      app = getApp()
-      console.log("Firebase app already initialized")
+export const app = getFirebaseApp()
+console.log("Firebase App Initialized")
+
+export async function getFirebaseAuth(): Promise<Auth> {
+  if (globalThis.__firebaseAuth) {
+    return globalThis.__firebaseAuth
+  }
+
+  const auth = getAuth(app)
+  globalThis.__firebaseAuth = auth
+  console.log("Firebase Auth Initialized")
+
+  if (typeof window !== "undefined") {
+    if (!globalThis.__authPersistenceSet) {
+      try {
+        const { setPersistence, browserLocalPersistence } = await import("firebase/auth")
+        await setPersistence(auth, browserLocalPersistence)
+        console.log("Firebase Auth persistence set to LOCAL (global)")
+        globalThis.__authPersistenceSet = true
+      } catch (error) {
+        console.error("Error setting Firebase auth persistence", error)
+      }
     }
   }
-  return app
+  return auth
 }
 
-export const getFirebaseFirestore = (): Firestore => {
-  if (!firestoreDB) {
-    const app = getFirebaseApp()
-    firestoreDB = getFirestore(app)
-    console.log("Firestore initialized")
+export function getFirebaseFirestore(): Firestore {
+  if (globalThis.__firebaseDB) {
+    return globalThis.__firebaseDB
   }
-  return firestoreDB
+  const db = getFirestore(app)
+  globalThis.__firebaseDB = db
+  console.log("Firestore Initialized")
+  return db
 }
 
-export const getFirebaseAuth = (): Auth => {
-  if (!firestoreAuth) {
-    const app = getFirebaseApp()
-    firestoreAuth = getAuth(app)
-    console.log("Firebase Auth initialized")
+export function getGoogleProvider(): GoogleAuthProvider {
+  if (globalThis.__googleProvider) {
+    return globalThis.__googleProvider
   }
-  return firestoreAuth
+  const provider = new GoogleAuthProvider()
+  provider.setCustomParameters({ prompt: 'select_account' })
+  globalThis.__googleProvider = provider
+  console.log("Google Auth Provider Initialized")
+  return provider
 }
 
-export const getGoogleAuthProvider = (): GoogleAuthProvider => {
-  return createGoogleProvider()
+export function getMicrosoftProvider(): OAuthProvider {
+  if (globalThis.__microsoftProvider) {
+    return globalThis.__microsoftProvider
+  }
+  const provider = new OAuthProvider('microsoft.com')
+  provider.setCustomParameters({ prompt: 'select_account' })
+  globalThis.__microsoftProvider = provider
+  console.log("Microsoft Auth Provider Initialized")
+  return provider
 }
 
-export const getMicrosoftAuthProvider = (): OAuthProvider => {
-  return createMicrosoftProvider()
-}
+// Initialize services right away
+export const firestoreAuth = getAuth(app);
+export const firestoreDB = getFirestore(app);
 
 // Initialize Analytics (only on client side)
 export const getFirebaseAnalytics = async () => {
@@ -106,15 +130,6 @@ export const getFirebaseAnalytics = async () => {
   }
 }
 
-// Initialize Analytics if in client side
 if (typeof window !== "undefined") {
-  getFirebaseAnalytics()
-  // Initialize Firebase on client side
-  getFirebaseApp()
-  getFirebaseFirestore()
-  getFirebaseAuth()
-  createGoogleProvider()
-  createMicrosoftProvider()
+    getFirebaseAnalytics()
 }
-
-export { app, firestoreDB, firestoreAuth }

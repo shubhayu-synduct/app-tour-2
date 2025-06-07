@@ -1,51 +1,18 @@
 "use client"
 
-import { useEffect, useState, ReactNode } from "react"
+import { ReactNode } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { getFirebaseAuth } from "@/lib/firebase"
-import { onAuthStateChanged } from "firebase/auth"
+import { useAuth } from "@/hooks/use-auth"
 
 interface HomeClientProps {
   fallback: ReactNode
 }
 
 export function HomeClient({ fallback }: HomeClientProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { user, loading } = useAuth() // Use centralized auth instead of duplicate listener
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const auth = await getFirebaseAuth()
-        if (!auth) {
-          setIsLoading(false)
-          return
-        }
-
-        return onAuthStateChanged(auth, (user) => {
-          setIsAuthenticated(!!user)
-          setIsLoading(false)
-        })
-      } catch (error) {
-        console.error("Auth check error:", error)
-        setIsLoading(false)
-      }
-    }
-
-    let unsubscribe: (() => void) | undefined
-    checkAuth().then(unsub => {
-      unsubscribe = unsub
-    })
-    
-    return () => {
-      if (unsubscribe) {
-        unsubscribe()
-      }
-    }
-  }, [])
-
-  if (isLoading) {
+  if (loading) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-blue-50 to-white p-6">
         <div className="animate-pulse">Loading...</div>
@@ -53,7 +20,7 @@ export function HomeClient({ fallback }: HomeClientProps) {
     )
   }
 
-  if (isAuthenticated) {
+  if (user) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-blue-50 to-white p-6">
         <div className="flex items-center mb-8">

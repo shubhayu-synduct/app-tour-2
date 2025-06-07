@@ -122,10 +122,10 @@ export function SignUpForm() {
     try {
       const { signInWithPopup } = await import("firebase/auth")
       const { doc, getDoc, setDoc } = await import("firebase/firestore")
-      const { getFirebaseAuth, getFirebaseFirestore, getGoogleAuthProvider } = await import("@/lib/firebase")
+      const { getFirebaseAuth, getFirebaseFirestore, getGoogleProvider } = await import("@/lib/firebase")
 
       const auth = await getFirebaseAuth()
-      const googleProvider = getGoogleAuthProvider()
+      const googleProvider = getGoogleProvider()
       const db = await getFirebaseFirestore()
       
       if (!auth || !googleProvider || !db) {
@@ -150,11 +150,7 @@ export function SignUpForm() {
           emailVerified: result.user.emailVerified
         })
         
-        // Sign out and show verification modal if email is not verified
-        if (!result.user.emailVerified) {
-          await auth.signOut()
-          setShowVerificationModal(true)
-        }
+        // AuthProvider will handle the redirect to onboarding
       }
     } catch (err: any) {
       console.error("Google sign up error:", err)
@@ -177,10 +173,10 @@ export function SignUpForm() {
     try {
       const { signInWithPopup } = await import("firebase/auth")
       const { doc, getDoc, setDoc } = await import("firebase/firestore")
-      const { getFirebaseAuth, getFirebaseFirestore, getMicrosoftAuthProvider } = await import("@/lib/firebase")
+      const { getFirebaseAuth, getFirebaseFirestore, getMicrosoftProvider } = await import("@/lib/firebase")
 
       const auth = await getFirebaseAuth()
-      const microsoftProvider = getMicrosoftAuthProvider()
+      const microsoftProvider = getMicrosoftProvider()
       const db = await getFirebaseFirestore()
       
       if (!auth || !microsoftProvider || !db) {
@@ -205,11 +201,7 @@ export function SignUpForm() {
           emailVerified: result.user.emailVerified
         })
         
-        // Sign out and show verification modal if email is not verified
-        if (!result.user.emailVerified) {
-          await auth.signOut()
-          setShowVerificationModal(true)
-        }
+        // AuthProvider will handle the redirect to onboarding
       }
     } catch (err: any) {
       console.error("Microsoft sign up error:", err)
