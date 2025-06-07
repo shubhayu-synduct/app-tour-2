@@ -926,7 +926,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                   {messages.map((msg, idx) => (
                     <div key={msg.id} className="mb-4">
                       {msg.type === 'user' ? (
-                        <div className="p-3 sm:p-4 border rounded-md" style={{ borderColor: '#3771FE', fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '16px sm:text-[18px]', color: '#223258', backgroundColor: '#F1F5FD' }}>
+                        <div className="p-3 sm:p-4 border rounded-5px" style={{ borderColor: 'rgba(55, 113, 254, 0.5)', fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '16px sm:text-[18px]', color: '#223258', backgroundColor: '#E4ECFF' }}>
                           <p className="m-0">{msg.content}</p>
                         </div>
                       ) : (
@@ -1009,7 +1009,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                             e.target.style.height = e.target.scrollHeight + 'px';
                           }}
                           placeholder="Ask a follow-up question..."
-                          className="w-full text-base md:text-[18px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
+                          className="w-full text-base md:text-[16px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
                           onKeyDown={(e) => e.key === 'Enter' && handleFollowUpQuestion(e as any)}
                           rows={1}
                           style={{ height: '24px' }}

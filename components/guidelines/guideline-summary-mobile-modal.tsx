@@ -532,23 +532,7 @@ export default function GuidelineSummaryMobileModal({
                 {/* Search Bar */}
                 {(!isLoading && summary) && (
                   <div className="relative mt-4 sm:mt-6">
-                    <div className="flex items-center border-2 border-[#3771FE] rounded-lg p-2 sm:p-4 bg-[#F4F7FF]">
-                      <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400 mr-2 sm:mr-3">
-                        <g clipPath="url(#clip0_3494_13766)">
-                          <g clipPath="url(#clip1_3494_13766)">
-                            <path d="M19.5841 19.9241L22.2746 22.6164M21.1977 15.6164C21.1977 12.3452 18.5459 9.69336 15.2746 9.69336C12.0034 9.69336 9.35156 12.3452 9.35156 15.6164C9.35156 18.8877 12.0034 21.5395 15.2746 21.5395C18.5459 21.5395 21.1977 18.8877 21.1977 15.6164Z" stroke="currentColor" strokeWidth="1.61538" strokeLinecap="square"/>
-                            <path d="M6.65595 22.6151H2.88672V18.8459V10.7689V3.23047H6.65595H18.5021H22.2713V6.9997" stroke="currentColor" strokeWidth="1.61538" strokeLinecap="square"/>
-                          </g>
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_3494_13766">
-                            <rect width="28" height="28" fill="white"/>
-                          </clipPath>
-                          <clipPath id="clip1_3494_13766">
-                            <rect width="28" height="28" fill="white" transform="translate(-0.339844)"/>
-                          </clipPath>
-                        </defs>
-                      </svg>
+                    <div className="flex items-center border-2 rounded-lg p-2 sm:p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
                       <input
                         ref={questionInputRef}
                         type="text"
@@ -561,65 +545,180 @@ export default function GuidelineSummaryMobileModal({
                           }
                         }}
                         disabled={isAskingFollowup}
-                        className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400"
+                        className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400 pr-10"
                       />
-                      <button 
-                        className={`ml-2 sm:ml-3 p-1.5 sm:p-2 bg-[#3771FE] text-white rounded-lg hover:bg-[#1B3B8B] transition-colors ${isAskingFollowup ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={askFollowupQuestion}
-                        disabled={isAskingFollowup}
-                      >
-                        {isAskingFollowup ? (
-                          <div className="h-4 w-4 sm:h-5 sm:w-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                        ) : (
-                          <ExternalLink size={14} className="sm:w-4 sm:h-4" />
-                        )}
-                      </button>
+                      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
+                        <img src="/search.svg" alt="Search" width={28} height={28} />
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-          ) : (
+          ) : activeTab === 'original' && activeReference ? (
             <div className="space-y-6">
               {/* Page Header */}
               <div className="flex items-center gap-3 mb-6">
                 <FileText size={20} className="text-[#3771FE]" />
                 <span className="text-lg font-semibold text-[#3771FE]">
-                  Page {activeReference?.number || '1'}
+                  Page {activeReference.number}
                 </span>
               </div>
 
               {/* Content */}
               <div className="space-y-4">
-                {activeReference ? (
+                {activeReference.highlightedRange ? (
                   <div className="p-4 rounded-lg bg-white">
-                    {activeReference.highlightedRange ? (
-                      <>
-                        <span>{activeReference.fullText?.substring(0, activeReference.highlightedRange.start)}</span>
-                        <span className="bg-yellow-200" ref={highlightRef}>
-                          {activeReference.fullText?.substring(
-                            activeReference.highlightedRange.start,
-                            activeReference.highlightedRange.end
-                          )}
-                        </span>
-                        <span>{activeReference.fullText?.substring(activeReference.highlightedRange.end)}</span>
-                      </>
-                    ) : (
-                      <p className="text-gray-800 leading-relaxed">
-                        {activeReference.fullText}
-                      </p>
-                    )}
+                    <span>{activeReference.fullText?.substring(0, activeReference.highlightedRange.start)}</span>
+                    <span className="bg-yellow-200" ref={highlightRef}>
+                      {activeReference.fullText?.substring(
+                        activeReference.highlightedRange.start,
+                        activeReference.highlightedRange.end
+                      )}
+                    </span>
+                    <span>{activeReference.fullText?.substring(activeReference.highlightedRange.end)}</span>
                   </div>
                 ) : (
                   <div className="p-4 rounded-lg bg-white">
-                    <p className="text-gray-500 text-base" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                      Click on a reference number to view the original source
+                    <p className="text-gray-800 leading-relaxed">
+                      {activeReference.fullText}
                     </p>
                   </div>
                 )}
               </div>
             </div>
-          )}
+          ) : activeTab === 'original' && !activeReference ? (
+            <div className="p-4 rounded-lg bg-white">
+              <p className="text-gray-500 text-base" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+                Click on a reference number
+                <span 
+                  className="reference-number"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#E0E9FF',
+                    color: '#1F2937',
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    fontSize: '0.6rem',
+                    marginLeft: '4px',
+                    verticalAlign: 'super',
+                    position: 'relative',
+                    top: '-2px'
+                  }}
+                >
+                  1
+                </span> to view the Original Source
+              </p>
+            </div>
+          ) : activeTab === 'summary' ? (
+            <div className="space-y-6">
+              {/* Title and Meta */}
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
+                  {summary?.title || guidelineTitle}
+                </h2>
+                <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  {year && (
+                    <span className="px-2 sm:px-3 py-1 bg-[#E0E9FF] text-[#3771FE] rounded-full text-xs sm:text-sm font-medium">
+                      {year}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Summary Section */}
+              <div>
+                {isLoading ? (
+                  <div className="flex flex-col justify-center items-center h-40">
+                    <div className="animate-spin rounded-full h-10 sm:h-12 w-10 sm:w-12 border-t-2 border-b-2 border-[#3771FE] mb-3 sm:mb-4"></div>
+                    <div className="text-sm sm:text-base text-gray-500" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+                      Generating AI Summary for this Guideline ...
+                    </div>
+                  </div>
+                ) : error ? (
+                  <div className="text-red-500 text-sm sm:text-base">{error}</div>
+                ) : (
+                  <div className="space-y-4">
+                    {chatHistory.map((message, index) => (
+                      <div key={index} className={`mb-3 sm:mb-4 ${index > 0 ? 'mt-6 sm:mt-8 border-t pt-4 sm:pt-6' : ''}`}>
+                        {message.question && (
+                          <div className="mb-3 sm:mb-4">
+                            <div className="bg-[#F4F7FF] p-2 sm:p-3 rounded-lg">
+                              <p style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '16px sm:text-lg md:text-xl', color: '#223258', margin: 0 }}>
+                                {message.question}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        {message.answer && (
+                          <>
+                            <div className="flex items-center gap-2 mb-2 sticky top-0 bg-white z-10 py-2">
+                              <div className="flex items-center text-[#3771FE]">
+                                <Image
+                                  src="/answer-icon.svg"
+                                  alt="Answer icon"
+                                  width={20}
+                                  height={20}
+                                  className="sm:w-6 sm:h-6"
+                                />
+                              </div>
+                              <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300, fontSize: '14px sm:text-base md:text-lg', color: '#262F4D' }}>
+                                {message.type === 'main' ? 'Summary' : 'Answer'}
+                              </span>
+                            </div>
+                            <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
+                              <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
+                                <GuidelineMarkdown 
+                                  content={message.answer}
+                                  sources={message.sources || null}
+                                  pageReferences={message.page_references || null}
+                                  onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                    {followupError && (
+                      <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded mb-3 sm:mb-4 text-sm sm:text-base">
+                        {followupError}
+                      </div>
+                    )}
+                    <div ref={answerEndRef} />
+                  </div>
+                )}
+                
+                {/* Search Bar */}
+                {(!isLoading && summary) && (
+                  <div className="relative mt-4 sm:mt-6">
+                    <div className="flex items-center border-2 rounded-lg p-2 sm:p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
+                      <input
+                        ref={questionInputRef}
+                        type="text"
+                        placeholder="Ask a question about this guideline..."
+                        value={followupQuestion}
+                        onChange={(e) => setFollowupQuestion(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            askFollowupQuestion();
+                          }
+                        }}
+                        disabled={isAskingFollowup}
+                        className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400 pr-10"
+                      />
+                      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
+                        <img src="/search.svg" alt="Search" width={28} height={28} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 

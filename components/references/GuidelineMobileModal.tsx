@@ -472,8 +472,7 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                 {/* Search Bar */}
                 {(!isLoading && summary) && (
                   <div className="relative mt-4 sm:mt-6">
-                    <div className="flex items-center border-2 border-[#3771FE] rounded-lg p-2 sm:p-4 bg-[#F4F7FF]">
-                      <Search size={18} className="text-gray-400 mr-2 sm:mr-3" />
+                    <div className="flex items-center border-2 rounded-lg p-2 sm:p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
                       <input
                         ref={questionInputRef}
                         type="text"
@@ -486,65 +485,74 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                           }
                         }}
                         disabled={isAskingFollowup}
-                        className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400"
+                        className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400 pr-10"
                       />
-                      <button 
-                        className={`ml-2 sm:ml-3 p-1.5 sm:p-2 bg-[#3771FE] text-white rounded-lg hover:bg-[#1B3B8B] transition-colors ${isAskingFollowup ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={askFollowupQuestion}
-                        disabled={isAskingFollowup}
-                      >
-                        {isAskingFollowup ? (
-                          <div className="h-4 w-4 sm:h-5 sm:w-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                        ) : (
-                          <ExternalLink size={14} className="sm:w-4 sm:h-4" />
-                        )}
-                      </button>
+                      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
+                        <img src="/search.svg" alt="Search" width={28} height={28} />
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-          ) : (
+          ) : activeTab === 'original' && activeReference ? (
             <div className="space-y-6">
               {/* Page Header */}
               <div className="flex items-center gap-3 mb-6">
                 <FileText size={20} className="text-[#3771FE]" />
                 <span className="text-lg font-semibold text-[#3771FE]">
-                  Page {activeReference?.number || '1'}
+                  Page {activeReference.number}
                 </span>
               </div>
-
               {/* Content */}
               <div className="space-y-4">
-                {activeReference ? (
+                {activeReference.highlightedRange ? (
                   <div className="p-4 rounded-lg bg-white">
-                    {activeReference.highlightedRange ? (
-                      <>
-                        <span>{activeReference.fullText?.substring(0, activeReference.highlightedRange.start)}</span>
-                        <span className="bg-yellow-200" ref={highlightRef}>
-                          {activeReference.fullText?.substring(
-                            activeReference.highlightedRange.start,
-                            activeReference.highlightedRange.end
-                          )}
-                        </span>
-                        <span>{activeReference.fullText?.substring(activeReference.highlightedRange.end)}</span>
-                      </>
-                    ) : (
-                      <p className="text-gray-800 leading-relaxed">
-                        {activeReference.fullText}
-                      </p>
-                    )}
+                    <span>{activeReference.fullText?.substring(0, activeReference.highlightedRange.start)}</span>
+                    <span className="bg-yellow-200" ref={highlightRef}>
+                      {activeReference.fullText?.substring(
+                        activeReference.highlightedRange.start,
+                        activeReference.highlightedRange.end
+                      )}
+                    </span>
+                    <span>{activeReference.fullText?.substring(activeReference.highlightedRange.end)}</span>
                   </div>
                 ) : (
                   <div className="p-4 rounded-lg bg-white">
-                    <p className="text-gray-500 text-base" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                      Click on a reference number to view the original source
+                    <p className="text-gray-800 leading-relaxed">
+                      {activeReference.fullText}
                     </p>
                   </div>
                 )}
               </div>
             </div>
-          )}
+          ) : activeTab === 'original' && !activeReference ? (
+            <div className="p-4 rounded-lg bg-white">
+              <p className="text-gray-500 text-base" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+                Click on a reference number
+                <span 
+                  className="reference-number"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#E0E9FF',
+                    color: '#1F2937',
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    fontSize: '0.6rem',
+                    marginLeft: '4px',
+                    verticalAlign: 'super',
+                    position: 'relative',
+                    top: '-2px'
+                  }}
+                >
+                  1
+                </span> to view the Original Source
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
 

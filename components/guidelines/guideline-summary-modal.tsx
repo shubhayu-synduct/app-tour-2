@@ -419,14 +419,14 @@ export default function GuidelineSummaryModal({
           <div
             className="full-reference"
             style={{
-              fontFamily: 'DM Sans, sans-serif',
+              fontFamily: 'Poppins, sans-serif',
               lineHeight: 1.7,
               padding: '1rem',
               backgroundColor: '#f8f9fa',
               overflowY: 'auto',
               wordBreak: 'break-word',
               width: '100%',
-              fontSize: '1rem',
+              fontSize: '14px',
               color: '#223258',
               background: 'none',
               border: 'none',
@@ -471,7 +471,7 @@ export default function GuidelineSummaryModal({
             <div className={isCitationPanelOpen ? 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 px-8 pt-6' : 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 px-8 pt-6'}>
               <div className="flex justify-between items-center" style={{ minHeight: 0, paddingTop: 0, paddingBottom: 0}}>
                 <div className="ml-10 w-full">
-                  <h2 className="font-medium" style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, color: '#263969', fontSize: '24px', margin: 0 }}>Guideline Summary</h2>
+                  <h2 className="font-medium border-b border-gray-200 pb-2" style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, color: '#263969', fontSize: '24px', margin: 0 }}>Guideline Summary</h2>
                   <div>
                     <h1 
                       className="mb-4"
@@ -553,8 +553,8 @@ export default function GuidelineSummaryModal({
                       <div key={index} className={`mb-4 ${index > 0 ? 'mt-8 border-t pt-6' : ''}`}>
                         {message.question && (
                           <div className="mb-4">
-                            <div className="bg-blue-50 p-3 rounded-lg">
-                              <p style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '20px', color: '#223258', margin: 0 }}>{message.question}</p>
+                            <div className="p-3 sm:p-4 border rounded-5px" style={{ borderColor: 'rgba(55, 113, 254, 0.5)', fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '16px sm:text-[16px]', color: '#223258', backgroundColor: '#E4ECFF' }}>
+                              <p className="m-0">{message.question}</p>
                             </div>
                           </div>
                         )}
@@ -574,7 +574,7 @@ export default function GuidelineSummaryModal({
                               </span>
                             </div>
                             <div style={{ marginLeft: 40 }}>
-                              <div className="prose prose-sm max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '20px' }}>
+                              <div className="prose prose-sm max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#223258', fontSize: '20px' }}>
                                 <GuidelineMarkdown 
                                   content={message.answer}
                                   sources={message.sources || null}
@@ -602,39 +602,29 @@ export default function GuidelineSummaryModal({
           </div>
           {/* Follow-up bar: fixed at the bottom, only show after summary is loaded */}
           {(!isLoading && summary) && (
-            <div className="absolute left-1/2 transform -translate-x-1/2 shadow-lg rounded-xl border" style={{ bottom: '32px', zIndex: 50, maxWidth: 'calc(100% - 48px)', width: '800px', borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white', padding: '0' }}>
+            <div className="absolute left-1/2 transform -translate-x-1/2 shadow-lg rounded-xl border" style={{ bottom: '32px', zIndex: 50, width: 'calc(100% - 48px)', maxWidth: '535px', borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white', padding: '0' }}>
               <div className="relative w-full">
-                <input
-                  ref={questionInputRef}
-                  type="text"
-                  placeholder="Ask a question about this guideline..."
-                  className="w-full h-20 p-4 pl-12 border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg bg-transparent"
-                  value={followupQuestion}
-                  onChange={(e) => setFollowupQuestion(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      askFollowupQuestion()
-                    }
-                  }}
-                  disabled={isAskingFollowup}
-                />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  <Search className="w-7 h-7" />
+                <div className="relative w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4">
+                  <div className="relative">
+                    <textarea
+                      value={followupQuestion}
+                      onChange={(e) => {
+                        setFollowupQuestion(e.target.value);
+                        // Auto-resize the textarea
+                        e.target.style.height = 'auto';
+                        e.target.style.height = e.target.scrollHeight + 'px';
+                      }}
+                      placeholder="Ask a follow-up question..."
+                      className="w-full text-base md:text-[16px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto pr-10"
+                      onKeyDown={(e) => e.key === 'Enter' && askFollowupQuestion()}
+                      rows={1}
+                      style={{ height: '24px' }}
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" onClick={(e) => askFollowupQuestion()}>
+                      <img src="/search.svg" alt="Search" width={30} height={30} />
+                    </div>
+                  </div>
                 </div>
-                <button 
-                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 text-white bg-[#3771FE] rounded-lg w-12 h-12 flex items-center justify-center transition-colors ${isAskingFollowup ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={askFollowupQuestion}
-                  disabled={isAskingFollowup}
-                >
-                  {isAskingFollowup ? (
-                    <div className="h-5 w-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                  )}
-                </button>
               </div>
             </div>
           )}
@@ -647,7 +637,7 @@ export default function GuidelineSummaryModal({
           {/* Blue padding area on top */}
           <div className={isCitationPanelOpen ? 'bg-[#F4F7FF] pt-14 px-6 w-full' : 'bg-[#F4F7FF] pt-14 px-0 w-full'}>
             <div className={isCitationPanelOpen ? 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 px-6 pt-6 w-full' : 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 pt-6 w-56 mx-auto'}>
-              <div className="flex items-center px-0 py-0" style={{ minHeight: 0 }}>
+              <div className="flex items-center px-0 py-0 border-b border-gray-200 pb-4" style={{ minHeight: 0 }}>
                 <button
                   type="button"
                   className="flex items-center gap-2 focus:outline-none bg-transparent border-none p-0 m-0"
@@ -667,7 +657,7 @@ export default function GuidelineSummaryModal({
                     width={40}
                     height={40}
                   />
-                  <h2 className="text-2xl font-medium text-gray-800" style={{ margin: 0 }}>
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-semibold" style={{ margin: 0, color: '#263969' }}>
                     Original Source
                   </h2>
                 </button>
@@ -698,7 +688,7 @@ export default function GuidelineSummaryModal({
                       color: '#3771FE',
                       fontWeight: 600,
                       fontFamily: 'DM Sans, sans-serif',
-                      fontSize: '1.1rem'
+                      fontSize: '1rem'
                     }}
                   >
                     Page {activeReference.number}
@@ -719,7 +709,28 @@ export default function GuidelineSummaryModal({
                     <>{formatReferenceContent({ hidePageLabel: true })}</>
                   ) : (
                     <span className="text-gray-500 text-base" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                      Click on a reference number to view the original source
+                      Click on a reference number
+                      <span 
+                        className="reference-number"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#E0E9FF',
+                          color: '#1F2937',
+                          width: '18px',
+                          height: '18px',
+                          borderRadius: '50%',
+                          fontSize: '0.6rem',
+                          marginLeft: '4px',
+                          verticalAlign: 'super',
+                          position: 'relative',
+                          top: '-2px'
+                        }}
+                      >
+                        1
+                      </span>
+                       to view the original source
                     </span>
                   )}
                 </div>
@@ -752,20 +763,20 @@ export default function GuidelineSummaryModal({
         }
 
         .full-reference {
-          font-family: 'DM Sans', sans-serif;
+          font-family: 'Poppins, sans-serif';
           line-height: 1.7;
-          padding: 1rem;
-          background-color: #f8f9fa;
-          overflow-y: auto;
-          word-break: break-word;
-          width: 100%;
-          font-size: 1rem;
-          color: #223258;
-          background: none;
-          border: none;
-          box-shadow: none;
+          padding: '1rem';
+          background-color: '#f8f9fa';
+          overflow-y: 'auto';
+          word-break: 'break-word';
+          width: '100%';
+          font-size: '16px';
+          color: '#223258';
+          background: 'none';
+          border: 'none';
+          box-shadow: 'none';
           margin: 0;
-          white-space: normal;
+          white-space: 'normal';
         }
 
         .reference-highlight {
