@@ -148,7 +148,7 @@ export const GuidelineMarkdown = ({
       <style jsx global>{`
         .reference-number {
           text-decoration: none;
-          color: #1F2937;
+          color: #223258;
           background: #E0E9FF;
           display: inline-flex !important;
           align-items: center;
@@ -174,47 +174,30 @@ export const GuidelineMarkdown = ({
         }
         
         /* Heading styles */
-        .heading-1 {
-          font-size: 1.75rem;
-          font-weight: 700;
-          margin-top: 2rem;
-          margin-bottom: 1rem;
-          color: #333;
-        }
-        
-        .heading-2 {
-          font-size: 1.5rem;
-          font-weight: 600;
+        .heading-1, .heading-2, .heading-3, .heading-4, .heading-5, .heading-6 {
+          font-size: 1rem; /* 16px */
+          font-weight: 600; /* Semi-bold */
+          font-family: 'DM Sans', sans-serif;
           margin-top: 1.5rem;
           margin-bottom: 0.75rem;
-          color: #444;
-        }
-        
-        .heading-3 {
-          font-size: 1.25rem;
-          font-weight: 600;
-          margin-top: 1.25rem;
-          margin-bottom: 0.5rem;
-          color: #555;
-        }
-        
-        .heading-4, .heading-5, .heading-6 {
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin-top: 1rem;
-          margin-bottom: 0.5rem;
-          color: #666;
+          color: #214498;
         }
         
         /* Make sure paragraph and inline elements display properly */
         .markdown-paragraph {
           display: block;
           margin-bottom: 1rem;
+          font-size: 1rem; /* 16px */
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 400; /* Regular */
         }
         
         #markdown-content p {
           display: inline !important;
           margin: 0;
+          font-size: 1rem; /* 16px */
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 400; /* Regular */
         }
         
         /* Ensure headings in markdown render properly */
@@ -227,7 +210,9 @@ export const GuidelineMarkdown = ({
           display: block;
           margin-top: 0;
           margin-bottom: 0;
-          font-weight: bold;
+          font-weight: 600; /* Semi-bold */
+          font-family: 'DM Sans', sans-serif;
+          font-size: 1rem; /* 16px */
           color: #214498;
         }
         
@@ -238,11 +223,23 @@ export const GuidelineMarkdown = ({
           margin-top: 0.5em;
           margin-bottom: 0.5em;
           padding-left: 1.5em;
+          font-size: 1rem; /* 16px */
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 400;
         }
         
         #markdown-content li {
           display: list-item;
           margin-bottom: 0.5em;
+          font-size: 1rem; /* 16px */
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 400;
+        }
+        
+        #markdown-content li strong {
+          font-size: 1rem; /* 16px */
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 600;
         }
         
         #markdown-content li p {

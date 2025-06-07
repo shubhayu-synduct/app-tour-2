@@ -259,7 +259,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="w-full py-3 md:py-4 text-center text-xs md:text-sm text-gray-400 px-4">
-          <p>Dr.info can make mistakes, please double check. Do not enter patients information.</p>
+          <p>Dr.Info can make mistakes, please double check. Do not enter patient information.</p>
           <Link href="/terms" className="text-black hover:underline inline-block">
             Terms and Conditions
           </Link>
