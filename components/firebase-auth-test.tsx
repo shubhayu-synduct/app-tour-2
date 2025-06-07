@@ -20,11 +20,7 @@ export function FirebaseAuthTest() {
         setConfig(envVars)
 
         // Import Firebase from your existing initialization
-        const { firebaseApp, getFirebaseAuth } = await import("@/lib/firebase")
-        
-        if (!firebaseApp) {
-          throw new Error("Firebase app initialization failed")
-        }
+        const { getFirebaseAuth } = await import("@/lib/firebase")
         
         setStatus("Firebase initialized")
         

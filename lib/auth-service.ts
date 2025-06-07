@@ -10,56 +10,61 @@ const SESSION_COOKIE_NAME = "drinfo-session"
 const SESSION_DURATION = 7
 
 /**
- * Sets the session cookie after successful authentication
+ * Sets the session cookie and notifies other tabs only if needed.
  */
 export async function setSessionCookie(user: User) {
   try {
-    // Get user data from Firestore
-    const { getFirebaseFirestore } = await import("@/lib/firebase")
-    const { doc, getDoc } = await import("firebase/firestore")
-    
-    const db = await getFirebaseFirestore()
-    if (!db) throw new Error("Firestore not initialized")
-    
-    const userDoc = await getDoc(doc(db, "users", user.uid))
-    const userData = userDoc.data()
-    
-    // Create a session object with essential user info
-    const session = {
+    const newSession = {
       uid: user.uid,
       email: user.email,
-      displayName: userData?.displayName || user.email?.split('@')[0] || '',
-      timestamp: Date.now()
+      displayName: user.displayName,
+      emailVerified: user.emailVerified,
     }
-    
-    // Store as a cookie with expiry
-    Cookies.set(SESSION_COOKIE_NAME, JSON.stringify(session), {
+
+    // Set the cookie (to refresh expiry)
+    Cookies.set(SESSION_COOKIE_NAME, JSON.stringify(newSession), {
       expires: SESSION_DURATION,
       path: "/",
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      domain: window.location.hostname
     })
-    
-    // Also set a server-side accessible cookie
-    document.cookie = `${SESSION_COOKIE_NAME}=${JSON.stringify(session)}; path=/; max-age=${SESSION_DURATION * 24 * 60 * 60}; SameSite=Lax`
+
+    // Only sync in production - disable in development to prevent Fast Refresh issues
+    if (process.env.NODE_ENV === "production" && typeof window !== "undefined") {
+      // Check if we already have the exact same session
+      const existingSession = getSessionCookie()
+      const sessionIsIdentical = existingSession && 
+        existingSession.uid === newSession.uid &&
+        existingSession.email === newSession.email &&
+        existingSession.displayName === newSession.displayName &&
+        existingSession.emailVerified === newSession.emailVerified
+
+      if (!sessionIsIdentical) {
+        console.log("New/different session detected, notifying other tabs")
+        window.localStorage.setItem("auth-sync", JSON.stringify({ 
+          action: "login", 
+          uid: user.uid,
+          timestamp: new Date().getTime() 
+        }))
+      }
+    } else if (process.env.NODE_ENV === "development") {
+      console.log("Cross-tab sync disabled in development mode")
+    }
     
     console.log("Session cookie set successfully")
-    return true
   } catch (error) {
     console.error("Error setting session cookie:", error)
-    return false
   }
 }
 
 /**
- * Retrieves the current session from the cookie
+ * Retrieves the current session from the cookie.
  */
 export function getSessionCookie() {
+  const cookie = Cookies.get(SESSION_COOKIE_NAME)
+  if (!cookie) return null
+  
   try {
-    const cookie = Cookies.get(SESSION_COOKIE_NAME)
-    if (!cookie) return null
-    
     return JSON.parse(cookie)
   } catch (error) {
     console.error("Error parsing session cookie:", error)
@@ -68,23 +73,26 @@ export function getSessionCookie() {
 }
 
 /**
- * Clears the session cookie on logout
+ * Clears the session cookie and notifies other tabs.
  */
 export function clearSessionCookie() {
   try {
-    Cookies.remove(SESSION_COOKIE_NAME, { 
-      path: "/",
-      domain: window.location.hostname
-    })
-    
-    // Also clear the server-side accessible cookie
-    document.cookie = `${SESSION_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`
+    // Remove the client-side cookie
+    Cookies.remove(SESSION_COOKIE_NAME, { path: "/" })
+
+    // Only sync in production
+    if (process.env.NODE_ENV === "production" && typeof window !== "undefined") {
+      window.localStorage.setItem("auth-sync", JSON.stringify({ 
+        action: "logout", 
+        timestamp: new Date().getTime() 
+      }))
+    } else if (process.env.NODE_ENV === "development") {
+      console.log("Cross-tab sync disabled in development mode")
+    }
     
     console.log("Session cookie cleared")
-    return true
   } catch (error) {
     console.error("Error clearing session cookie:", error)
-    return false
   }
 }
 

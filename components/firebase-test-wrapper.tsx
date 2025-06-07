@@ -1,11 +1,9 @@
 'use client'
 
-import dynamic from "next/dynamic"
-
-const FirebaseTest = dynamic(() => import("@/components/firebase-test-client").then((mod) => mod.FirebaseTest), {
-  ssr: false,
-})
-
 export function FirebaseTestWrapper() {
-  return <FirebaseTest />
+  return (
+    <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg">
+      <p className="text-gray-500">Firebase test component has been removed</p>
+    </div>
+  )
 } 

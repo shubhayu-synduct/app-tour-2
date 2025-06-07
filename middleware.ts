@@ -4,7 +4,6 @@ import type { NextRequest } from "next/server"
 export function middleware(request: NextRequest) {
   // Get the path of the request
   const path = request.nextUrl.pathname
-  console.log("Middleware processing path:", path)
 
   // Define public paths that don't require authentication
   const isPublicPath = path === "/" || 
@@ -23,29 +22,41 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Log all cookies for debugging
-  const allCookies = request.cookies.getAll()
-  console.log("All cookies:", allCookies.map(c => c.name))
-
   // Check for the drinfo-session cookie which indicates authentication
   const authCookie = request.cookies.get('drinfo-session')
-  const hasAuthCookie = !!authCookie
+  let hasValidAuthCookie = false
   
-  console.log("Auth cookie found:", hasAuthCookie)
-  if (hasAuthCookie) {
-    console.log("Auth cookie value:", authCookie.value)
+  if (authCookie) {
+    // Try to validate the cookie content
+    try {
+      const sessionData = JSON.parse(authCookie.value || '{}')
+      // Check if the session has required fields and isn't too old
+      if (sessionData.uid && sessionData.email && sessionData.timestamp) {
+        const age = Date.now() - sessionData.timestamp
+        const maxAge = 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+        
+        if (age < maxAge) {
+          hasValidAuthCookie = true
+        }
+      }
+    } catch (error) {
+      // Invalid cookie, treat as unauthenticated
+    }
   }
 
-  // // If the user is authenticated and trying to access login/signup, redirect to dashboard
-  // if (hasAuthCookie && isPublicPath && !path.startsWith("/_next") && !path.startsWith("/api")) {
-  //   console.log("User is authenticated, redirecting to dashboard from:", path)
-  //   return NextResponse.redirect(new URL("/dashboard", request.url))
-  // }
-
-  // If the user is not authenticated and trying to access a protected route, redirect to login
-  if (!hasAuthCookie && !isPublicPath) {
-    console.log("User not authenticated, redirecting to login from:", path)
-    return NextResponse.redirect(new URL("/login", request.url))
+  // Only redirect to login for truly protected routes
+  // Let client-side auth handle most auth logic to prevent race conditions
+  if (!hasValidAuthCookie && !isPublicPath) {
+    // Remove onboarding from critical paths - let AuthProvider handle it
+    const criticalProtectedPaths: string[] = [] // Remove '/onboarding' from here
+    const isCriticalPath = criticalProtectedPaths.some(criticalPath => path.startsWith(criticalPath))
+    
+    if (isCriticalPath) {
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
+    
+    // For all other protected paths including onboarding, let client-side handle it
+    return NextResponse.next()
   }
 
   // For all other cases, proceed with the request

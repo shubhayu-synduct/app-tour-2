@@ -27,13 +27,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     localStorage.setItem('sidebarOpen', isOpen.toString())
   }, [isOpen])
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      console.log("User not authenticated, redirecting to login...")
-      router.push("/login")
-    }
-  }, [user, loading, router])
+  // TEMPORARILY DISABLE COMPETING REDIRECT - AuthProvider handles this
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     console.log("User not authenticated, redirecting to login...")
+  //     router.push("/login")
+  //   }
+  // }, [user, loading, router])
 
   const getPageTitle = () => {
     if (pathname === '/dashboard/history') {

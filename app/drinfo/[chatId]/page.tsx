@@ -1,41 +1,29 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { DrInfoSummary } from '@/components/drinfo-summary/drinfo-summary'
 import { ChatHistory } from '@/components/chat-history/chat-history'
 import { Menu, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { getFirebaseAuth } from '@/lib/firebase'
-import { User } from 'firebase/auth'
+import { useAuth } from '@/hooks/use-auth'
 
 interface DrInfoChatPageProps {
-  params: {
+  params: Promise<{
     chatId: string;
-  };
+  }>;
 }
 
-export default function DrInfoChatPage({ params }: DrInfoChatPageProps) {
+export default async function DrInfoChatPage({ params }: DrInfoChatPageProps) {
+  const { chatId } = await params
+  
+  return <DrInfoChatPageClient chatId={chatId} />
+}
+
+function DrInfoChatPageClient({ chatId }: { chatId: string }) {
   const [showSidebar, setShowSidebar] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
-  const [user, setUser] = useState<User | null>(null)
-  const { chatId } = params
+  const { user } = useAuth() // Use centralized auth instead of duplicate listener
   const router = useRouter()
-  
-  // Listen for auth state changes
-  useEffect(() => {
-    const auth = getFirebaseAuth()
-    const unsubscribe = auth.onAuthStateChanged((authUser) => {
-      console.log("Auth state changed:", authUser ? "User logged in" : "No user");
-      if (authUser) {
-        console.log("User ID:", authUser.uid);
-        setUser(authUser);
-      } else {
-        setUser(null);
-      }
-    });
-    
-    return () => unsubscribe();
-  }, []);
   
   const toggleSidebar = () => {
     setShowSidebar(prev => !prev)
@@ -72,7 +60,7 @@ export default function DrInfoChatPage({ params }: DrInfoChatPageProps) {
       <div className="flex-1 overflow-hidden">
         <DrInfoSummary 
           user={user} 
-          chatId={chatId}
+          sessionId={chatId}
           onChatCreated={() => setRefreshTrigger(prev => prev + 1)} 
         />
       </div>

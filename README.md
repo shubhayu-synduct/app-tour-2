@@ -116,10 +116,14 @@ Merge pull request #7 from synductgmbh/dev_sand
 # color push ### ###### #### ## ###
 
 merged changes guideline and layout
-### ## deploy
+### ## deploy ###
 ### new change 
 ## new deployment
 #### responsive
 ### deploy from sandy
-### deploy from subh
+### deploy from subh##
 ### deploy
+## deploy
+### commiting with all major issues
+
+### Praying to deploy gods
