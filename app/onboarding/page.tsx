@@ -61,13 +61,23 @@ export default function Onboarding() {
     }
   }, [user, authLoading])
 
-  // Check email verification
+  // Check email verification - be lenient for OAuth providers
   useEffect(() => {
     if (!authLoading && user) {
-      if (!user.emailVerified) {
-        window.location.href = "/login?error=email-not-verified"
-        return
-      }
+      // Check if user signed in via OAuth providers (they should be trusted)
+      const isOAuthUser = user.providerData.some(provider => 
+        provider.providerId === 'google.com' || 
+        provider.providerId === 'microsoft.com'
+      )
+      
+      console.log("Email verification status:", { 
+        emailVerified: user.emailVerified, 
+        isOAuthUser,
+        providers: user.providerData.map(p => p.providerId)
+      })
+      
+      // Note: We no longer block access for unverified emails
+      // Instead, we'll show a reminder within the onboarding flow
     }
   }, [user, authLoading])
 
@@ -366,6 +376,29 @@ export default function Onboarding() {
           <h2 className="font-semibold text-[#223258] mt-4 sm:mt-6 mb-4 sm:mb-6 text-[24px] sm:text-[28px] font-dm-sans">
             Complete Registration
           </h2>
+          
+          {/* Email Verification Reminder */}
+          {user && !user.emailVerified && !user.providerData.some(provider => 
+            provider.providerId === 'google.com' || provider.providerId === 'microsoft.com'
+          ) && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 sm:mb-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    Email Verification Pending
+                  </h3>
+                  <p className="mt-1 text-sm text-yellow-700">
+                    Please check your email ({user.email}) and verify your account. You can complete onboarding now, but some features may be limited until verified.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Step Indicator */}
           <div className="flex items-center justify-center mb-4 sm:mb-6">

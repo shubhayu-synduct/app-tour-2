@@ -8,7 +8,7 @@ import { Eye, EyeOff } from "lucide-react"
 import { setSessionCookie } from "@/lib/auth-service"
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth"
 import { doc, getDoc } from "firebase/firestore"
-import { getFirebaseAuth, getFirebaseFirestore, getGoogleAuthProvider, getMicrosoftAuthProvider } from "@/lib/firebase"
+import { getFirebaseAuth, getFirebaseFirestore, getGoogleProvider, getMicrosoftProvider } from "@/lib/firebase"
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -106,7 +106,8 @@ export function SignInForm() {
       }
 
       await signInWithEmailAndPassword(auth, email, password)
-      router.push("/dashboard")
+      // AuthProvider will handle the redirect based on onboarding status
+      
     } catch (err: any) {
       console.error("Error during sign in:", err)
       setError(parseFirebaseError(err))
@@ -120,26 +121,18 @@ export function SignInForm() {
     setLoading(true)
     
     try {
-      const auth = getFirebaseAuth()
-      const googleProvider = getGoogleAuthProvider()
-      const db = getFirebaseFirestore()
+      const auth = await getFirebaseAuth()
+      const googleProvider = getGoogleProvider()
       
-      if (!auth || !googleProvider || !db) {
+      if (!auth || !googleProvider) {
         throw new Error("Firebase services not initialized")
       }
 
       const result = await signInWithPopup(auth, googleProvider)
       await setSessionCookie(result.user)
       
-      const userDocRef = doc(db, "users", result.user.uid)
-      const userDoc = await getDoc(userDocRef)
+      // AuthProvider will handle the redirect based on onboarding status
       
-      if (userDoc.exists()) {
-        const userData = userDoc.data()
-        router.push(userData?.onboardingCompleted ? "/dashboard" : "/onboarding")
-      } else {
-        router.push("/onboarding")
-      }
     } catch (err: any) {
       console.error("Google sign in error:", err)
       if (err.code === 'auth/popup-closed-by-user') {
@@ -159,26 +152,18 @@ export function SignInForm() {
     setLoading(true)
     
     try {
-      const auth = getFirebaseAuth()
-      const microsoftProvider = getMicrosoftAuthProvider()
-      const db = getFirebaseFirestore()
+      const auth = await getFirebaseAuth()
+      const microsoftProvider = getMicrosoftProvider()
       
-      if (!auth || !microsoftProvider || !db) {
+      if (!auth || !microsoftProvider) {
         throw new Error("Firebase services not initialized")
       }
 
       const result = await signInWithPopup(auth, microsoftProvider)
       await setSessionCookie(result.user)
       
-      const userDocRef = doc(db, "users", result.user.uid)
-      const userDoc = await getDoc(userDocRef)
+      // AuthProvider will handle the redirect based on onboarding status
       
-      if (userDoc.exists()) {
-        const userData = userDoc.data()
-        router.push(userData?.onboardingCompleted ? "/dashboard" : "/onboarding")
-      } else {
-        router.push("/onboarding")
-      }
     } catch (err: any) {
       console.error("Microsoft sign in error:", err)
       if (err.code === 'auth/popup-closed-by-user') {
