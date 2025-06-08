@@ -70,7 +70,7 @@ export default function DrugInformationPage() {
     const fetchDrugs = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`https://drugsumary.drinfo.ai/api/library/drugs?letter=${selectedLetter}&offset=0`);
+        const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/library/drugs?letter=${selectedLetter}&offset=0`);
         const data = await response.json();
         setDrugs(data.drugs);
         setIsLoading(false);
@@ -93,7 +93,7 @@ export default function DrugInformationPage() {
     }
     setShowRecommendations(true);
     try {
-      const response = await fetch(`https://drugsumary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(term)}&limit=10`);
+      const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(term)}&limit=10`);
       console.log('API response status:', response.status);
       const data = await response.json();
       console.log('API response data:', data);
