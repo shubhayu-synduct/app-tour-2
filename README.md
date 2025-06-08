@@ -126,4 +126,4 @@ merged changes guideline and layout
 ## deploy
 ### commiting with all major issues
 
-### Praying to deploy gods
+### Praying to deploy gods............
