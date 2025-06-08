@@ -231,15 +231,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    // If authenticated and on auth pages, only redirect if it's a fresh sign-in
+    // If authenticated and on auth pages, redirect to appropriate page
     if (user && (pathname === '/login' || pathname === '/signup')) {
       if (freshSignIn) {
         console.log("Fresh sign-in detected on auth page, checking onboarding status...")
         setFreshSignIn(false) // Reset the flag
-        checkUserOnboardingAndRedirect(user)
       } else {
-        console.log("User is authenticated but this is not a fresh sign-in, staying on auth page")
+        console.log("User is authenticated (session restored), redirecting from auth page...")
       }
+      checkUserOnboardingAndRedirect(user)
       return
     }
 
