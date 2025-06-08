@@ -119,7 +119,7 @@ export default function DrugDetailPage() {
           .replace(/-/g, ' '); // Replace remaining hyphens with spaces
         
         // console.log('cleanDrugSlug', cleanDrugSlug);
-        const response = await fetch(`https://drugsumary.drinfo.ai/api/drugs/${cleanDrugSlug}`);
+        const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/drugs/${cleanDrugSlug}`);
         
         if (!response.ok) {
           throw new Error('Drug Information Not Available');
@@ -176,7 +176,7 @@ export default function DrugDetailPage() {
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         console.log('Searching for term:', searchTerm);
-        const response = await fetch(`https://drugsumary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(searchTerm.trim())}&limit=10`);
+        const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(searchTerm.trim())}&limit=10`);
         console.log('Response status:', response.status);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
