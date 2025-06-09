@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // The URL for the external guidelines search API
-const GUIDELINES_API_URL = 'https://guidelines-stage.duckdns.org/search';
+const GUIDELINES_API_URL = 'https://synduct-guidelines.drinfo.ai/search';
 // const GUIDELINES_API_URL = 'http://localhost:8001/search';
 
 export async function POST(request: NextRequest) {
