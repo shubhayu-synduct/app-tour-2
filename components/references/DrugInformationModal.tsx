@@ -83,7 +83,7 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
         .replace(/\s+/g, ' ')          // Collapse multiple spaces to one
         .trim();                       // Trim leading/trailing spaces
       // console.log('cleanDrugName', cleanDrugName);
-      const response = await fetch(`https://drugsumary.drinfo.ai/api/drugs/${cleanDrugName}`);
+      const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/drugs/${cleanDrugName}`);
       // console.log('Response:', response);
       
       if (!response.ok) {
@@ -136,7 +136,7 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         console.log('Searching for term:', searchTerm);
-        const response = await fetch(`https://drugsumary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(searchTerm.trim())}&limit=10`);
+        const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(searchTerm.trim())}&limit=10`);
         console.log('Response status:', response.status);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
