@@ -114,7 +114,7 @@ Merge pull request #7 from synductgmbh/dev_sand
 ####
 ##.......
 # color push ### ###### #### ## ###
-
+## history page responsive
 merged changes guideline and layout
 ### ## deploy ###
 ### new change 
