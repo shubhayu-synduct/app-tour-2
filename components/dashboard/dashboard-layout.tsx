@@ -61,6 +61,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       )
     } else if (pathname === '/drug-information') {
       return 'Drug Information'
+    } else if (pathname.startsWith('/drug-information/')) {
+      // Extract drug name from URL and format it
+      const drugName = pathname.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      return 'Drug Information';
     }
     return (
       <Image 

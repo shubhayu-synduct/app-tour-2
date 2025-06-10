@@ -42,3 +42,27 @@ body {
 .animate-slide-in-right {
   animation: slideInRight 0.3s ease-out;
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-inner-l {
+  animation: fadeIn 0.5s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.animate-middle-l {
+  animation: fadeIn 0.5s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+.animate-outer-l {
+  animation: fadeIn 0.5s ease-in-out infinite;
+  animation-delay: 0.4s;
+}
