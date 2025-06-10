@@ -411,7 +411,7 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
               overflowY: 'auto',
               wordBreak: 'break-word',
               width: '100%',
-              fontSize: '1rem',
+              fontSize: '16px',
               color: '#223258',
               background: 'none',
               border: 'none',
@@ -427,6 +427,15 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
     )
   }
 
+  const toggleRightCollapse = () => {
+    if (isCitationPanelOpen) {
+      setIsCitationPanelOpen(false);
+      setActiveReference(null);
+    } else {
+      setIsCitationPanelOpen(true);
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -434,24 +443,58 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
       <div className="bg-white rounded-lg shadow-lg w-[90%] h-full flex overflow-hidden relative">
         {/* Back Button above modal */}
         <button
-          className="absolute left-6 top-4 bg-[#214498] text-white font-medium rounded px-3 py-1 text-sm flex items-center gap-1 shadow z-50"
+          className="absolute left-6 top-4 bg-[#214498] text-white font-medium rounded px-3 py-1 text-base flex items-center gap-1 shadow z-50"
           style={{ border: '1px solid #3771FE' }}
           onClick={onClose}
         >
-          <span style={{ fontSize: '1rem', lineHeight: 1 }}>&laquo;</span>
+          <Image
+            src="/back-icon.png"
+            alt="Back"
+            width={20}
+            height={20}
+          />
         </button>
-        {/* Summary Panel */}
-        <div
-          className="flex flex-col overflow-hidden transition-all duration-300 ease-in-out relative"
-          style={{ width: isCitationPanelOpen ? '60%' : '97%' }}
-        >
-          {/* Blue padding area on top, now wraps both header and content */}
-          <div className={isCitationPanelOpen ? 'bg-[#F4F7FF] pt-14 px-6 flex-1 flex flex-col min-h-0' : 'bg-[#F4F7FF] pt-14 px-6 flex-1 flex flex-col min-h-0'}>
-            <div className={isCitationPanelOpen ? 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 px-8 pt-6' : 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 px-8 pt-6'}>
-              <div className="flex justify-between items-center" style={{ minHeight: 0, paddingTop: 0, paddingBottom: 0}}>
-                <div className="ml-10 w-full">
-                  <h2 className="font-medium text-gray-800" style={{ fontSize: '28px', margin: 0 }}>Guideline Summary</h2>
-                  <div>
+
+        {/* Blue padding area wraps both panels */}
+        <div className="bg-[#F4F7FF] pt-14 px-6 flex-1 flex gap-6 min-h-0">
+          {/* Summary Panel - flex-1 takes remaining space */}
+          <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-300 flex flex-col min-h-0">
+            {/* Header */}
+            <div className="flex justify-between items-center px-8 pt-6 pb-4 border-b border-gray-200">
+              <h2 className="font-medium text-gray-800" style={{ fontSize: '28px', margin: 0 }}>Guideline Summary</h2>
+              {(citation.link || citation.url) && (
+                <a
+                  href={citation.link || citation.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#3771FE',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    zIndex: 2,
+                  }}
+                  title="Open original source"
+                >
+                  <ExternalLink size={24} />
+                </a>
+              )}
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0" style={{paddingTop: 0}}>
+              {isLoading ? (
+                <div className="flex flex-col justify-center items-center h-full">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+                  <div className="text-base text-gray-500" style={{ fontFamily: 'DM Sans, sans-serif', marginTop: 8 }}>
+                    Generating AI Summary for this Guideline ...
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="text-red-500">{error}</div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Title and Tags */}
+                  <div className="pt-6 pb-4">
                     <h1 
                       className="mb-4"
                       style={{
@@ -477,7 +520,7 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
                       )}
                     </h1>
                     {/* Tags */}
-                    <div className="flex gap-2 mb-6">
+                    <div className="flex gap-2">
                       {citation.year && (
                         <span
                           className="px-3 py-1 text-sm"
@@ -510,201 +553,148 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
                       )}
                     </div>
                   </div>
-                </div>
-              </div>
-              {/* Main Heading, Title, and Tags aligned with answer icon */}
-            </div>
-            {/* Scrollable summary content, no gap below header, same px-6 as header */}
-            <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex-1 overflow-y-auto px-6 pb-40 bg-white rounded-lg border border-gray-300 border-t-0 min-h-0" style={{paddingTop: 0}}>
-                {isLoading ? (
-                  <div className="flex flex-col justify-center items-center h-full">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-                    <div className="text-base text-gray-500" style={{ fontFamily: 'DM Sans, sans-serif', marginTop: 8 }}>
-                      Generating AI Summary for this Guideline ...
-                    </div>
-                  </div>
-                ) : error ? (
-                  <div className="text-red-500">{error}</div>
-                ) : (
-                  <div className="space-y-4">
-                    {chatHistory.map((message, index) => (
-                      <div key={index} className={`mb-4 ${index > 0 ? 'mt-8 border-t pt-6' : ''}`}>
-                        {message.question && (
-                          <div className="mb-4">
-                            <div className="bg-blue-50 p-3 rounded-lg">
-                              <p style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '20px', color: '#223258', margin: 0 }}>{message.question}</p>
+
+                  {chatHistory.map((message, index) => (
+                    <div key={index} className={`mb-4 ${index > 0 ? 'mt-8 border-t pt-6' : ''}`}>
+                      {message.question && (
+                        <div className="mb-4">
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <p style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '20px', color: '#223258', margin: 0 }}>{message.question}</p>
+                          </div>
+                        </div>
+                      )}
+                      {message.answer && (
+                        <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center text-blue-500">
+                              <Image
+                                src="/answer-icon.svg"
+                                alt="Answer icon"
+                                width={24}
+                                height={24}
+                              />
+                            </div>
+                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300, fontSize: '18px', color: '#262F4D' }}>
+                              {message.type === 'main' ? 'Summary' : 'Answer'}
+                            </span>
+                          </div>
+                          <div className='mt-6'>
+                            <div className="prose prose-sm max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '16px' }}>
+                              <GuidelineMarkdown 
+                                content={message.answer}
+                                sources={message.sources || null}
+                                pageReferences={message.page_references || null}
+                                onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
+                              />
                             </div>
                           </div>
-                        )}
-                        {message.answer && (
-                          <>
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="flex items-center text-blue-500">
-                                <Image
-                                  src="/answer-icon.svg"
-                                  alt="Answer icon"
-                                  width={24}
-                                  height={24}
-                                />
-                              </div>
-                              <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300, fontSize: '18px', color: '#262F4D' }}>
-                                {message.type === 'main' ? 'Summary' : 'Answer'}
-                              </span>
-                            </div>
-                            <div style={{ marginLeft: 40 }}>
-                              <div className="prose prose-sm max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '20px' }}>
-                                <GuidelineMarkdown 
-                                  content={message.answer}
-                                  sources={message.sources || null}
-                                  pageReferences={message.page_references || null}
-                                  onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
-                                />
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                    {followupError && (
-                      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                        {followupError}
-                      </div>
-                    )}
-                    <div ref={answerEndRef} />
-                    {/* Spacer to ensure content is visible above the follow-up bar */}
-                    <div style={{ height: '120px' }} />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          {/* Follow-up bar: fixed at the bottom, only show after summary is loaded */}
-          {(!isLoading && summary) && (
-            <div className="absolute left-1/2 transform -translate-x-1/2 shadow-lg rounded-xl border" style={{ bottom: '32px', zIndex: 50, maxWidth: 'calc(100% - 48px)', width: '800px', borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white', padding: '0' }}>
-              <div className="relative w-full">
-                <input
-                  ref={questionInputRef}
-                  type="text"
-                  placeholder="Ask a question about this guideline..."
-                  className="w-full h-20 p-4 pl-12 border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg bg-transparent"
-                  value={followupQuestion}
-                  onChange={(e) => setFollowupQuestion(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      askFollowupQuestion()
-                    }
-                  }}
-                  disabled={isAskingFollowup}
-                />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  <Search className="w-7 h-7" />
-                </div>
-                <button 
-                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 text-white bg-[#3771FE] rounded-lg w-12 h-12 flex items-center justify-center transition-colors ${isAskingFollowup ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={askFollowupQuestion}
-                  disabled={isAskingFollowup}
-                >
-                  {isAskingFollowup ? (
-                    <div className="h-5 w-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  {followupError && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                      {followupError}
+                    </div>
                   )}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        {/* Original Source Panel (side by side, always shows content) */}
-        <div
-          className="flex flex-col h-full transition-all duration-300 ease-in-out bg-white shadow-lg border-l border-gray-200"
-          style={{ width: isCitationPanelOpen ? '40%' : '3%' }}
-        >
-          {/* Blue padding area on top */}
-          <div className={isCitationPanelOpen ? 'bg-[#F4F7FF] pt-14 px-6 w-full' : 'bg-[#F4F7FF] pt-14 px-0 w-full'}>
-            <div className={isCitationPanelOpen ? 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 px-6 pt-6 w-full' : 'bg-white rounded-lg shadow-sm border border-gray-300 border-b-0 pt-6 w-56 mx-auto'}>
-              <div className="flex items-center px-0 py-0" style={{ minHeight: 0 }}>
-                <button
-                  type="button"
-                  className="flex items-center gap-2 focus:outline-none bg-transparent border-none p-0 m-0"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    if (isCitationPanelOpen) {
-                      setIsCitationPanelOpen(false);
-                      setActiveReference(null);
-                    } else {
-                      setIsCitationPanelOpen(true);
-                    }
-                  }}
-                >
-                  <Image
-                    src="/Original Source.svg"
-                    alt="Original Source icon"
-                    width={40}
-                    height={40}
-                  />
-                  <h2 className="text-2xl font-medium text-gray-800" style={{ margin: 0 }}>
-                    Original Source
-                  </h2>
-                </button>
-                {citation.link && (
-                  <a
-                    href={citation.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      marginLeft: 'auto',
-                      color: '#3771FE',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      zIndex: 2,
-                    }}
-                    title="Open original source"
-                  >
-                    <ExternalLink size={32} />
-                  </a>
-                )}
-              </div>
-              {/* Page Number label at the same level as icon/label row */}
-              {isCitationPanelOpen && activeReference && (
-                <div className="flex items-center gap-2 mb-0" style={{ marginTop: '24px' }}>
-                  <FileText size={20} className="text-blue-500" />
-                  <span
-                    style={{
-                      color: '#3771FE',
-                      fontWeight: 600,
-                      fontFamily: 'DM Sans, sans-serif',
-                      fontSize: '1.1rem'
-                    }}
-                  >
-                    Page {activeReference.number}
-                  </span>
+                  <div ref={answerEndRef} />
                 </div>
               )}
             </div>
-          </div>
-          {/* Only show content area when expanded */}
-          {isCitationPanelOpen && (
-            <div className="flex-1 flex flex-col min-h-0">
-              <div
-                className={`px-6 pt-0 pb-6 bg-[#F4F7FF] transition-all duration-300 ease-in-out flex-1 min-h-0`}
-                style={{ pointerEvents: 'auto', overflow: 'hidden', maxHeight: '100%' }}
-              >
-                <div className="prose prose-sm max-w-none bg-white h-full rounded-lg p-6 border border-gray-300 border-t-0 flex items-center justify-center">
-                  {activeReference ? (
-                    <>{formatReferenceContent({ hidePageLabel: true })}</>
-                  ) : (
-                    <span className="text-gray-500 text-base" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                      Click on a reference number to view the original source
-                    </span>
-                  )}
+
+            {/* Follow-up Input - Fixed at bottom inside the container */}
+            {(!isLoading && summary) && (
+              <div className="p-6">
+                <div className="relative">
+                  <input
+                    ref={questionInputRef}
+                    type="text"
+                    placeholder="Ask a question about this guideline..."
+                    className="w-full h-16 p-4 pl-12 pr-16 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg bg-white shadow-sm"
+                    value={followupQuestion}
+                    onChange={(e) => setFollowupQuestion(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        askFollowupQuestion()
+                      }
+                    }}
+                    disabled={isAskingFollowup}
+                  />
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <Search className="w-6 h-6" />
+                  </div>
+                  <button 
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-white bg-[#3771FE] w-10 h-10 flex items-center justify-center transition-colors ${isAskingFollowup ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                    onClick={askFollowupQuestion}
+                    disabled={isAskingFollowup}
+                  >
+                    {isAskingFollowup ? (
+                      <div className="h-4 w-4 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                    ) : (
+                      <Image
+                        src="/search-icon.png"
+                        alt="Search"
+                        width={38}
+                        height={38}
+                      />
+                    )}
+                  </button>
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* Original Source Panel - Collapsible like reference */}
+          <div className={`bg-white rounded-xl shadow-sm border border-gray-300 transition-all duration-300 ease-in-out flex flex-col ${isCitationPanelOpen ? 'w-[28rem]' : 'w-16'}`}>
+            {/* Header */}
+            <div className={`flex items-center pt-6 pb-4 border-b border-gray-200 ${isCitationPanelOpen ? 'px-4' : 'px-1'}`} style={{ minHeight: '80px' }}>
+              <button
+                onClick={toggleRightCollapse}
+                className={`rounded-md hover:bg-gray-100 transition-colors ${isCitationPanelOpen ? 'mr-2' : 'mx-auto'}`}
+                title={isCitationPanelOpen ? "Collapse" : "Expand"}
+              >
+                <Image
+                  src="/source-collapsible.png"
+                  alt="Toggle Source Panel"
+                  width={32}
+                  height={32}
+                />
+              </button>
+              {isCitationPanelOpen && (
+                <span className="font-medium text-gray-900" style={{ fontSize: '28px' }}>Original Source</span>
+              )}
             </div>
-          )}
+
+            {/* Content - Only show when expanded */}
+            {isCitationPanelOpen && (
+              <div className="flex-1 p-6 overflow-y-auto">
+                {activeReference && (
+                  <div className="flex items-center gap-2 mb-6">
+                    <FileText size={16} className="text-blue-600" />
+                    <span
+                      className="text-blue-600 font-medium"
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: '1.1rem'
+                      }}
+                    >
+                      Page {activeReference.number}
+                    </span>
+                  </div>
+                )}
+
+                {activeReference ? (
+                  <>{formatReferenceContent({ hidePageLabel: true })}</>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <span className="text-gray-500 text-center" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+                      Click on a reference number to view the original source
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -734,11 +724,11 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
           font-family: 'DM Sans', sans-serif;
           line-height: 1.7;
           padding: 1rem;
-          background-color: #f8f9fa;
+          backgroundColor: '#f8f9fa';
           overflow-y: auto;
           word-break: break-word;
           width: 100%;
-          font-size: 1rem;
+          font-size: 16px;
           color: #223258;
           background: none;
           border: none;
@@ -882,9 +872,6 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
         #markdown-content ol > li::marker {
           color: #214498;
         }
-
-        /* Add this to your global styles for a nice fade/blur effect */
-        .minimized-original-source { filter: blur(2px); opacity: 0.5; pointer-events: none; overflow: hidden; }
 
         .guideline-title-link:hover {
           color: #3771FE !important;
