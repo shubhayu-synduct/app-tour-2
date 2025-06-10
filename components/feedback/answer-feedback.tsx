@@ -16,7 +16,7 @@ const FEEDBACK_OPTIONS_HELPFUL = [
 ];
 
 const FEEDBACK_OPTIONS_NOT_HELPFUL = [
-  'Not useful', 'Incorrect', 'Low-grade evidence', 'Missing options', 'Too long', 'Generic', 'Outdated', 'Poorly referenced', 'Safety concern', 'Dissatisfied', 'Too short'
+  'Incorrect', 'Low-grade evidence', 'Missing options', 'Too long', 'Generic', 'Outdated', 'Poorly referenced', 'Safety concern', 'Dissatisfied', 'Too short'
 ];
 
 export default function AnswerFeedback({ 
@@ -191,7 +191,7 @@ export default function AnswerFeedback({
           disabled={submittedFeedback.helpful}
         >
           <ThumbsUp className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-          <span className="text-xs sm:text-sm">Helpful</span>
+          <span className="text-xs sm:text-sm">Helpful...</span>
         </button>
         <button
           onClick={() => handleFeedbackClick('not_helpful')}
@@ -201,7 +201,7 @@ export default function AnswerFeedback({
           disabled={submittedFeedback.not_helpful}
         >
           <ThumbsDown className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-          <span className="text-xs sm:text-sm">Not helpful</span>
+          <span className="text-xs sm:text-sm">Not Helpful...</span>
         </button>
         <button
           onClick={handleCopyText}

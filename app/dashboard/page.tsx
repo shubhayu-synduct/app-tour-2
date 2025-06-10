@@ -433,8 +433,8 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="w-full py-3 md:py-4 text-center text-xs md:text-sm text-gray-400 px-4">
-          <p>Dr.Info can make mistakes, please double check. Do not enter patient information.</p>
-          <Link href="/terms" className="text-black hover:underline inline-block">
+          <p>Dr.Info can make mistakes, please double check. Do not insert protected health information or personal data.</p>
+          <Link href="https://synduct.com/terms-and-conditions/" className="text-black hover:text-[#3771FE] underline inline-block" target="_blank" rel="noopener noreferrer">
             Terms and Conditions
           </Link>
         </div>

@@ -1081,8 +1081,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                       </div>
                     </div>
                     <div className="w-full py-3 text-center text-[14px] text-gray-400">
-                      <p>Dr.info can make mistakes, please double check. Do not enter patients information.</p>
-                      <Link href="/terms" className="text-black hover:underline inline-block">
+                      <p>Dr.info can make mistakes, please double check. Do not insert protected health information or personal data.</p>
+                      <Link href="https://synduct.com/terms-and-conditions/" className="text-black hover:text-[#3771FE] underline inline-block" target="_blank" rel="noopener noreferrer">
                         Terms and Conditions
                       </Link>
                     </div>

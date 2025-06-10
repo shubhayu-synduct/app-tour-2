@@ -58,6 +58,12 @@ export default function DrugDetailPage() {
       .replace(/[^\w-]+/g, '');
   };
   
+  // Function to capitalize first letter
+  const capitalizeFirstLetter = (text: string) => {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  };
+  
   const drugSlug = params.drug as string;
   const drugName = drugSlug ? unslugify(drugSlug) : '';
   
@@ -118,7 +124,6 @@ export default function DrugDetailPage() {
           .replace(/-previously-.*$/, '') // Remove "-previously-anything" from the end
           .replace(/-/g, ' '); // Replace remaining hyphens with spaces
         
-        // console.log('cleanDrugSlug', cleanDrugSlug);
         const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/drugs/${cleanDrugSlug}`);
         
         if (!response.ok) {
@@ -140,9 +145,21 @@ export default function DrugDetailPage() {
           data.markdown_content = data.markdown_content.replace(/\$\\pm\$/g, '±');
         }
         setDrug(data);
-        // Initialize search term with drug name and store it as the initial term
+        // Initialize search term with drug name
         setSearchTerm(data.name);
         setInitialSearchTerm(data.name);
+        
+        // Process markdown and set initial open sections
+        const sections = processMarkdownContent(data.markdown_content);
+        const initialOpenSections: Record<string, boolean> = {};
+        // Open first two sections
+        if (sections.length > 0) {
+          initialOpenSections[sections[0].id] = true;
+          if (sections.length > 1) {
+            initialOpenSections[sections[1].id] = true;
+          }
+        }
+        setOpenSections(initialOpenSections);
       } catch (error) {
         console.error('Error fetching drug data:', error);
         setError(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -297,249 +314,247 @@ export default function DrugDetailPage() {
     const sections = processMarkdownContent(drug.markdown_content);
 
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Link href="/drug-information" className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[8px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors">
-            <ChevronLeft size={16} />
-            <ChevronLeft size={16} className="-ml-3" />
-            <span>Back</span>
-          </Link>
-        </div>
-        
-        {/* Search bar with autocomplete */}
-        <div className="relative mb-8" ref={searchContainerRef}>
-          <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 rounded-xl bg-white mt-5">
-            <div className="pl-2 flex items-center">
-              <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
+      <div className="flex flex-col h-[calc(100vh-64px)]">
+        {/* Fixed header section */}
+        <div className="flex-none px-4 py-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6">
+              <Link href="/drug-information" className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[8px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors">
+                <ChevronLeft size={16} />
+                <ChevronLeft size={16} className="-ml-3" />
+                <span>Back</span>
+              </Link>
             </div>
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list.."
-              className="w-full py-3 px-2 outline-none text-[#223258] font-['DM_Sans'] text-[16px] placeholder:text-[#9599A8]"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={() => {
-                // Only show recommendations if the search term is different from initial
-                if (searchTerm.trim() !== '' && searchTerm !== initialSearchTerm) {
-                  setShowRecommendations(true);
-                }
-              }}
-              // Prevent blur when clicking on recommendations
-              onBlur={(e) => {
-                // Delay the blur to check if click was on a recommendation
-                setTimeout(() => {
-                  if (searchContainerRef.current && !searchContainerRef.current.contains(document.activeElement)) {
-                    setShowRecommendations(false);
-                  } else {
-                    // Refocus the input if we're still within the search container
-                    if (searchInputRef.current) {
-                      searchInputRef.current.focus();
-                    }
-                  }
-                }, 100);
-              }}
-            />
-            {searchTerm && (
-              <button 
-                className="hover:bg-blue-700 p-1 text-white flex items-center justify-center"
-                onClick={() => {
-                  setSearchTerm('');
-                  // Show recommendations when clearing search
-                  setShowRecommendations(true);
-                }}
-              >
-                <Image src="/search.svg" alt="Search" width={32} height={32} />
-              </button>
-            )}
-          </div>
-          
-          {/* Recommendations dropdown */}
-          {showRecommendations && recommendations.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
-              {recommendations.map((rec, index) => (
-                <Link 
-                  key={index}
-                  href={`/drug-information/${slugify(rec.brand_name)}`}
-                  className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] text-[16px]"
-                  onClick={() => {
-                    setShowRecommendations(false);
-                    // Refocus the input before navigation
-                    if (searchInputRef.current) {
-                      searchInputRef.current.focus();
+            
+            {/* Search bar with autocomplete */}
+            <div className="relative mb-4" ref={searchContainerRef}>
+              <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[69px] w-full max-w-[1118px] mx-auto pr-4 rounded-xl bg-white">
+                <div className="pl-2 flex items-center">
+                  <Search className="text-[#9599A8] stroke-[1.5]" size={20} fill="none" />
+                </div>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search by a drug brand name or an active ingredient name or scroll the drug list.."
+                  className="w-full py-3 px-2 outline-none text-[#223258] font-['DM_Sans'] text-[16px] placeholder:text-[#9599A8]"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onFocus={() => {
+                    if (searchTerm.trim() !== '' && searchTerm !== initialSearchTerm) {
+                      setShowRecommendations(true);
                     }
                   }}
-                  onMouseDown={(e) => {
-                    // Prevent blur event from firing on the input
-                    e.preventDefault();
+                  onBlur={(e) => {
+                    setTimeout(() => {
+                      if (searchContainerRef.current && !searchContainerRef.current.contains(document.activeElement)) {
+                        setShowRecommendations(false);
+                      } else {
+                        if (searchInputRef.current) {
+                          searchInputRef.current.focus();
+                        }
+                      }
+                    }, 100);
                   }}
-                >
-                  {rec.search_type !== 'direct_brand' ? (
-                    <>
-                      <b>{rec.active_substance.join(', ')}</b> (<i>Brand Name:</i> <b>{rec.brand_name}</b>)
-                    </>
-                  ) : (
-                    <>
-                      <b>{rec.brand_name}</b> (<i>active substances:</i> <b>{rec.active_substance.join(', ')}</b>)
-                    </>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Document header */}
-        <div className="flex items-start mb-8">
-          <Image src="/answer-icon.svg" alt="Answer Icon" width={24} height={24} className="mt-1 mr-3" />
-          <h2 className="text-lg text-[#273561] font-['DM_Sans'] font-regular">
-            Drug information from the European Medicines Agency approved Summary of Product Characteristics
-          </h2>
-        </div>
-        
-        {/* Accordion sections */}
-        <div className="mb-8 p-2 rounded-2xl" style={{ background: '#E4ECFF' }}>
-          {sections.map((section) => (
-            <div 
-              key={section.id}
-              className="rounded-lg overflow-hidden mb-3"
-              data-section-number={section.number}
-            >
-              <button
-                className="w-full flex justify-between items-center p-4 text-left focus:outline-none bg-white border rounded-[10px] font-['DM_Sans']"
-                style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}
-                onClick={() => toggleSection(section.id)}
-              >
-                <span className="font-medium">{section.title}</span>
-                <ChevronDown 
-                  className={`transition-transform ${openSections[section.id] ? 'transform rotate-180' : ''}`} 
-                  size={20} 
                 />
-              </button>
-              {/* Collapsible content */}
-              {openSections[section.id] && (
-                <div className="p-4 bg-white border rounded-[10px]" style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}>
-                  <div className="prose max-w-none text-gray-700 font-['DM_Sans']">
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        table: ({node, ...props}) => (
-                          <div className="overflow-auto my-4">
-                            <table className="min-w-full divide-y divide-gray-300 border border-gray-300" {...props} />
-                          </div>
-                        ),
-                        thead: ({node, ...props}) => (
-                          <thead className="bg-gray-100" {...props} />
-                        ),
-                        th: ({node, ...props}) => (
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-900" {...props} />
-                        ),
-                        td: ({node, children, ...props}) => {
-                          if (typeof children === 'string') {
-                            const parts = children.split(/<br\s*\/?\>/gi);
-                            if (parts.length > 1) {
-                              return (
-                                <td className="px-4 py-3 text-sm text-gray-700 border-t border-gray-200" {...props}>
-                                  {parts.map((part, index) => (
-                                    <React.Fragment key={index}>
-                                      {part}
-                                      {index < parts.length - 1 && <br />}
-                                    </React.Fragment>
-                                  ))}
-                                </td>
-                              );
-                            }
-                          }
-                          return <td className="px-4 py-3 text-sm text-gray-700 border-t border-gray-200" {...props}>{children}</td>;
-                        },
-                        tr: ({node, ...props}) => (
-                          <tr className="even:bg-gray-50" {...props} />
-                        ),
-                        ul: ({node, ...props}) => (
-                          <ul className="list-disc pl-5 space-y-1 mb-4" {...props} />
-                        ),
-                        ol: ({node, ...props}) => (
-                          <ol className="list-decimal pl-5 space-y-1 mb-4" {...props} />
-                        ),
-                        li: ({node, ...props}) => (
-                          <li className="mb-1" {...props} />
-                        ),
-                        p: ({node, children, ...props}) => {
-                          if (typeof children === 'string') {
-                            const parts = children.split(/<br\s*\/?\>/gi);
-                            if (parts.length > 1) {
-                              return (
-                                <p className="mb-4" {...props}>
-                                  {parts.map((part, index) => (
-                                    <React.Fragment key={index}>
-                                      {part}
-                                      {index < parts.length - 1 && <br />}
-                                    </React.Fragment>
-                                  ))}
-                                </p>
-                              );
-                            }
-                          }
-                          return <p className="mb-4" {...props}>{children}</p>;
-                        },
-                        h1: ({node, ...props}) => (
-                          <h1 className="text-2xl font-bold mb-4 mt-6" {...props} />
-                        ),
-                        h2: ({node, ...props}) => (
-                          <h2 className="text-xl font-bold mb-3 mt-5" {...props} />
-                        ),
-                        h3: ({node, ...props}) => (
-                          <h3 className="text-lg font-bold mb-2 mt-4" {...props} />
-                        ),
-                        h4: ({node, ...props}) => (
-                          <h4 className="text-base font-bold mb-2 mt-4" {...props} />
-                        )
+                {searchTerm && (
+                  <button 
+                    className="hover:bg-blue-700 p-1 text-white flex items-center justify-center"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setShowRecommendations(true);
+                    }}
+                  >
+                    <Image src="/search.svg" alt="Search" width={32} height={32} />
+                  </button>
+                )}
+              </div>
+              
+              {/* Recommendations dropdown */}
+              {showRecommendations && recommendations.length > 0 && (
+                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
+                  {recommendations.map((rec, index) => (
+                    <Link 
+                      key={index}
+                      href={`/drug-information/${slugify(rec.brand_name)}`}
+                      className="block px-4 py-2 hover:bg-blue-50 text-[#223258] font-['DM_Sans'] text-[16px]"
+                      onClick={() => {
+                        setShowRecommendations(false);
+                        if (searchInputRef.current) {
+                          searchInputRef.current.focus();
+                        }
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
                       }}
                     >
-                      {section.content}
-                    </ReactMarkdown>
-                  </div>
+                      {rec.search_type !== 'direct_brand' ? (
+                        <>
+                          <b>{rec.active_substance.join(', ')}</b> (<i>Brand Name:</i> <b>{rec.brand_name}</b>)
+                        </>
+                      ) : (
+                        <>
+                          <b>{rec.brand_name}</b> (<i>active substances:</i> <b>{rec.active_substance.join(', ')}</b>)
+                        </>
+                      )}
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Links section */}
-        <div className="mb-6">
-          <div className="flex items-center mb-4">
-            <DrugsLinksIcon className="mr-3" />
-            <h3 className="text-lg text-[#273561] font-['DM_Sans'] font-normal">Links</h3>
-          </div>
-          
-          <div className="rounded-lg">
-            <div className="border rounded-[10px] p-4" style={{ borderColor: 'rgba(55, 113, 254, 0.5)', borderWidth: '1px' }}>
-              {drug.pdf_url ? (
-                <a 
-                  href={drug.pdf_url} 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-bold font-['DM_Sans'] text-[#273561] hover:text-[#3771FE] block mb-4 text-lg underline"
+        {/* Scrollable content section */}
+        <div className="flex-1 overflow-y-auto px-4 pb-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Document header */}
+            <div className="flex items-start mb-2">
+              <Image src="/answer-icon.svg" alt="Answer Icon" width={24} height={24} className="mt-1 mr-3" />
+              <h2 className="text-lg text-[#273561] font-['DM_Sans'] font-regular">
+                Drug information from the European Medicines Agency approved Summary of Product Characteristics
+              </h2>
+            </div>
+            
+            {/* Accordion sections */}
+            <div className="mb-8 p-2 rounded-2xl" style={{ background: '#E4ECFF' }}>
+              {sections.map((section) => (
+                <div 
+                  key={section.id}
+                  className="rounded-lg overflow-hidden mb-3"
+                  data-section-number={section.number}
                 >
-                  EMA Document PDF: {drug.name}
-                </a>
-              ) : (
-                <p className="text-gray-600">No PDF document available</p>
-              )}
+                  <button
+                    className="w-full flex justify-between items-center p-4 text-left focus:outline-none bg-white border rounded-[10px] font-['DM_Sans']"
+                    style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}
+                    onClick={() => toggleSection(section.id)}
+                  >
+                    <span className="font-medium">{section.title}</span>
+                    <ChevronDown 
+                      className={`transition-transform ${openSections[section.id] ? 'transform rotate-180' : ''}`} 
+                      size={20} 
+                    />
+                  </button>
+                  {openSections[section.id] && (
+                    <div className="p-4 bg-white border rounded-[10px]" style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}>
+                      <div className="prose max-w-none text-gray-700 font-['DM_Sans']">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            table: ({node, ...props}) => (
+                              <div className="overflow-auto my-4">
+                                <table className="min-w-full divide-y divide-gray-300 border border-gray-300" {...props} />
+                              </div>
+                            ),
+                            thead: ({node, ...props}) => (
+                              <thead className="bg-gray-100" {...props} />
+                            ),
+                            th: ({node, ...props}) => (
+                              <th className="px-4 py-3 text-left text-sm font-medium text-gray-900" {...props} />
+                            ),
+                            td: ({node, children, ...props}) => {
+                              if (typeof children === 'string') {
+                                const parts = children.split(/<br\s*\/?\>/gi);
+                                if (parts.length > 1) {
+                                  return (
+                                    <td className="px-4 py-3 text-sm text-gray-700 border-t border-gray-200" {...props}>
+                                      {parts.map((part, index) => (
+                                        <React.Fragment key={index}>
+                                          {part}
+                                          {index < parts.length - 1 && <br />}
+                                        </React.Fragment>
+                                      ))}
+                                    </td>
+                                  );
+                                }
+                              }
+                              return <td className="px-4 py-3 text-sm text-gray-700 border-t border-gray-200" {...props}>{children}</td>;
+                            },
+                            tr: ({node, ...props}) => (
+                              <tr className="even:bg-gray-50" {...props} />
+                            ),
+                            ul: ({node, ...props}) => (
+                              <ul className="list-disc pl-5 space-y-1 mb-4" {...props} />
+                            ),
+                            ol: ({node, ...props}) => (
+                              <ol className="list-decimal pl-5 space-y-1 mb-4" {...props} />
+                            ),
+                            li: ({node, ...props}) => (
+                              <li className="mb-1" {...props} />
+                            ),
+                            p: ({node, children, ...props}) => {
+                              if (typeof children === 'string') {
+                                const parts = children.split(/<br\s*\/?\>/gi);
+                                if (parts.length > 1) {
+                                  return (
+                                    <p className="mb-4" {...props}>
+                                      {parts.map((part, index) => (
+                                        <React.Fragment key={index}>
+                                          {part}
+                                          {index < parts.length - 1 && <br />}
+                                        </React.Fragment>
+                                      ))}
+                                    </p>
+                                  );
+                                }
+                              }
+                              return <p className="mb-4" {...props}>{children}</p>;
+                            },
+                            h1: ({node, ...props}) => (
+                              <h1 className="text-2xl font-bold mb-4 mt-6" {...props} />
+                            ),
+                            h2: ({node, ...props}) => (
+                              <h2 className="text-xl font-bold mb-3 mt-5" {...props} />
+                            ),
+                            h3: ({node, ...props}) => (
+                              <h3 className="text-lg font-bold mb-2 mt-4" {...props} />
+                            ),
+                            h4: ({node, ...props}) => (
+                              <h4 className="text-base font-bold mb-2 mt-4" {...props} />
+                            )
+                          }}
+                        >
+                          {section.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Links section */}
+            <div className="mb-6">
+              <div className="flex items-center mb-4">
+                <DrugsLinksIcon className="mr-3" />
+                <h3 className="text-lg text-[#273561] font-['DM_Sans'] font-normal">Links</h3>
+              </div>
               
-              <div className="flex items-center">
-                <div className="px-3 py-1 border rounded-[8px] flex items-center font-['DM_Sans']" style={{ borderColor: 'rgba(39, 53, 97, 0.5)', backgroundColor: '#EEF3FF' }}>
-                  <img src="/logo_ema.svg" alt="EMA Logo" className="mr-2" style={{ height: '25px', width: 'auto', display: 'inline-block' }} />
-                  <span className="text-[#273561] text-md">European Medicines Agency</span>
+              <div className="rounded-lg">
+                <div className="border rounded-[10px] p-4" style={{ borderColor: 'rgba(55, 113, 254, 0.5)', borderWidth: '1px' }}>
+                  {drug.pdf_url ? (
+                    <a 
+                      href={drug.pdf_url} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold font-['DM_Sans'] text-[#273561] hover:text-[#3771FE] block mb-4 text-lg underline"
+                    >
+                      EMA Document PDF: {drug.name}
+                    </a>
+                  ) : (
+                    <p className="text-gray-600">No PDF document available</p>
+                  )}
+                  
+                  <div className="flex items-center">
+                    <div className="px-3 py-1 border rounded-[8px] flex items-center font-['DM_Sans']" style={{ borderColor: 'rgba(39, 53, 97, 0.5)', backgroundColor: '#EEF3FF' }}>
+                      <img src="/logo_ema.svg" alt="EMA Logo" className="mr-2" style={{ height: '25px', width: 'auto', display: 'inline-block' }} />
+                      <span className="text-[#273561] text-md">European Medicines Agency</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
-        {/* <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600 italic">
-          <p>Disclaimer: The information provided is for educational purposes only and should not replace professional medical advice. Always consult a healthcare professional before taking any medication.</p>
-        </div> */}
       </div>
     );
   };
