@@ -237,18 +237,11 @@ export default function ChatHistory() {
     <DashboardLayout>
       <div className="p-4 md:p-6 h-full flex flex-col">
         <div className="mb-6 w-full flex justify-center items-center">
-          <h1 className="text-3xl font-bold text-center" style={{ fontFamily: 'DM Sans, sans-serif', color: '#214498' }}>History</h1>
+          <h1 className="hidden md:block text-4xl font-bold text-center" style={{ fontFamily: 'DM Sans, sans-serif', color: '#214498' }}>History</h1>
         </div>
 
         {/* Search and Filters */}
         <div className="mb-6 w-full flex flex-col sm:flex-row gap-4 max-w-3xl mx-auto items-center justify-between">
-          <Link 
-            href="/dashboard"
-            className="h-11 px-4 min-w-[110px] flex items-center justify-center bg-[#214498] text-white rounded-[10px] hover:bg-[#1a3780] transition-colors font-medium gap-2 whitespace-nowrap text-xs md:text-sm md:gap-2 md:px-5"
-            style={{ fontFamily: 'DM Sans, sans-serif' }}
-          >
-            <span className="text-xs md:text-sm font-medium">New Search</span>
-          </Link>
           <div ref={searchRef} className="relative flex-grow min-w-[320px] max-w-xl w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
@@ -259,7 +252,7 @@ export default function ChatHistory() {
               onFocus={() => {
                 if (searchTerm) setShowSuggestions(true)
               }}
-              className="pl-10 pr-10 h-11 w-full border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
+              className="pl-10 pr-10 h-11 w-full border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base border-[#3771fe44] shadow-[0px_0px_11px_#0000000c]"
               style={{ fontFamily: 'DM Sans, sans-serif', borderColor: 'rgba(55, 113, 254, 0.5)' }}
             />
             {searchTerm && (
@@ -340,12 +333,12 @@ export default function ChatHistory() {
                 <div className="space-y-8 max-w-4xl mx-auto">
                   {Object.entries(groups).map(([label, sessions]) => (
                     <div key={label}>
-                      <div className="text-lg font-semibold text-[#214498] mb-3" style={{ fontFamily: 'DM Sans, sans-serif' }}>{label}</div>
+                      <div className="text-lg font-semibold text-[#214498] mb-3" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px' }}>{label}</div>
                       <div className="space-y-4">
                         {sessions.map(session => (
                           <div key={session.id} className="bg-[#F4F7FF] rounded-xl p-4 flex items-start shadow-sm hover:shadow-md transition-shadow relative border" style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}>
-                            <Link href={`/dashboard/${session.id}`} className="flex-1 min-w-0 group">
-                              <div className="text-base font-medium mb-2 group-hover:underline" style={{ fontFamily: 'DM Sans, sans-serif', color: '#223258' }}>
+                            <Link href={`/dashboard/${session.id}`} className="flex-1 min-w-0 group pr-10">
+                              <div className="text-base font-medium mb-2 group-hover:underline truncate overflow-hidden whitespace-nowrap" style={{ fontFamily: 'DM Sans, sans-serif', color: '#223258', fontSize: '16px' }}>
                                 {session.title}
                               </div>
                               <div className="flex items-center text-xs text-[#7A8CA3] font-['DM_Sans']">

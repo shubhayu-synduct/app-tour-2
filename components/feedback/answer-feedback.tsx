@@ -12,15 +12,11 @@ interface AnswerFeedbackProps {
 }
 
 const FEEDBACK_OPTIONS_HELPFUL = [
-  'Relevant', 'Accurate', 'High-evidence', 'Comprehensive', 'Sufficient detail', 'Concise', 'Patient-tailored', 'Current data', 'Well-cited', 'Safe', 'Satisfied', 'Moderate', 'Advanced'
+  'Relevant', 'Accurate', 'High-grade evidence', 'Comprehensive', 'Sufficient detail', 'Concise', 'Patient-tailored', 'Recent Information', 'Well-referenced', 'Highly Satisfied', 'Moderately Satisified'
 ];
 
 const FEEDBACK_OPTIONS_NOT_HELPFUL = [
-  'Not useful', 'Incorrect', 'Low-evidence', 'Missing options', 'Too long', 'Generic', 'Outdated', 'Poorly cited', 'Safety concern', 'Dissatisfied', 'Too short'
-];
-
-const CONTEXT_OPTIONS = [
-  'ER', 'Patient consult', 'Medication info', 'Disease / Ddx', 'Diagnosis', 'Treatment advice', 'Self-study', 'Exam prep'
+  'Not useful', 'Incorrect', 'Low-grade evidence', 'Missing options', 'Too long', 'Generic', 'Outdated', 'Poorly referenced', 'Safety concern', 'Dissatisfied', 'Too short'
 ];
 
 export default function AnswerFeedback({ 
