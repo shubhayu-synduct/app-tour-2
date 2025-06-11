@@ -41,11 +41,11 @@ export default function SignIn() {
           {/* Terms and Privacy */}
           <div className="text-center mt-4 sm:mt-5 md:mt-6 text-xs sm:text-sm text-gray-500 font-['DM_Sans'] w-full px-2">
             By signing in, you agree to our{' '}
-            <Link href="/terms" className="text-[#3771FE] hover:text-[#3771FE] font-['DM_Sans']">
+            <Link href="https://synduct.com/terms-and-conditions/" className="text-[#3771FE] hover:text-[#3771FE] font-['DM_Sans']" target="_blank" rel="noopener noreferrer">
               Terms of use
             </Link>
             {' '}and{' '}
-            <Link href="/privacy" className="text-[#3771FE] hover:text-[#3771FE] font-['DM_Sans']">
+            <Link href="https://synduct.com/privacy-policy/" className="text-[#3771FE] hover:text-[#3771FE] font-['DM_Sans']" target="_blank" rel="noopener noreferrer">
               Privacy policy
             </Link>
           </div>

@@ -78,14 +78,14 @@ function VerifyEmailContent() {
           <div className="flex items-center justify-center mb-4">
             <div className="mr-3">
               <Image
-                src="/icon.svg"
+                src="/full-icon.svg"
                 alt="DR. INFO Logo"
                 width={32}
                 height={32}
                 className="text-white"
               />
             </div>
-            <h1 className="text-2xl font-bold text-blue-800">DR. INFO</h1>
+            {/* <h1 className="text-2xl font-bold text-blue-800">DR. INFO</h1> */}
           </div>
         </div>
 
