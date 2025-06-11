@@ -323,8 +323,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error checking user onboarding status:", error)
       // Default to dashboard on error
-      console.log("Error occurred, setting redirect to dashboard")
-      setRedirectTo('/dashboard')
+      //console.log("Error occurred, setting redirect to dashboard")
+      //setRedirectTo('/dashboard')
     }
   }
 
