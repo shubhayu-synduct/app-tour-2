@@ -182,7 +182,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                     <div className="flex justify-end mt-4 pr-4 pb-4">
                       {citation.source_type === 'guideline_database' && (
                         <button
-                          className="flex flex-row items-center justify-between rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors shadow-lg w-[240px]"
+                          className="flex flex-row items-center justify-center gap-x-2 rounded-[5px] px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors"
                           style={{
                             border: "none"
                           }}
@@ -191,7 +191,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                           <span className="text-white font-regular text-xs sm:text-sm md:text-base" style={{ fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
                             Guideline AI Summary
                           </span>
-                          <svg width="16" height="16" className="sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="16" height="16" className="sm:w-5 sm:h-5 md:w-6 md:h-6 flex-shrink-0 mt-0 md:mt-2" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="7 12 11 8 7 4" />
                             <polyline points="11 12 15 8 11 4" />
                           </svg>
@@ -199,7 +199,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                       )}
                       {citation.source_type === 'drug_database' && (
                         <button
-                          className="flex flex-row items-center justify-between rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors shadow-lg w-[240px]"
+                          className="flex flex-row items-center justify-between rounded-[5px] px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors"
                           style={{
                             border: "none"
                           }}
@@ -208,7 +208,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                           <span className="text-white font-regular text-xs sm:text-sm md:text-base" style={{ fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
                             Clinical Particulars
                           </span>
-                          <svg width="16" height="16" className="sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="16" height="16" className="sm:w-5 sm:h-5 md:w-6 md:h-6 mt-0 md:mt-2" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="7 12 11 8 7 4" />
                             <polyline points="11 12 15 8 11 4" />
                           </svg>

@@ -1,5 +1,6 @@
 export function createCitationTooltip({
   source,
+  source_type,
   title,
   authors,
   journal,
@@ -8,6 +9,7 @@ export function createCitationTooltip({
   url
 }: {
   source?: string;
+  source_type?: string;
   title?: string;
   authors?: string | string[];
   journal?: string;
@@ -28,19 +30,19 @@ export function createCitationTooltip({
   tooltip.style.fontFamily = 'DM Sans, sans-serif';
 
   // Source type label (Guidelines, Drugs, or Internet)
-  let sourceType = '';
-  if (source === 'guideline_database') sourceType = 'Guidelines';
-  else if (source === 'drug_database') sourceType = 'Drugs';
-  else if (source) sourceType = 'Internet';
-  if (sourceType) {
-    const sourceTypeEl = document.createElement('div');
-    sourceTypeEl.textContent = sourceType;
-    sourceTypeEl.style.color = '#8D8D8D';
-    sourceTypeEl.style.fontWeight = '500';
-    sourceTypeEl.style.fontSize = '14px';
-    sourceTypeEl.style.marginBottom = '2px';
-    tooltip.appendChild(sourceTypeEl);
+  let sourceType = 'Internet';  // Default to Internet
+  if (source_type === 'guideline_database') {
+    sourceType = 'Guidelines';
+  } else if (source_type === 'drug_database') {
+    sourceType = 'Drugs';
   }
+  const sourceTypeEl = document.createElement('div');
+  sourceTypeEl.textContent = sourceType;
+  sourceTypeEl.style.color = '#8D8D8D';
+  sourceTypeEl.style.fontWeight = '500';
+  sourceTypeEl.style.fontSize = '14px';
+  sourceTypeEl.style.marginBottom = '2px';
+  tooltip.appendChild(sourceTypeEl);
 
   // Title
   if (title) {

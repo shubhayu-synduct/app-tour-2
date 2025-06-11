@@ -67,7 +67,7 @@ export async function POST(request: Request) {
               </h2>
               <div style=" font-size: 16px; font-weight: 400; font-family: 'DM Sans', sans-serif;">
                 <p>
-                  <span style="font-weight: 500;"><strong>Disclosing Party:</strong></span> <a href="https://synduct.com/contact-us/" style="color: #3771FE; text-decoration: underline;" target="_blank" rel="noopener">Synduct GmbH, Bergmannstrasse 58, 80339 Munich, Germany</a>, represented by Managing Director Valentine Emmanuel.
+                  <span style="font-weight: 500;"><strong>Disclosing Party:</strong></span> <a href="https://synduct.com/" style="color: #3771FE; text-decoration: underline;" target="_blank" rel="noopener">Synduct GmbH, Bergmannstrasse 58, 80339 Munich, Germany</a>, represented by Managing Director Valentine Emmanuel.
                 </p>
                 <p>
                   <span style="font-weight: 500;"><strong>Receiving Party:</strong></span> ${userName} residing at ${address} ("<strong>you</strong>").

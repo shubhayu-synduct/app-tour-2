@@ -65,9 +65,10 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
-                maxHeight: "calc(100% - 28px)"
+                maxHeight: "calc(100% - 28px)",
+                fontSize: "16px"
               }}
-              className="text-sm sm:text-base md:text-lg"
+              className="text-base"
             >
               {citation.title}
             </p>
@@ -117,9 +118,10 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
-                maxHeight: "calc(100% - 28px)"
+                maxHeight: "calc(100% - 28px)",
+                fontSize: "16px"
               }}
-              className="text-sm sm:text-base md:text-lg"
+              className="text-base"
             >
               {citation.title}
             </p>
@@ -146,8 +148,9 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                   fontWeight: 600,
                   fontFamily: "DM Sans, sans-serif",
                   margin: 0,
+                  fontSize: "16px"
                 }}
-                className="text-sm sm:text-base md:text-lg"
+                className="text-base"
               >
                 Show All ({getCitationCount(citations)})
               </p>
