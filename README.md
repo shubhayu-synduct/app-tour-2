@@ -22,7 +22,7 @@ Dr. INFO is a comprehensive web application designed for healthcare professional
 - **Database**: Firestore
 - **Deployment**: Vercel
 
-## Getting Started
+### Getting Started
 
 ### Prerequisites
 
