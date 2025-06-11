@@ -16,7 +16,7 @@ const FEEDBACK_OPTIONS_HELPFUL = [
 ];
 
 const FEEDBACK_OPTIONS_NOT_HELPFUL = [
-  'Incorrect', 'Low-grade evidence', 'Missing options', 'Too long', 'Generic', 'Outdated', 'Poorly referenced', 'Safety concern', 'Dissatisfied', 'Too short'
+  'Incorrect', 'Low-grade evidence', 'Missing information', 'Too long', 'Generic', 'Outdated', 'Poorly referenced', 'Patient safety concern', 'Dissatisfied', 'Too short'
 ];
 
 export default function AnswerFeedback({ 
@@ -191,7 +191,7 @@ export default function AnswerFeedback({
           disabled={submittedFeedback.helpful}
         >
           <ThumbsUp className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-          <span className="text-xs sm:text-sm">Helpful...</span>
+          <span className="text-xs sm:text-sm">Useful...</span>
         </button>
         <button
           onClick={() => handleFeedbackClick('not_helpful')}
@@ -201,7 +201,7 @@ export default function AnswerFeedback({
           disabled={submittedFeedback.not_helpful}
         >
           <ThumbsDown className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-          <span className="text-xs sm:text-sm">Not Helpful...</span>
+          <span className="text-xs sm:text-sm">Not Useful...</span>
         </button>
         <button
           onClick={handleCopyText}
@@ -227,7 +227,7 @@ export default function AnswerFeedback({
         <div className="border border-[#C8C8C8] rounded-lg p-3 sm:p-6 bg-white">
           <form onSubmit={handleSubmit}>
             <div className="mb-3 sm:mb-4">
-              <div className="font-semibold mb-2 text-sm sm:text-base" style={{ color: '#62739B' }}>Why was this answer {showForm === 'helpful' ? 'helpful' : 'not helpful'}?</div>
+              <div className="font-semibold mb-2 text-sm sm:text-base" style={{ color: '#62739B' }}>Why was this answer {showForm === 'helpful' ? 'useful' : 'not useful'}?</div>
               <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2">
                 {(showForm === 'helpful' ? FEEDBACK_OPTIONS_HELPFUL : FEEDBACK_OPTIONS_NOT_HELPFUL).map(option => (
                   <button
@@ -247,7 +247,7 @@ export default function AnswerFeedback({
                   color: '#62739B'
                 }}
                 rows={3}
-                placeholder="Tell us more about your experience (Optional)"
+                placeholder="Tell us more about your experience"
                 value={feedbackText}
                 onChange={e => {
                   setFeedbackText(e.target.value);
