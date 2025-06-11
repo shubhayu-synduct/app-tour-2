@@ -84,7 +84,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - UI components built with Tailwind CSS 
 
 
-# Deploy
+### Deploy
 #### Lets se
 
 ## Miracales Happen
