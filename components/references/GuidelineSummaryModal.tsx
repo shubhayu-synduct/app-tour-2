@@ -457,8 +457,8 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
 
         {/* Blue padding area wraps both panels */}
         <div className="bg-[#F4F7FF] pt-14 px-6 flex-1 flex gap-6 min-h-0">
-          {/* Summary Panel - flex-1 takes remaining space */}
-          <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-300 flex flex-col min-h-0">
+          {/* Summary Panel - 1.3 times wider than source panel */}
+          <div className={`bg-white rounded-xl shadow-sm border border-gray-300 flex flex-col min-h-0 ${isCitationPanelOpen ? 'flex-[1.3]' : 'flex-1'}`}>
             {/* Header */}
             <div className="flex justify-between items-center px-8 pt-6 pb-4 border-b border-gray-200">
               <h2 className="font-medium text-gray-800" style={{ fontSize: '28px', margin: 0 }}>Guideline Summary</h2>
@@ -505,9 +505,9 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
                         lineHeight: 1.2
                       }}
                     >
-                      {citation.link ? (
+                      {(citation.link || citation.url) ? (
                         <a
-                          href={citation.link}
+                          href={citation.link || citation.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="guideline-title-link"
@@ -605,47 +605,35 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
             {/* Follow-up Input - Fixed at bottom inside the container */}
             {(!isLoading && summary) && (
               <div className="p-6">
-                <div className="relative">
+                <div className="flex items-center border-2 rounded-lg p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
                   <input
                     ref={questionInputRef}
                     type="text"
                     placeholder="Ask a question about this guideline..."
-                    className="w-full h-16 p-4 pl-12 pr-16 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg bg-white shadow-sm"
                     value={followupQuestion}
                     onChange={(e) => setFollowupQuestion(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        askFollowupQuestion()
+                        askFollowupQuestion();
                       }
                     }}
                     disabled={isAskingFollowup}
+                    className="flex-1 bg-transparent border-none outline-none text-lg text-gray-700 placeholder-gray-400 pr-12"
                   />
-                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    <Search className="w-6 h-6" />
-                  </div>
-                  <button 
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-white bg-[#3771FE] w-10 h-10 flex items-center justify-center transition-colors ${isAskingFollowup ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
-                    onClick={askFollowupQuestion}
-                    disabled={isAskingFollowup}
-                  >
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
                     {isAskingFollowup ? (
-                      <div className="h-4 w-4 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                      <div className="h-6 w-6 border-t-2 border-b-2 border-[#3771FE] rounded-full animate-spin"></div>
                     ) : (
-                      <Image
-                        src="/search-icon.png"
-                        alt="Search"
-                        width={38}
-                        height={38}
-                      />
+                      <Image src="/search.svg" alt="Search" width={40} height={40} />
                     )}
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Original Source Panel - Collapsible like reference */}
-          <div className={`bg-white rounded-xl shadow-sm border border-gray-300 transition-all duration-300 ease-in-out flex flex-col ${isCitationPanelOpen ? 'w-[28rem]' : 'w-16'}`}>
+          <div className={`bg-white rounded-xl shadow-sm border border-gray-300 transition-all duration-300 ease-in-out flex flex-col ${isCitationPanelOpen ? 'flex-1 min-w-80' : 'w-16'}`}>
             {/* Header */}
             <div className={`flex items-center pt-6 pb-4 border-b border-gray-200 ${isCitationPanelOpen ? 'px-4' : 'px-1'}`} style={{ minHeight: '80px' }}>
               <button
@@ -688,7 +676,27 @@ export const GuidelineSummaryModal: React.FC<GuidelineSummaryModalProps> = ({ op
                 ) : (
                   <div className="flex items-center justify-center h-full">
                     <span className="text-gray-500 text-center" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                      Click on a reference number to view the original source
+                      Click on a reference number
+                      <span 
+                        className="reference-number"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#E0E9FF',
+                          color: '#1F2937',
+                          width: '18px',
+                          height: '18px',
+                          borderRadius: '50%',
+                          fontSize: '0.75rem',
+                          marginLeft: '4px',
+                          verticalAlign: 'super',
+                          position: 'relative',
+                          top: '-2px'
+                        }}
+                      >
+                        1
+                      </span> to view the original source
                     </span>
                   </div>
                 )}

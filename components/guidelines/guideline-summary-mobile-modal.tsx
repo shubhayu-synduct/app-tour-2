@@ -60,6 +60,7 @@ export default function GuidelineSummaryMobileModal({
   url 
 }: GuidelineSummaryMobileModalProps) {
   const router = useRouter();
+  const effectiveLink = link || url;
   const [activeTab, setActiveTab] = useState('summary');
   const [summary, setSummary] = useState<Summary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -351,7 +352,13 @@ export default function GuidelineSummaryMobileModal({
   };
 
   const handleSearchClick = () => {
+    console.log('Dashboard button clicked');
     router.push("/dashboard");
+  };
+
+  const handleCloseClick = () => {
+    console.log('Close button clicked');
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -363,8 +370,9 @@ export default function GuidelineSummaryMobileModal({
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <button 
-              onClick={onClose}
+              onClick={handleCloseClick}
               className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-[#214498] rounded-[5px] hover:bg-[#1B3B8B] transition-colors"
+              style={{ zIndex: 60 }}
             >
               <Image
                 src="/double_back.svg"
@@ -382,45 +390,36 @@ export default function GuidelineSummaryMobileModal({
               Guideline Summary
             </h1>
           </div>
-          <div 
-            role="button"
-            tabIndex={0}
+          <button
             onClick={handleSearchClick}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleSearchClick();
-              }
-            }}
-            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer select-none"
-            style={{ touchAction: 'manipulation' }}
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            style={{ zIndex: 60 }}
           >
-            <div className="w-full h-full flex items-center justify-center">
-              <svg 
-                width="28" 
-                height="28" 
-                viewBox="0 0 28 28" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-                className="pointer-events-none"
-                aria-hidden="true"
-              >
-                <g clipPath="url(#clip0_3494_13766)">
-                  <g clipPath="url(#clip1_3494_13766)">
-                    <path d="M19.5841 19.9241L22.2746 22.6164M21.1977 15.6164C21.1977 12.3452 18.5459 9.69336 15.2746 9.69336C12.0034 9.69336 9.35156 12.3452 9.35156 15.6164C9.35156 18.8877 12.0034 21.5395 15.2746 21.5395C18.5459 21.5395 21.1977 18.8877 21.1977 15.6164Z" stroke="#223258" strokeWidth="1.61538" strokeLinecap="square"/>
-                    <path d="M6.65595 22.6151H2.88672V18.8459V10.7689V3.23047H6.65595H18.5021H22.2713V6.9997" stroke="#223258" strokeWidth="1.61538" strokeLinecap="square"/>
-                  </g>
+            <svg 
+              width="28" 
+              height="28" 
+              viewBox="0 0 28 28" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              className="pointer-events-none"
+              aria-hidden="true"
+            >
+              <g clipPath="url(#clip0_3494_13766)">
+                <g clipPath="url(#clip1_3494_13766)">
+                  <path d="M19.5841 19.9241L22.2746 22.6164M21.1977 15.6164C21.1977 12.3452 18.5459 9.69336 15.2746 9.69336C12.0034 9.69336 9.35156 12.3452 9.35156 15.6164C9.35156 18.8877 12.0034 21.5395 15.2746 21.5395C18.5459 21.5395 21.1977 18.8877 21.1977 15.6164Z" stroke="#223258" strokeWidth="1.61538" strokeLinecap="square"/>
+                  <path d="M6.65595 22.6151H2.88672V18.8459V10.7689V3.23047H6.65595H18.5021H22.2713V6.9997" stroke="#223258" strokeWidth="1.61538" strokeLinecap="square"/>
                 </g>
-                <defs>
-                  <clipPath id="clip0_3494_13766">
-                    <rect width="28" height="28" fill="white"/>
-                  </clipPath>
-                  <clipPath id="clip1_3494_13766">
-                    <rect width="28" height="28" fill="white" transform="translate(-0.339844)"/>
-                  </clipPath>
-                </defs>
-              </svg>
-            </div>
-          </div>
+              </g>
+              <defs>
+                <clipPath id="clip0_3494_13766">
+                  <rect width="28" height="28" fill="white"/>
+                </clipPath>
+                <clipPath id="clip1_3494_13766">
+                  <rect width="28" height="28" fill="white" transform="translate(-0.339844)"/>
+                </clipPath>
+              </defs>
+            </svg>
+          </button>
         </div>
 
         {/* Tabs */}
@@ -449,13 +448,25 @@ export default function GuidelineSummaryMobileModal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 h-full">
+        <div className="flex-1 overflow-y-auto p-6 h-full pb-20">
           {activeTab === 'summary' ? (
             <div className="space-y-6">
               {/* Title and Meta */}
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
-                  {summary?.title || guidelineTitle}
+                  {effectiveLink ? (
+                    <a
+                      href={effectiveLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="guideline-title-link"
+                      style={{ color: '#1F2937', cursor: 'pointer', transition: 'color 0.2s' }}
+                    >
+                      {summary?.title || guidelineTitle}
+                    </a>
+                  ) : (
+                    summary?.title || guidelineTitle
+                  )}
                 </h2>
                 <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
                   {year && (
@@ -492,7 +503,7 @@ export default function GuidelineSummaryMobileModal({
                         )}
                         {message.answer && (
                           <>
-                            <div className="flex items-center gap-2 mb-2 sticky top-0 bg-white z-10 py-2">
+                            <div className="flex items-center gap-2 mb-2 top-0 bg-white z-10 py-2">
                               <div className="flex items-center text-[#3771FE]">
                                 <Image
                                   src="/answer-icon.svg"
@@ -506,15 +517,13 @@ export default function GuidelineSummaryMobileModal({
                                 {message.type === 'main' ? 'Summary' : 'Answer'}
                               </span>
                             </div>
-                            <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
-                              <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
-                                <GuidelineMarkdown 
-                                  content={message.answer}
-                                  sources={message.sources || null}
-                                  pageReferences={message.page_references || null}
-                                  onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
-                                />
-                              </div>
+                            <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
+                              <GuidelineMarkdown 
+                                content={message.answer}
+                                sources={message.sources || null}
+                                pageReferences={message.page_references || null}
+                                onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
+                              />
                             </div>
                           </>
                         )}
@@ -526,31 +535,6 @@ export default function GuidelineSummaryMobileModal({
                       </div>
                     )}
                     <div ref={answerEndRef} />
-                  </div>
-                )}
-                
-                {/* Search Bar */}
-                {(!isLoading && summary) && (
-                  <div className="relative mt-4 sm:mt-6">
-                    <div className="flex items-center border-2 rounded-lg p-2 sm:p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
-                      <input
-                        ref={questionInputRef}
-                        type="text"
-                        placeholder="Ask a question about this guideline..."
-                        value={followupQuestion}
-                        onChange={(e) => setFollowupQuestion(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            askFollowupQuestion();
-                          }
-                        }}
-                        disabled={isAskingFollowup}
-                        className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400 pr-10"
-                      />
-                      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
-                        <img src="/search.svg" alt="Search" width={28} height={28} />
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
@@ -613,113 +597,33 @@ export default function GuidelineSummaryMobileModal({
                 </span> to view the Original Source
               </p>
             </div>
-          ) : activeTab === 'summary' ? (
-            <div className="space-y-6">
-              {/* Title and Meta */}
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
-                  {summary?.title || guidelineTitle}
-                </h2>
-                <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
-                  {year && (
-                    <span className="px-2 sm:px-3 py-1 bg-[#E0E9FF] text-[#3771FE] rounded-full text-xs sm:text-sm font-medium">
-                      {year}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Summary Section */}
-              <div>
-                {isLoading ? (
-                  <div className="flex flex-col justify-center items-center h-40">
-                    <div className="animate-spin rounded-full h-10 sm:h-12 w-10 sm:w-12 border-t-2 border-b-2 border-[#3771FE] mb-3 sm:mb-4"></div>
-                    <div className="text-sm sm:text-base text-gray-500" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-                      Generating AI Summary for this Guideline ...
-                    </div>
-                  </div>
-                ) : error ? (
-                  <div className="text-red-500 text-sm sm:text-base">{error}</div>
-                ) : (
-                  <div className="space-y-4">
-                    {chatHistory.map((message, index) => (
-                      <div key={index} className={`mb-3 sm:mb-4 ${index > 0 ? 'mt-6 sm:mt-8 border-t pt-4 sm:pt-6' : ''}`}>
-                        {message.question && (
-                          <div className="mb-3 sm:mb-4">
-                            <div className="bg-[#F4F7FF] p-2 sm:p-3 rounded-lg">
-                              <p style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 500, fontSize: '16px sm:text-lg md:text-xl', color: '#223258', margin: 0 }}>
-                                {message.question}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        {message.answer && (
-                          <>
-                            <div className="flex items-center gap-2 mb-2 sticky top-0 bg-white z-10 py-2">
-                              <div className="flex items-center text-[#3771FE]">
-                                <Image
-                                  src="/answer-icon.svg"
-                                  alt="Answer icon"
-                                  width={20}
-                                  height={20}
-                                  className="sm:w-6 sm:h-6"
-                                />
-                              </div>
-                              <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 300, fontSize: '14px sm:text-base md:text-lg', color: '#262F4D' }}>
-                                {message.type === 'main' ? 'Summary' : 'Answer'}
-                              </span>
-                            </div>
-                            <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
-                              <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
-                                <GuidelineMarkdown 
-                                  content={message.answer}
-                                  sources={message.sources || null}
-                                  pageReferences={message.page_references || null}
-                                  onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
-                                />
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                    {followupError && (
-                      <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded mb-3 sm:mb-4 text-sm sm:text-base">
-                        {followupError}
-                      </div>
-                    )}
-                    <div ref={answerEndRef} />
-                  </div>
-                )}
-                
-                {/* Search Bar */}
-                {(!isLoading && summary) && (
-                  <div className="relative mt-4 sm:mt-6">
-                    <div className="flex items-center border-2 rounded-lg p-2 sm:p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
-                      <input
-                        ref={questionInputRef}
-                        type="text"
-                        placeholder="Ask a question about this guideline..."
-                        value={followupQuestion}
-                        onChange={(e) => setFollowupQuestion(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            askFollowupQuestion();
-                          }
-                        }}
-                        disabled={isAskingFollowup}
-                        className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400 pr-10"
-                      />
-                      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
-                        <img src="/search.svg" alt="Search" width={28} height={28} />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           ) : null}
         </div>
+
+        {/* Fixed Search Bar */}
+        {(!isLoading && summary && activeTab === 'summary') && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white p-4 z-50">
+            <div className="flex items-center border-2 rounded-lg p-2 sm:p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
+              <input
+                ref={questionInputRef}
+                type="text"
+                placeholder="Ask a question about this guideline..."
+                value={followupQuestion}
+                onChange={(e) => setFollowupQuestion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    askFollowupQuestion();
+                  }
+                }}
+                disabled={isAskingFollowup}
+                className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400 pr-10"
+              />
+              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
+                <img src="/search.svg" alt="Search" width={28} height={28} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`
@@ -894,6 +798,10 @@ export default function GuidelineSummaryMobileModal({
         }
         .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
           font-weight: 700 !important;
+        }
+
+        .guideline-title-link:hover {
+          color: #3771FE !important;
         }
       `}</style>
     </div>

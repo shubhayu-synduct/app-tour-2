@@ -436,7 +436,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
         </div>
       </div>
 
-      {selectedGuideline && (
+      {isModalOpen && selectedGuideline && (
         isMobile ? (
           <GuidelineSummaryMobileModal
             isOpen={isModalOpen}

@@ -46,6 +46,7 @@ function decodeUnicode(str: string): string {
 }
 
 export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open, onClose, citation }) => {
+  const effectiveLink = citation.link || citation.url;
   const [activeTab, setActiveTab] = useState('summary');
   const [summary, setSummary] = useState<Summary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -346,14 +347,54 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
           <div className="flex items-center gap-3">
             <button 
               onClick={onClose}
-              className="p-2 bg-[#214498] text-white rounded-lg hover:bg-[#1B3B8B] transition-colors"
+              className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-[#214498] rounded-[5px] hover:bg-[#1B3B8B] transition-colors"
+              style={{ zIndex: 60 }}
             >
-              <ArrowLeft size={20} />
+              <Image
+                src="/double_back.svg"
+                alt="Back"
+                width={32}
+                height={32}
+                className="w-6 h-6 sm:w-8 sm:h-8"
+                priority
+              />
             </button>
-            <h1 className="text-xl font-semibold text-gray-800">Guideline Summary</h1>
+            <h1 
+              className="text-xl font-semibold absolute left-1/2 transform -translate-x-1/2"
+              style={{ fontFamily: 'DM Sans, sans-serif', color: '#214498', textAlign: 'center', width: '100%', fontSize: '20px' }}
+            >
+              Guideline Summary
+            </h1>
           </div>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Search size={20} className="text-gray-600" />
+          <button
+            onClick={() => window.location.href = '/dashboard'}
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            style={{ zIndex: 60 }}
+          >
+            <svg 
+              width="28" 
+              height="28" 
+              viewBox="0 0 28 28" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              className="pointer-events-none"
+              aria-hidden="true"
+            >
+              <g clipPath="url(#clip0_3494_13766)">
+                <g clipPath="url(#clip1_3494_13766)">
+                  <path d="M19.5841 19.9241L22.2746 22.6164M21.1977 15.6164C21.1977 12.3452 18.5459 9.69336 15.2746 9.69336C12.0034 9.69336 9.35156 12.3452 9.35156 15.6164C9.35156 18.8877 12.0034 21.5395 15.2746 21.5395C18.5459 21.5395 21.1977 18.8877 21.1977 15.6164Z" stroke="#223258" strokeWidth="1.61538" strokeLinecap="square"/>
+                  <path d="M6.65595 22.6151H2.88672V18.8459V10.7689V3.23047H6.65595H18.5021H22.2713V6.9997" stroke="#223258" strokeWidth="1.61538" strokeLinecap="square"/>
+                </g>
+              </g>
+              <defs>
+                <clipPath id="clip0_3494_13766">
+                  <rect width="28" height="28" fill="white"/>
+                </clipPath>
+                <clipPath id="clip1_3494_13766">
+                  <rect width="28" height="28" fill="white" transform="translate(-0.339844)"/>
+                </clipPath>
+              </defs>
+            </svg>
           </button>
         </div>
 
@@ -377,20 +418,31 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                 ? 'text-[#3771FE] border-b-2 border-[#3771FE] bg-[#D3DFFE]'
                 : 'text-[#263969] hover:text-gray-800'
             }`}
-            style={{ fontFamily: 'DM Sans, sans-serif' }}
           >
             Original Source
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 h-full">
+        <div className="flex-1 overflow-y-auto p-6 h-full pb-20">
           {activeTab === 'summary' ? (
             <div className="space-y-6">
               {/* Title and Meta */}
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
-                  {summary?.title || citation.title}
+                  {effectiveLink ? (
+                    <a
+                      href={effectiveLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="guideline-title-link"
+                      style={{ color: '#1F2937', cursor: 'pointer', transition: 'color 0.2s' }}
+                    >
+                      {summary?.title || citation.title}
+                    </a>
+                  ) : (
+                    summary?.title || citation.title
+                  )}
                 </h2>
                 <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
                   {citation.year && (
@@ -432,7 +484,7 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                         )}
                         {message.answer && (
                           <>
-                            <div className="flex items-center gap-2 mb-2 sticky top-0 bg-white z-10 py-2">
+                            <div className="flex items-center gap-2 mb-2 top-0 bg-white z-10 py-2">
                               <div className="flex items-center text-[#3771FE]">
                                 <Image
                                   src="/answer-icon.svg"
@@ -446,15 +498,13 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                                 {message.type === 'main' ? 'Summary' : 'Answer'}
                               </span>
                             </div>
-                            <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
-                              <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
-                                <GuidelineMarkdown 
-                                  content={message.answer}
-                                  sources={message.sources || null}
-                                  pageReferences={message.page_references || null}
-                                  onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
-                                />
-                              </div>
+                            <div className="prose prose-sm sm:prose-base max-w-none" style={{ fontFamily: 'DM Sans, sans-serif', color: '#1F2937', fontSize: '14px sm:text-base md:text-lg' }}>
+                              <GuidelineMarkdown 
+                                content={message.answer}
+                                sources={message.sources || null}
+                                pageReferences={message.page_references || null}
+                                onCitationClick={(citation, index) => handleReferenceClick(citation, index || 0)}
+                              />
                             </div>
                           </>
                         )}
@@ -468,31 +518,6 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                     <div ref={answerEndRef} />
                   </div>
                 )}
-                
-                {/* Search Bar */}
-                {(!isLoading && summary) && (
-                  <div className="relative mt-4 sm:mt-6">
-                    <div className="flex items-center border-2 rounded-lg p-2 sm:p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
-                      <input
-                        ref={questionInputRef}
-                        type="text"
-                        placeholder="Ask a question about this guideline..."
-                        value={followupQuestion}
-                        onChange={(e) => setFollowupQuestion(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            askFollowupQuestion();
-                          }
-                        }}
-                        disabled={isAskingFollowup}
-                        className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400 pr-10"
-                      />
-                      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
-                        <img src="/search.svg" alt="Search" width={28} height={28} />
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ) : activeTab === 'original' && activeReference ? (
@@ -504,6 +529,7 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
                   Page {activeReference.number}
                 </span>
               </div>
+
               {/* Content */}
               <div className="space-y-4">
                 {activeReference.highlightedRange ? (
@@ -554,6 +580,31 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
             </div>
           ) : null}
         </div>
+
+        {/* Fixed Search Bar */}
+        {(!isLoading && summary && activeTab === 'summary') && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white p-4 z-50">
+            <div className="flex items-center border-2 rounded-lg p-2 sm:p-4 w-full relative" style={{ borderColor: 'rgba(55, 113, 254, 0.27)', background: 'white' }}>
+              <input
+                ref={questionInputRef}
+                type="text"
+                placeholder="Ask a question about this guideline..."
+                value={followupQuestion}
+                onChange={(e) => setFollowupQuestion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    askFollowupQuestion();
+                  }
+                }}
+                disabled={isAskingFollowup}
+                className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-gray-700 placeholder-gray-400 pr-10"
+              />
+              <div className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer" onClick={askFollowupQuestion}>
+                <Image src="/search.svg" alt="Search" width={28} height={28} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`
@@ -728,6 +779,10 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
         }
         .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
           font-weight: 700 !important;
+        }
+
+        .guideline-title-link:hover {
+          color: #3771FE !important;
         }
       `}</style>
     </div>
