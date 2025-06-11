@@ -108,6 +108,11 @@ interface DrInfoSummaryData {
   references?: any[];
   feedback?: MessageFeedback;
   thread_id?: string;
+  sections?: Array<{
+    id: string;
+    title: string;
+    content: string;
+  }>;
 }
 
 const KNOWN_STATUSES: StatusType[] = ['processing', 'searching', 'summarizing', 'formatting', 'complete'];
@@ -200,6 +205,17 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     fetchUserCountry();
   }, [user]);
 
+  // Add this new useEffect after the existing useEffects
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastAssistantMsg = [...messages].reverse().find(msg => msg.type === 'assistant');
+      if (lastAssistantMsg?.answer?.citations) {
+        console.log('[CITATIONS] Setting citations from messages:', lastAssistantMsg.answer.citations);
+        setActiveCitations(lastAssistantMsg.answer.citations);
+      }
+    }
+  }, [messages]);
+
   const loadChatSession = async (sessionId: string) => {
     setIsChatLoading(true);
     try {
@@ -261,6 +277,11 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
           const citations = (lastAssistantMsg.answer.citations && typeof lastAssistantMsg.answer.citations === 'object')
             ? lastAssistantMsg.answer.citations
             : {};
+          
+          // Set activeCitations immediately when loading from history
+          console.log('[LOAD] Setting citations from history:', citations);
+          setActiveCitations(citations);
+          
           setStreamedContent({
             mainSummary: lastAssistantMsg.answer.mainSummary,
             sections: lastAssistantMsg.answer.sections || []
@@ -271,10 +292,12 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             citations,
             status: 'complete',
             references: []
-          } as DrInfoSummaryData);
+          });
+          
           if (citations && Object.keys(citations).length > 0) {
             setStatus('complete');
           }
+          
           console.log('[LOAD] Raw assistant content:', lastAssistantMsg.answer.mainSummary);
           console.log('[LOAD] Raw assistant citations:', citations);
           console.log('[LOAD] streamedContent:', {
@@ -313,8 +336,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         
         if (typeof window !== 'undefined') {
           const storedQuery = sessionStorage.getItem(`chat_query_${sessionId}`);
-        if (storedQuery) {
-          setQuery(storedQuery);
+          if (storedQuery) {
+            setQuery(storedQuery);
             setLastQuestion(storedQuery);
             sessionStorage.removeItem(`chat_query_${sessionId}`);
           }
@@ -605,6 +628,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         visibility: visible;
         pointer-events: auto;
       }
+
+      .citation-reference:not(:hover) .citation-tooltip {
+        transition-delay: 0.4s;
+      }
       
       .citation-tooltip-title {
         color: #0284c7;
@@ -704,6 +731,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         const authors = ref.getAttribute('data-citation-authors');
         const year = ref.getAttribute('data-citation-year');
         const source = ref.getAttribute('data-citation-source');
+        const source_type = ref.getAttribute('data-citation-source-type');
         const url = ref.getAttribute('data-citation-url');
         const journal = ref.getAttribute('data-citation-journal') || undefined;
         const doi = ref.getAttribute('data-citation-doi') || undefined;
@@ -716,6 +744,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             })
           : createCitationTooltip({
               source: source || undefined,
+              source_type: source_type || undefined,
               title: title || undefined,
               authors: authors || undefined,
               journal: journal || undefined,
@@ -768,6 +797,16 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         if (hoveredElement.closest('.citation-tooltip') === activeTooltip || 
             hoveredElement.closest('.citation-reference')?.contains(activeTooltip)) {
           (activeTooltip as HTMLElement).style.pointerEvents = 'auto';
+        } else {
+          // Add timeout to close tooltip after 1 second
+          setTimeout(() => {
+            const currentTooltip = document.querySelector('.citation-tooltip[style*="opacity: 1"]');
+            if (currentTooltip && !currentTooltip.matches(':hover')) {
+              (currentTooltip as HTMLElement).style.opacity = '0';
+              (currentTooltip as HTMLElement).style.visibility = 'hidden';
+              (currentTooltip as HTMLElement).style.pointerEvents = 'none';
+            }
+          }, 1000);
         }
       }
     };
@@ -891,13 +930,25 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                   answer: {
                     mainSummary: data?.processed_content || '',
                     sections: [],
-                    citations: data?.citations || {},
+                    citations: data?.citations ? Object.entries(data.citations).reduce((acc, [key, citation]) => ({
+                      ...acc,
+                      [key]: {
+                        ...citation,
+                        source_type: citation.source_type || 'internet'
+                      }
+                    }), {}) : {},
                   },
                 }
               : msg
           ));
 
-          setActiveCitations(data?.citations || {});
+          setActiveCitations(data?.citations ? Object.entries(data.citations).reduce((acc, [key, citation]) => ({
+            ...acc,
+            [key]: {
+              ...citation,
+              source_type: citation.source_type || 'internet'
+            }
+          }), {}) : {});
           setStatus('complete');
           setIsLoading(false);
           setTimeout(() => {
