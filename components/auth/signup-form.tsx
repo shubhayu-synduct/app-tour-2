@@ -98,15 +98,23 @@ export function SignUpForm() {
 
     try {
       const { getFirebaseAuth } = await import("@/lib/firebase")
-      const { createUserWithEmailAndPassword } = await import("firebase/auth")
+      const { createUserWithEmailAndPassword, sendEmailVerification } = await import("firebase/auth")
 
       const auth = await getFirebaseAuth()
       if (!auth) {
         throw new Error("Firebase not initialized")
       }
 
-      await createUserWithEmailAndPassword(auth, email, password)
-      router.push("/onboarding")
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      
+      // Send email verification
+      await sendEmailVerification(userCredential.user, {
+        url: `${window.location.origin}/verify-email`,
+        handleCodeInApp: true
+      })
+      
+      // Show verification modal instead of redirecting
+      setShowVerificationModal(true)
     } catch (err: any) {
       console.error("Error during sign up:", err)
       setError(parseFirebaseError(err))

@@ -7,12 +7,43 @@ import { X } from "lucide-react"
 interface VerificationModalProps {
   email: string
   onClose: () => void
+  redirectToLogin?: boolean
 }
 
-export function VerificationModal({ email, onClose }: VerificationModalProps) {
+export function VerificationModal({ email, onClose, redirectToLogin = true }: VerificationModalProps) {
   const [resending, setResending] = useState(false)
   const [resendMessage, setResendMessage] = useState("")
   const router = useRouter()
+
+  // Check email verification status periodically
+  useEffect(() => {
+    if (!redirectToLogin) {
+      const checkEmailVerification = async () => {
+        try {
+          const { getAuth } = await import("firebase/auth")
+          const auth = getAuth()
+          const user = auth.currentUser
+          
+          if (user) {
+            await user.reload() // Refresh user data from Firebase
+            if (user.emailVerified) {
+              console.log("Email verified, closing modal")
+              onClose()
+              // Trigger a page refresh to update auth state
+              window.location.reload()
+            }
+          }
+        } catch (error) {
+          console.error("Error checking email verification:", error)
+        }
+      }
+
+      // Check every 3 seconds
+      const interval = setInterval(checkEmailVerification, 3000)
+      
+      return () => clearInterval(interval)
+    }
+  }, [onClose, redirectToLogin])
 
   // Prevent closing the modal by clicking outside or pressing escape
   useEffect(() => {
@@ -68,7 +99,12 @@ export function VerificationModal({ email, onClose }: VerificationModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 modal-overlay">
       <div className="bg-[#F4F7FF] rounded-xl shadow-lg border border-[#3771FE80] p-8 max-w-md w-full relative">
         <button
-          onClick={onClose}
+          onClick={() => {
+            onClose()
+            if (redirectToLogin) {
+              router.push("/login")
+            }
+          }}
           className="absolute top-4 right-4 text-blue-600 font-bold hover:text-blue-800"
         >
           <X size={20} />
@@ -105,7 +141,12 @@ export function VerificationModal({ email, onClose }: VerificationModalProps) {
               {resending ? "Sending..." : "Resend Verification Email"}
             </button>
             <button
-              onClick={onClose}
+              onClick={() => {
+                onClose()
+                if (redirectToLogin) {
+                  router.push("/login")
+                }
+              }}
               className="w-full bg-gray-50 text-gray-600 border border-gray-200 py-2 px-4 rounded-lg hover:bg-[#C6D7FF]/50 transition duration-200 font-medium"
             >
               Return to Login
