@@ -51,7 +51,7 @@ export function EmailVerifiedModal({ isOpen, onClose }: EmailVerifiedModalProps)
             onClick={handleSignIn}
             className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] font-medium font-['DM_Sans'] transition duration-200 hover:bg-[#C6D7FF]"
           >
-            Continue to Sign In
+            Continue to Onboarding
           </button>
         </div>
       </div>
