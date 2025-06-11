@@ -142,6 +142,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const router = useRouter()
   const pathname = usePathname()
   const [activeMode, setActiveMode] = useState<'instant' | 'research'>(initialMode);
+  const answerIconRef = useRef<HTMLDivElement>(null);
 
   const contentRef = useRef<HTMLDivElement>(null)
   const inputAnchorRef = useRef<HTMLDivElement>(null)
@@ -1013,6 +1014,13 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     return content.replace(/\[citation\]/g, () => `[${citationCount++}]`);
   };
 
+  // Add useEffect for scrolling to answer icon when status changes
+  useEffect(() => {
+    if (status && status !== 'complete' && answerIconRef.current) {
+      answerIconRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [status]);
+
   return (
     <div className="p-2 sm:p-4 md:p-6 h-full flex flex-col relative">
       <div className="flex-1 flex flex-col">
@@ -1044,7 +1052,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-start gap-2 mb-3 sm:mb-4">
+                          <div ref={idx === messages.length - 1 ? answerIconRef : null} className="flex items-start gap-2 mb-3 sm:mb-4">
                             <div className="flex-shrink-0 mt-1">
                               <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
                                 <img src="/answer-icon.svg" alt="Answer" className="w-5 h-5 sm:w-6 sm:h-6" />
