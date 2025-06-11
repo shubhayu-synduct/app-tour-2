@@ -10,7 +10,7 @@ interface VerificationModalProps {
   redirectToLogin?: boolean
 }
 
-export function VerificationModal({ email, onClose, redirectToLogin = true }: VerificationModalProps) {
+export function VerificationModal({ email, onClose, redirectToLogin = false }: VerificationModalProps) {
   const [resending, setResending] = useState(false)
   const [resendMessage, setResendMessage] = useState("")
   const router = useRouter()
