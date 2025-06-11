@@ -253,10 +253,6 @@ export default function Onboarding() {
   }, []);
 
   const specialtiesOptions = [
-    { value: "family-medicine", label: "Family Medicine" },
-    { value: "internal-medicine", label: "Internal Medicine" },
-    { value: "pediatrics", label: "Pediatrics" },
-    { value: "geriatrics", label: "Geriatrics" },
     { value: "anesthesiology", label: "Anesthesiology" },
     { value: "allergy-immunology", label: "Allergy & Immunology" },
     { value: "cardiology", label: "Cardiology" },
@@ -264,9 +260,12 @@ export default function Onboarding() {
     { value: "dermatology", label: "Dermatology" },
     { value: "emergency-medicine", label: "Emergency Medicine" },
     { value: "endocrinology", label: "Endocrinology" },
+    { value: "family-medicine", label: "Family Medicine" },
     { value: "gastroenterology", label: "Gastroenterology" },
+    { value: "geriatrics", label: "Geriatrics" },
     { value: "hematology", label: "Hematology" },
     { value: "infectious-disease", label: "Infectious Disease" },
+    { value: "internal-medicine", label: "Internal Medicine" },
     { value: "microbiology", label: "Microbiology" },
     { value: "nephrology", label: "Nephrology" },
     { value: "neurology", label: "Neurology" },
@@ -278,6 +277,7 @@ export default function Onboarding() {
     { value: "otolaryngology", label: "Otolaryngology" },
     { value: "palliative-care", label: "Palliative Care Medicine" },
     { value: "pathology", label: "Pathology" },
+    { value: "pediatrics", label: "Pediatrics" },
     { value: "psychiatry", label: "Psychiatry" },
     { value: "pulmonology", label: "Pulmonology" },
     { value: "radiology", label: "Radiology" },
@@ -377,7 +377,7 @@ export default function Onboarding() {
             Complete Registration
           </h2>
           
-          {/* Email Verification Reminder */}
+          {/* Email Verification Reminder
           {user && !user.emailVerified && !user.providerData.some(provider => 
             provider.providerId === 'google.com' || provider.providerId === 'microsoft.com'
           ) && (
@@ -398,7 +398,7 @@ export default function Onboarding() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
           
           {/* Step Indicator */}
           <div className="flex items-center justify-center mb-4 sm:mb-6">
@@ -1054,7 +1054,7 @@ export default function Onboarding() {
                       style={{ backgroundColor: !termsAgreed ? '#DEE8FF' : undefined, minWidth: '20px', minHeight: '20px' }}
                     />
                     <label htmlFor="terms-agreement" className="cursor-pointer" style={{ fontFamily: 'DM Sans', fontSize: '12px', fontWeight: 400, color: '#000' }}>
-                      I agree to the Terms of Use and Privacy Policy
+                      I agree to the <a href="https://synduct.com/terms-and-conditions/" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-[#3771FE] transition-colors duration-200">Terms of Use</a> and <a href="https://synduct.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-[#3771FE] transition-colors duration-200">Privacy Policy</a>
                     </label>
                   </div>
                 </div>
