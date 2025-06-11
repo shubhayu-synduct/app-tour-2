@@ -5,21 +5,74 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { getAuth, applyActionCode } from "firebase/auth"
 import Image from "next/image"
 import { getFirebaseAuth } from "@/lib/firebase"
-import { EmailVerifiedModal } from "@/components/auth/email-verified-modal"
+import { useAuth } from "@/hooks/use-auth"
 
 function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user } = useAuth()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
   const [verified, setVerified] = useState(false)
   const [alreadyVerified, setAlreadyVerified] = useState(false)
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [redirecting, setRedirecting] = useState(false)
 
-  // Debug logging
-  useEffect(() => {
-    console.log("showSuccessModal state changed:", showSuccessModal)
-  }, [showSuccessModal])
+  const handleSuccessfulVerification = async () => {
+    if (!user) {
+      console.log("No user found after verification, redirecting to login")
+      router.push("/login")
+      return
+    }
+
+    setRedirecting(true)
+    
+    try {
+      // Check user's onboarding status
+      const { getFirebaseFirestore } = await import("@/lib/firebase")
+      const { doc, getDoc } = await import("firebase/firestore")
+      
+      const db = await getFirebaseFirestore()
+      if (!db) {
+        console.error("Firestore not available")
+        router.push("/dashboard")
+        return
+      }
+      
+      console.log("Checking onboarding status for user:", user.uid)
+      const userDoc = await getDoc(doc(db, "users", user.uid))
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data()
+        console.log("User document found:", userData)
+        if (userData?.onboardingCompleted) {
+          console.log("User onboarding completed, redirecting to dashboard")
+          router.push('/dashboard')
+        } else {
+          console.log("User onboarding not completed, redirecting to onboarding")
+          router.push('/onboarding')
+        }
+      } else {
+        console.log("User document does not exist, creating new user and redirecting to onboarding")
+        
+        // Create user document for new users
+        const { setDoc } = await import("firebase/firestore")
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          displayName: user.displayName,
+          emailVerified: user.emailVerified,
+          onboardingCompleted: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        
+        router.push('/onboarding')
+      }
+    } catch (error) {
+      console.error("Error checking user onboarding status:", error)
+      // Default to onboarding on error for new email verification
+      router.push('/onboarding')
+    }
+  }
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -46,9 +99,8 @@ function VerifyEmailContent() {
           await applyActionCode(auth, oobCode)
           console.log("Email verification successful!")
           setVerified(true)
-          // Show success modal immediately
-          console.log("Setting showSuccessModal to true")
-          setShowSuccessModal(true)
+          // Redirect to onboarding after successful verification
+          handleSuccessfulVerification()
         } catch (verificationError: any) {
           console.error("Verification error:", verificationError)
           if (verificationError.code === "auth/invalid-action-code") {
@@ -81,112 +133,115 @@ function VerifyEmailContent() {
     })
   }
 
-  return (
-    <>
-      {!showSuccessModal && (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center mb-4">
-                <div className="mr-3">
-                  <Image
-                    src="/full-icon.svg"
-                    alt="DR. INFO Logo"
-                    width={32}
-                    height={32}
-                    className="text-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Verification Status */}
-            <div className="bg-[#F4F7FF] rounded-xl shadow-lg border-2 border-blue-200 p-8">
-              {loading ? (
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Verifying your email...</p>
-                </div>
-              ) : error ? (
-                <div className="text-center font-['DM_Sans']">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg
-                      className="w-8 h-8 text-red-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 font-['DM_Sans']">
-                    Verification Failed
-                  </h3>
-                  <p className="text-gray-600 mb-6 font-['DM_Sans']">{error}</p>
-                  <div className="flex flex-col gap-3">
-                    <button
-                      onClick={handleSignIn}
-                      className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] font-medium font-['DM_Sans'] transition duration-200 hover:bg-[#C6D7FF]"
-                    >
-                      Return to Login
-                    </button>
-                  </div>
-                </div>
-              ) : alreadyVerified ? (
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg
-                      className="w-8 h-8 text-blue-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    Email Already Verified
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Your email has already been verified.
-                    <br />
-                    You can proceed to sign in.
-                  </p>
-                  <button
-                    onClick={handleSignIn}
-                    className="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
-                  >
-                    Sign In
-                  </button>
-                </div>
-              ) : null}
+  if (verified && redirecting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-[#F4F7FF] rounded-xl shadow-lg border-2 border-blue-200 p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2 font-['DM_Sans']">
+                Email Verified Successfully!
+              </h3>
+              <p className="text-gray-600">Redirecting you to continue...</p>
             </div>
           </div>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* Background when modal is showing */}
-      {showSuccessModal && (
-        <div className="min-h-screen bg-gray-50"></div>
-      )}
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="mr-3">
+              <Image
+                src="/full-icon.svg"
+                alt="DR. INFO Logo"
+                width={32}
+                height={32}
+                className="text-white"
+              />
+            </div>
+          </div>
+        </div>
 
-      {/* Success Modal */}
-      <EmailVerifiedModal 
-        isOpen={showSuccessModal} 
-        onClose={() => setShowSuccessModal(false)} 
-      />
-    </>
+        {/* Verification Status */}
+        <div className="bg-[#F4F7FF] rounded-xl shadow-lg border-2 border-blue-200 p-8">
+          {loading ? (
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Verifying your email...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center font-['DM_Sans']">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2 font-['DM_Sans']">
+                Verification Failed
+              </h3>
+              <p className="text-gray-600 mb-6 font-['DM_Sans']">{error}</p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleSignIn}
+                  className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] font-medium font-['DM_Sans'] transition duration-200 hover:bg-[#C6D7FF]"
+                >
+                  Return to Login
+                </button>
+              </div>
+            </div>
+          ) : alreadyVerified ? (
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Email Already Verified
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Your email has already been verified.
+                <br />
+                You can proceed to sign in.
+              </p>
+              <button
+                onClick={handleSignIn}
+                className="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+              >
+                Sign In
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
   )
 }
 

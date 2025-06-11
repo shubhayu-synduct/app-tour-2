@@ -238,7 +238,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // If user is authenticated but email not verified (and using email/password auth), show verification modal
-    if (user && !user.emailVerified && user.providerData.some(p => p.providerId === 'password') && !isPublicRoute && pathname !== '/verify-email') {
+    // Skip verification modal if coming from email verification process
+    const isEmailVerificationRoute = pathname === '/verify-email' || pathname.includes('verify-email')
+    if (user && !user.emailVerified && user.providerData.some(p => p.providerId === 'password') && !isPublicRoute && !isEmailVerificationRoute) {
       console.log("User email not verified, showing verification modal")
       setShowVerificationModal(true)
       return
