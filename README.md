@@ -15,7 +15,7 @@ Dr. INFO is a comprehensive web application designed for healthcare professional
 - **Projects**: Save and organize your research and references (coming soon)
 - **History**: Track and manage your search history
 
-#### Tech Stack
+###### Tech Stack
 
 - **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
 - **Authentication**: Firebase Authentication
