@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { getFirebaseFirestore } from '@/lib/firebase'
 import { doc, setDoc } from 'firebase/firestore'
@@ -36,6 +36,15 @@ export default function AnswerFeedback({
     helpful?: boolean;
     not_helpful?: boolean;
   }>({});
+  const feedbackFormRef = useRef<HTMLDivElement>(null);
+  const buttonContainerRef = useRef<HTMLDivElement>(null);
+
+  // Add useEffect for auto-scrolling
+  useEffect(() => {
+    if (showForm && feedbackFormRef.current) {
+      feedbackFormRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [showForm]);
 
   const toggleFeedback = (option: string) => {
     setSelectedFeedback(prev =>
@@ -56,6 +65,12 @@ export default function AnswerFeedback({
       setSelectedFeedback([]);
       setFeedbackText('');
       setThankYou(false);
+      // Scroll back to the button container
+      setTimeout(() => {
+        if (buttonContainerRef.current) {
+          buttonContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     } else {
       // If clicking a different type, switch to it
       setShowForm(type);
@@ -182,7 +197,7 @@ export default function AnswerFeedback({
   return (
     <div className="mt-4 max-w-[684px]">
       {/* Top row: Helpful, Not helpful, Copy */}
-      <div className="flex flex-row items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+      <div ref={buttonContainerRef} className="flex flex-row items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
         <button
           onClick={() => handleFeedbackClick('helpful')}
           className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('helpful')}`}
@@ -224,7 +239,7 @@ export default function AnswerFeedback({
       </div>
       {/* Feedback form appears only after clicking Helpful/Not helpful */}
       {showForm && !thankYou && (
-        <div className="border border-[#C8C8C8] rounded-lg p-3 sm:p-6 bg-white">
+        <div ref={feedbackFormRef} className="border border-[#C8C8C8] rounded-lg p-3 sm:p-6 bg-white">
           <form onSubmit={handleSubmit}>
             <div className="mb-3 sm:mb-4">
               <div className="font-semibold mb-2 text-sm sm:text-base" style={{ color: '#62739B' }}>Why was this answer {showForm === 'helpful' ? 'useful' : 'not useful'}?</div>
