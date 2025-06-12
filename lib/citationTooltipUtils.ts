@@ -30,7 +30,7 @@ export function createCitationTooltip({
   tooltip.style.fontFamily = 'DM Sans, sans-serif';
 
   // Source type label (Guidelines, Drugs, or Internet)
-  let sourceType = 'Internet';  // Default to Internet
+  let sourceType = 'Journals';  // Default to Internet
   if (source_type === 'guideline_database') {
     sourceType = 'Guidelines';
   } else if (source_type === 'drug_database') {

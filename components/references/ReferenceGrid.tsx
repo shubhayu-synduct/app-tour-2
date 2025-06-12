@@ -52,7 +52,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 ? 'Guidelines'
                 : citation.source_type === 'drug_database'
                 ? 'Drugs'
-                : 'Internet'}
+                : 'Journals'}
             </span>
             <p
               style={{
@@ -105,7 +105,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 ? 'Guidelines'
                 : citation.source_type === 'drug_database'
                 ? 'Drugs'
-                : 'Internet'}
+                : 'Journals'}
             </span>
             <p
               style={{
