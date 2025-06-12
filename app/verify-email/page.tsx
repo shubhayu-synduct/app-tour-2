@@ -5,14 +5,74 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { getAuth, applyActionCode } from "firebase/auth"
 import Image from "next/image"
 import { getFirebaseAuth } from "@/lib/firebase"
+import { useAuth } from "@/hooks/use-auth"
 
 function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user } = useAuth()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
   const [verified, setVerified] = useState(false)
   const [alreadyVerified, setAlreadyVerified] = useState(false)
+  const [redirecting, setRedirecting] = useState(false)
+
+  const handleSuccessfulVerification = async () => {
+    if (!user) {
+      console.log("No user found after verification, redirecting to login")
+      router.push("/login")
+      return
+    }
+
+    setRedirecting(true)
+    
+    try {
+      // Check user's onboarding status
+      const { getFirebaseFirestore } = await import("@/lib/firebase")
+      const { doc, getDoc } = await import("firebase/firestore")
+      
+      const db = await getFirebaseFirestore()
+      if (!db) {
+        console.error("Firestore not available")
+        router.push("/dashboard")
+        return
+      }
+      
+      console.log("Checking onboarding status for user:", user.uid)
+      const userDoc = await getDoc(doc(db, "users", user.uid))
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data()
+        console.log("User document found:", userData)
+        if (userData?.onboardingCompleted) {
+          console.log("User onboarding completed, redirecting to dashboard")
+          router.push('/dashboard')
+        } else {
+          console.log("User onboarding not completed, redirecting to onboarding")
+          router.push('/onboarding')
+        }
+      } else {
+        console.log("User document does not exist, creating new user and redirecting to onboarding")
+        
+        // Create user document for new users
+        const { setDoc } = await import("firebase/firestore")
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          displayName: user.displayName,
+          emailVerified: user.emailVerified,
+          onboardingCompleted: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        })
+        
+        router.push('/onboarding')
+      }
+    } catch (error) {
+      console.error("Error checking user onboarding status:", error)
+      // Default to onboarding on error for new email verification
+      router.push('/onboarding')
+    }
+  }
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -37,7 +97,10 @@ function VerifyEmailContent() {
         try {
           // Apply the verification code
           await applyActionCode(auth, oobCode)
+          console.log("Email verification successful!")
           setVerified(true)
+          // Redirect to onboarding after successful verification
+          handleSuccessfulVerification()
         } catch (verificationError: any) {
           console.error("Verification error:", verificationError)
           if (verificationError.code === "auth/invalid-action-code") {
@@ -70,6 +133,24 @@ function VerifyEmailContent() {
     })
   }
 
+  if (verified && redirecting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-[#F4F7FF] rounded-xl shadow-lg border-2 border-blue-200 p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2 font-['DM_Sans']">
+                Email Verified Successfully!
+              </h3>
+              <p className="text-gray-600">Redirecting you to continue...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -85,7 +166,6 @@ function VerifyEmailContent() {
                 className="text-white"
               />
             </div>
-            {/* <h1 className="text-2xl font-bold text-blue-800">DR. INFO</h1> */}
           </div>
         </div>
 
@@ -156,32 +236,6 @@ function VerifyEmailContent() {
                 className="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
               >
                 Sign In
-              </button>
-            </div>
-          ) : verified ? (
-            <div className="text-center font-['DM_Sans']">
-              <div className="flex items-center justify-center mx-auto mb-4">
-                <Image
-                  src="/password-success.svg"
-                  alt="Success"
-                  width={48}
-                  height={48}
-                />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2 font-['DM_Sans']">
-                Email Verified Successfully!
-              </h3>
-              <p className="text-gray-600 mb-1 font-['DM_Sans']">
-                Your email has been successfully verified.
-              </p>
-              <p className="text-gray-600 mb-6 font-['DM_Sans']">
-                You can now sign in to your account.
-              </p>
-              <button
-                onClick={handleSignIn}
-                className="w-full bg-[#C6D7FF]/50 text-[#3771FE] border border-[#3771FE]/50 py-3 px-4 rounded-[10px] font-medium font-['DM_Sans'] transition duration-200 hover:bg-[#C6D7FF]"
-              >
-                Back to Sign In
               </button>
             </div>
           ) : null}

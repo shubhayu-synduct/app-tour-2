@@ -5,15 +5,20 @@ import { createContext, useEffect, useState, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import type { User } from "firebase/auth"
 import { getSessionCookie, setSessionCookie, clearSessionCookie } from "@/lib/auth-service"
+import { VerificationModal } from "@/components/auth/verification-modal"
 
 type AuthContextType = {
   user: User | null
   loading: boolean
+  showVerificationModal: boolean
+  setShowVerificationModal: (show: boolean) => void
 }
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  showVerificationModal: false,
+  setShowVerificationModal: () => {},
 })
 
 // Global variables to persist auth state across hot reloads
@@ -33,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState<boolean>(() => globalThis.__authLoading ?? true)
   const [redirectTo, setRedirectTo] = useState<string | null>(null)
   const [freshSignIn, setFreshSignIn] = useState(false)
+  const [showVerificationModal, setShowVerificationModal] = useState(false)
   const logoutTimer = useRef<NodeJS.Timeout | null>(null)
   const userRef = useRef(user); // Create a ref to hold the current user
   const router = useRouter()
@@ -231,6 +237,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
+    // If user is authenticated but email not verified (and using email/password auth), show verification modal
+    // Skip verification modal if coming from email verification process
+    const isEmailVerificationRoute = pathname === '/verify-email' || pathname.includes('verify-email')
+    if (user && !user.emailVerified && user.providerData.some(p => p.providerId === 'password') && !isPublicRoute && !isEmailVerificationRoute) {
+      console.log("User email not verified, showing verification modal")
+      setShowVerificationModal(true)
+      return
+    }
+
     // If authenticated and on auth pages, redirect to appropriate page
     if (user && (pathname === '/login' || pathname === '/signup')) {
       if (freshSignIn) {
@@ -259,6 +274,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Function to check user onboarding status and redirect accordingly
   const checkUserOnboardingAndRedirect = async (user: User) => {
     console.log("checkUserOnboardingAndRedirect called for user:", user.uid)
+    
+    // First check if email is verified for email/password users
+    if (!user.emailVerified && user.providerData.some(p => p.providerId === 'password')) {
+      console.log("Email not verified for email/password user, showing verification modal")
+      setShowVerificationModal(true)
+      return
+    }
+    
     try {
       const { getFirebaseFirestore } = await import("@/lib/firebase")
       const { doc, getDoc } = await import("firebase/firestore")
@@ -302,14 +325,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error checking user onboarding status:", error)
       // Default to dashboard on error
-      console.log("Error occurred, setting redirect to dashboard")
-      setRedirectTo('/dashboard')
+      //console.log("Error occurred, setting redirect to dashboard")
+      //setRedirectTo('/dashboard')
     }
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, showVerificationModal, setShowVerificationModal }}>
       {children}
+      {showVerificationModal && user?.email && (
+        <VerificationModal
+          email={user.email}
+          onClose={() => setShowVerificationModal(false)}
+          redirectToLogin={false}
+        />
+      )}
     </AuthContext.Provider>
   )
 }
