@@ -6,7 +6,7 @@ import GuidelineSummaryModal from './guideline-summary-modal'
 import GuidelineSummaryMobileModal from './guideline-summary-mobile-modal'
 import { useAuth } from '@/hooks/use-auth'
 import { getFirebaseFirestore } from '@/lib/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, collection, setDoc, serverTimestamp } from 'firebase/firestore'
 
 interface Guideline {
   id: number;
@@ -93,6 +93,39 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
       setIsLoading(true)
       setError(null)
       
+      // Save the search query to Firebase if user is logged in
+      if (user) {
+        try {
+          const db = getFirebaseFirestore();
+          const userId = user.uid;
+          
+          // Create a reference to the user's queries document
+          const userQueriesRef = doc(db, "guideline_queries", userId);
+          
+          // Get the current queries document
+          const userQueriesDoc = await getDoc(userQueriesRef);
+          
+          // Create or update the queries array
+          const queries = userQueriesDoc.exists() ? userQueriesDoc.data().queries || [] : [];
+          
+          // Add new query with timestamp
+          queries.push({
+            query: searchTerm,
+            timestamp: Date.now()
+          });
+          
+          // Save to Firebase
+          await setDoc(userQueriesRef, {
+            queries: queries,
+            lastUpdated: serverTimestamp()
+          }, { merge: true });
+          
+        } catch (error) {
+          console.error("Error saving search query:", error);
+          // Don't throw error here as we still want to proceed with the search
+        }
+      }
+      
       const response = await fetch('/api/guidelines/search', {
         method: 'POST',
         headers: {
@@ -100,7 +133,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
         },
         body: JSON.stringify({
           query: searchTerm,
-          country: userCountry || 'None' // Pass the user's country or default to 'International'
+          country: userCountry || 'None'
         })
       })
       

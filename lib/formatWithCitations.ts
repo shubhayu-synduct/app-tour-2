@@ -30,7 +30,7 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
         : '';
       const yearText = citation.year ? `(${citation.year})` : '';
       const titleText = citation.title || '';
-      let sourceType = 'Internet';
+      let sourceType = 'Journals';
       if (citation.source_type === 'drug_database') {
         sourceType = 'Drugs';
       } else if (citation.source_type === 'guidelines_database') {
@@ -64,7 +64,7 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
       : '';
     const yearText = citation.year ? `(${citation.year})` : '';
     const titleText = citation.text || '';
-    let sourceType = 'Internet';
+    let sourceType = 'Journal';
     if (citation.source_type === 'drug_database') {
       sourceType = 'Drugs';
     } else if (citation.source_type === 'guidelines_database') {

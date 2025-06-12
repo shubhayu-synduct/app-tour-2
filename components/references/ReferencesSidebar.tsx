@@ -136,7 +136,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                               ? 'Guidelines'
                               : citation.source_type === 'drug_database'
                                 ? 'Drugs'
-                                : 'Internet'}
+                                : 'Journals'}
                           </span>
                           <h3 className="text-blue-650 font-semibold" style={{ fontWeight: 650, marginBottom: '2px' }}>
                             <a
