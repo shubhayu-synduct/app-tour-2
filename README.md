@@ -1,4 +1,4 @@
-# Dr. INFO - Medical Information Platform
+## Dr. INFO - Medical Information Platform
 
 Dr. INFO is a comprehensive web application designed for healthcare professionals to access evidence-based medical information, clinical guidelines, drug information, and other healthcare resources in one centralized platform.
 ###
