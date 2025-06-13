@@ -16,6 +16,13 @@ export const metadata: Metadata = {
   title: "Dr. Info - Medical AI Assistant",
   description: "Get instant access to evidence-based, trusted medical information",
   generator: 'v0.dev',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover'
+  },
   icons: {
     icon: [
       {

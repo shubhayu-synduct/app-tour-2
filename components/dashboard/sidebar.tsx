@@ -21,6 +21,9 @@ import {
 } from "lucide-react"
 import { clearSessionCookie, getSessionCookie } from "@/lib/auth-service"
 import { SidebarHistory } from "./sidebar-history"
+import { useAuth } from '@/hooks/use-auth'
+import { doc, getDoc } from 'firebase/firestore'
+import { getFirebaseFirestore } from '@/lib/firebase'
 
 interface SidebarProps {
   isOpen: boolean;
@@ -33,6 +36,33 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname()
   const user = getSessionCookie()
   const sidebarRef = useRef<HTMLElement>(null)
+  const { user: authUser } = useAuth()
+  const [userProfile, setUserProfile] = useState<{ firstName?: string; lastName?: string; occupation?: string }>({})
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!authUser) return
+      
+      try {
+        const db = getFirebaseFirestore()
+        const docRef = doc(db, "users", authUser.uid)
+        const docSnap = await getDoc(docRef)
+        
+        if (docSnap.exists()) {
+          const profileData = docSnap.data().profile || {}
+          setUserProfile({
+            firstName: profileData.firstName,
+            lastName: profileData.lastName,
+            occupation: profileData.occupation
+          })
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error)
+      }
+    }
+
+    fetchUserProfile()
+  }, [authUser])
 
   // Add click outside handler
   useEffect(() => {
@@ -227,12 +257,22 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
               >
                 <div className="flex items-center">
                   <div className="h-8 w-8 rounded-[8px] bg-[#E4ECFF] flex items-center justify-center text-[#223258] font-semibold border border-[#223258]">
-                    {user?.displayName?.[0]}
+                    {userProfile.firstName?.[0] || user?.email?.[0]}
                   </div>
                   {isOpen && (
                     <div className="ml-3 text-left">
-                      <p className="font-semibold text-sm text-[#223258]">{user?.displayName}</p>
-                      <p className="text-xs text-[#223258]/70">Physician</p>
+                      <p className="font-semibold text-sm text-[#223258]">
+                        {userProfile.firstName && userProfile.lastName 
+                          ? `${userProfile.firstName} ${userProfile.lastName}`
+                          : user?.email}
+                      </p>
+                      <p className="text-xs text-[#223258]/70">
+                        {userProfile.occupation 
+                          ? userProfile.occupation.split('-').map(word => 
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join(' ')
+                          : 'User'}
+                      </p>
                     </div>
                   )}
                 </div>

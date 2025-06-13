@@ -6,6 +6,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent zoom on input focus in iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Ensure proper viewport height on iOS Safari */
+html, body {
+  height: -webkit-fill-available;
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+}
+
+/* Prevent overscroll bounce on iOS */
+body {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure modals and fixed elements are properly positioned */
+.modal, .fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50;
+}
+
+/* Ensure footer is always visible */
+footer {
+  position: relative;
+  width: 100%;
+  z-index: 10;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
