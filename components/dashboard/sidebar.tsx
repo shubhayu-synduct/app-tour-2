@@ -117,7 +117,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`bg-white border-r border-gray-200 h-screen flex flex-col transition-all duration-300 ease-in-out font-['DM_Sans'] ${
+        className={`bg-white border-r border-gray-200 h-[100dvh] flex flex-col transition-all duration-300 ease-in-out font-['DM_Sans'] ${
           isOpen ? "w-72" : "w-20"
         } ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-40`}
       >
