@@ -20,8 +20,7 @@ export const metadata: Metadata = {
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover'
+    userScalable: false
   },
   icons: {
     icon: [
@@ -48,6 +47,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+      </head>
       <body className={`${inter.className} ${poppins.variable} font-['DM_Sans']`}>
         <AuthProvider>{children}</AuthProvider>
         <Analytics />
