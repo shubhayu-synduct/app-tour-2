@@ -6,60 +6,46 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Prevent zoom on input focus in iOS Safari */
+/* Prevent zoom on input focus in iOS */
 @supports (-webkit-touch-callout: none) {
   input, select, textarea {
     font-size: 16px !important;
   }
 }
 
-/* Ensure proper viewport height on iOS Safari */
-html, body {
+/* Ensure proper display on Safari iPhone */
+html {
+  -webkit-text-size-adjust: 100%;
   height: -webkit-fill-available;
-  overflow-x: hidden;
-  position: relative;
-  width: 100%;
 }
 
-/* Prevent overscroll bounce on iOS */
 body {
-  overscroll-behavior-y: none;
-  -webkit-overflow-scrolling: touch;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  position: relative;
+  color: rgb(var(--foreground-rgb));
+  background: white;
+  font-family: 'DM Sans', system-ui, sans-serif;
 }
 
 /* Ensure modals and fixed elements are properly positioned */
-.modal, .fixed {
+.modal-open {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   width: 100%;
-  z-index: 50;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* Ensure footer is always visible */
 footer {
   position: relative;
-  width: 100%;
   z-index: 10;
-}
-
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
 }
 
 @layer base {
   html {
     font-family: 'DM Sans', system-ui, sans-serif;
   }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: white;
-  font-family: 'DM Sans', system-ui, sans-serif;
 }
 
 @layer utilities {
