@@ -30,7 +30,7 @@ Dr. INFO is a comprehensive web application designed for healthcare professional
 - npm or yarn
 - Firebase account
 
-### Installation
+#### Installation
 
 1. Clone the repository:
    ```
