@@ -66,3 +66,25 @@ body {
   animation: fadeIn 0.5s ease-in-out infinite;
   animation-delay: 0.4s;
 }
+
+/* Prevent Safari auto-zoom on input fields */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea,
+select {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Ensure the viewport meta tag is respected */
+@viewport {
+  zoom: 1.0;
+  min-zoom: 1.0;
+  max-zoom: 1.0;
+  user-zoom: fixed;
+}

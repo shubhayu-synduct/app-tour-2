@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { useAuth } from "@/hooks/use-auth";
 import Image from 'next/image';
+import { getCachedAuthStatus, UserAuthStatus } from '@/lib/background-auth';
+
 
 interface Drug {
   brand_name: string;
@@ -70,12 +72,24 @@ export default function DrugInformationPage() {
     const fetchDrugs = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/library/drugs?letter=${selectedLetter}&offset=0`);
-        const data = await response.json();
+        // Get authentication status in background with fallback
+        const authStatus = await getCachedAuthStatus();
+        console.log('Using database:', authStatus.database, 'for country:', authStatus.country);
+        
+        const { getDrugLibrary } = await import('@/lib/authenticated-api');
+        const data = await getDrugLibrary(selectedLetter, undefined, 0, authStatus.database);
         setDrugs(data.drugs);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching drugs:', error);
+        // Fallback: try with English database
+        try {
+          const { getDrugLibrary } = await import('@/lib/authenticated-api');
+          const data = await getDrugLibrary(selectedLetter, undefined, 0, 'english');
+          setDrugs(data.drugs);
+        } catch (fallbackError) {
+          console.error('Fallback also failed:', fallbackError);
+        }
         setIsLoading(false);
       }
     };
@@ -93,9 +107,12 @@ export default function DrugInformationPage() {
     }
     setShowRecommendations(true);
     try {
-      const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(term)}&limit=10`);
-      console.log('API response status:', response.status);
-      const data = await response.json();
+      // Get authentication status in background with fallback
+      const authStatus = await getCachedAuthStatus();
+      console.log('Search using database:', authStatus.database, 'for country:', authStatus.country);
+      
+      const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
+      const data = await enhancedSearchDrugs(term, 10, authStatus.database);
       console.log('API response data:', data);
       
       let transformedData = [];
@@ -128,6 +145,34 @@ export default function DrugInformationPage() {
       }
     } catch (error) {
       console.error('Error fetching recommendations:', error);
+      // Fallback: try with English database
+      try {
+        const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
+        const data = await enhancedSearchDrugs(term, 10, 'english');
+        
+        let transformedData = [];
+        if (data.direct_match) {
+          transformedData.push({
+            brand_name: data.direct_match.name,
+            active_substance: data.direct_match.active_substance,
+            inn: [],
+            search_type: 'direct_brand'
+          });
+        }
+        if (data.brand_options && data.brand_options.length > 0) {
+          const brandOptions = data.brand_options.map((drug: any) => ({
+            brand_name: drug.brand_name,
+            active_substance: drug.active_substance || [],
+            inn: drug.inn || [],
+            search_type: drug.search_type || 'brand_option'
+          }));
+          transformedData = [...transformedData, ...brandOptions];
+        }
+        setRecommendations(transformedData);
+      } catch (fallbackError) {
+        console.error('Search fallback also failed:', fallbackError);
+        setRecommendations([]);
+      }
     }
   };
 
@@ -194,9 +239,14 @@ export default function DrugInformationPage() {
   const DrugInformationContent = () => {
     return (
       <div className="max-w-5xl mx-auto px-4 py-4 md:py-8 mt-0 md:mt-16 relative">
-        <div className="text-center mb-0 md:mb-[20px]">
-          <h1 className="hidden md:block text-[36px] font-semibold text-[#214498] mb-[4px] mt-0 font-['DM_Sans'] font-[600]">Drug Information</h1>
-          <p className="hidden md:block text-gray-600 text-[16px] mt-0">European Medicines Agency approved drug information</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-0 md:mb-[20px]">
+          <div className="text-center md:text-left flex-1 mb-4 md:mb-0">
+            <h1 className="hidden md:block text-[36px] font-semibold text-[#214498] mb-[4px] mt-0 font-['DM_Sans'] font-[600]">Drug Information</h1>
+            <p className="hidden md:block text-gray-600 text-[16px] mt-0">European Medicines Agency approved drug information</p>
+          </div>
+          <div className="w-full md:w-auto">
+            
+          </div>
         </div>
         
         <div className="relative mb-4 md:mb-8" ref={searchContainerRef}>

@@ -1,5 +1,7 @@
 "use client"
 
+
+
 interface ContentLayoutProps {
   title: string;
   description?: string;
@@ -10,8 +12,12 @@ interface ContentLayoutProps {
 export function ContentLayout({ title, description, user, children }: ContentLayoutProps) {
   return (
     <div className="p-4 md:p-6 h-full flex flex-col">
-      {/* Header with user info */}
-      <div className="flex justify-end mb-6">
+      {/* Header with user info and status */}
+      <div className="flex justify-between items-center mb-6">
+        {/* User Status Indicator */}
+
+        
+        {/* User Profile */}
         <div className="flex items-center space-x-2">
           <div className="text-right">
             <p className="font-medium">{user?.displayName || "Dr. Thomas Müller"}</p>

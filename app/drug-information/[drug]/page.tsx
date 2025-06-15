@@ -124,13 +124,8 @@ export default function DrugDetailPage() {
           .replace(/-previously-.*$/, '') // Remove "-previously-anything" from the end
           .replace(/-/g, ' '); // Replace remaining hyphens with spaces
         
-        const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/drugs/${cleanDrugSlug}`);
-        
-        if (!response.ok) {
-          throw new Error('Drug Information Not Available');
-        }
-        
-        const data = await response.json();
+        const { getDrugInfo } = await import('@/lib/authenticated-api');
+        const data = await getDrugInfo(cleanDrugSlug);
         // Pre-process the markdown content
         if (data.markdown_content) {
           // Replace <br> tags with spaces
@@ -193,12 +188,8 @@ export default function DrugDetailPage() {
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         console.log('Searching for term:', searchTerm);
-        const response = await fetch(`https://synduct-drugsummary.drinfo.ai/api/enhanced-search?q=${encodeURIComponent(searchTerm.trim())}&limit=10`);
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
+        const data = await enhancedSearchDrugs(searchTerm.trim(), 10);
         console.log('Response data:', data);
         
         let transformedData = [];
