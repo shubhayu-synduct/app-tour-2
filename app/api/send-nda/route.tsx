@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
     // Send email notification with formatted NDA
     const emailResponse = await resend.emails.send({
-      from: "Dr. Info <noreply@drinfo.ai>",
+      from: "DR. INFO <noreply@drinfo.ai>",
       to: userEmail,
       subject: "Your Signed Non-Disclosure Agreement",
       html: `
