@@ -19,8 +19,8 @@ function VerifyEmailContent() {
 
   const handleSuccessfulVerification = async () => {
     if (!user) {
-      console.log("No user found after verification, redirecting to login")
-      router.push("/login")
+      console.log("No user found after verification, redirecting to onboarding")
+      router.push("/onboarding")
       return
     }
 
@@ -34,7 +34,7 @@ function VerifyEmailContent() {
       const db = await getFirebaseFirestore()
       if (!db) {
         console.error("Firestore not available")
-        router.push("/dashboard")
+        router.push("/onboarding")
         return
       }
       
@@ -85,6 +85,8 @@ function VerifyEmailContent() {
         const mode = searchParams.get("mode")
         const apiKey = searchParams.get("apiKey")
 
+        console.log("Verification parameters:", { oobCode: !!oobCode, mode, apiKey: !!apiKey })
+
         // Validate required parameters
         if (!oobCode) {
           throw new Error("No verification code found")
@@ -99,23 +101,35 @@ function VerifyEmailContent() {
           await applyActionCode(auth, oobCode)
           console.log("Email verification successful!")
           setVerified(true)
+          setError("") // Clear any existing errors
           // Redirect to onboarding after successful verification
           handleSuccessfulVerification()
         } catch (verificationError: any) {
-          console.error("Verification error:", verificationError)
+          console.error("Verification error details:", {
+            code: verificationError.code,
+            message: verificationError.message,
+            fullError: verificationError
+          })
+
           if (verificationError.code === "auth/invalid-action-code") {
-            // Check if the error is due to already being verified
             if (verificationError.message.includes("already verified")) {
               setAlreadyVerified(true)
+              setError("") // Clear error when already verified
             } else {
               setError("This verification link has expired or is invalid. Please request a new verification email.")
             }
+          } else if (verificationError.code === "auth/expired-action-code") {
+            setError("This verification link has expired. Please request a new verification email.")
           } else {
-            setError(verificationError.message || "Failed to verify email")
+            setError(`Verification failed: ${verificationError.message || "Unknown error"}`)
           }
         }
       } catch (err: any) {
-        console.error("Error in verification process:", err)
+        console.error("Error in verification process:", {
+          message: err.message,
+          code: err.code,
+          fullError: err
+        })
         setError(err.message || "Failed to verify email")
       } finally {
         setLoading(false)
