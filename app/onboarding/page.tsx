@@ -93,7 +93,6 @@ export default function Onboarding() {
     const requiredFields = {
       firstName: "First Name",
       lastName: "Last Name",
-      gender: "Gender",
       occupation: "Occupation",
       experience: "Experience",
       placeOfWork: "Place of Work",
