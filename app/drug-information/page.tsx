@@ -239,12 +239,12 @@ export default function DrugInformationPage() {
   const DrugInformationContent = () => {
     return (
       <div className="max-w-5xl mx-auto px-4 py-4 md:py-8 mt-0 md:mt-16 relative">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-0 md:mb-[20px]">
-          <div className="text-center md:text-left flex-1 mb-4 md:mb-0">
+        <div className="flex flex-col md:flex-row justify-center items-center mb-0 md:mb-[20px]">
+          <div className="text-center mb-4 md:mb-0">
             <h1 className="hidden md:block text-[36px] font-semibold text-[#214498] mb-[4px] mt-0 font-['DM_Sans'] font-[600]">Drug Information</h1>
             <p className="hidden md:block text-gray-600 text-[16px] mt-0">European Medicines Agency approved drug information</p>
           </div>
-          <div className="w-full md:w-auto">
+          <div>
             
           </div>
         </div>

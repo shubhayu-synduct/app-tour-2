@@ -285,10 +285,9 @@ export default function DrugDetailPage() {
       return (
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="mb-6">
-            <Link href="/drug-information" className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[8px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors">
+            <Link href="/drug-information" className="flex items-center justify-center bg-[#01257C] text-white w-8 h-8 rounded-[4px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors" style={{ width: 32, height: 32 }}>
               <ChevronLeft size={16} />
               <ChevronLeft size={16} className="-ml-3" />
-              <span>Back</span>
             </Link>
           </div>
           
@@ -310,10 +309,9 @@ export default function DrugDetailPage() {
         <div className="flex-none px-4 py-4">
           <div className="max-w-4xl mx-auto">
             <div className="mb-6">
-              <Link href="/drug-information" className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[8px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors">
+              <Link href="/drug-information" className="flex items-center justify-center bg-[#01257C] text-white w-8 h-8 rounded-[4px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors" style={{ width: 32, height: 32 }}>
                 <ChevronLeft size={16} />
                 <ChevronLeft size={16} className="-ml-3" />
-                <span>Back</span>
               </Link>
             </div>
             

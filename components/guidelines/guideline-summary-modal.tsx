@@ -458,15 +458,14 @@ export default function GuidelineSummaryModal({
       <div className="bg-white rounded-lg shadow-lg w-[90%] h-full flex overflow-hidden relative">
         {/* Back Button above modal */}
         <button
-          className="absolute left-6 top-4 bg-[#214498] text-white font-medium rounded px-3 py-1 text-base flex items-center gap-1 shadow z-50"
-          style={{ border: '1px solid #3771FE' }}
+          className="absolute left-6 top-4 text-base flex items-center gap-1 shadow z-50"
           onClick={onClose}
         >
           <Image
-            src="/back-icon.png"
+            src="/double_back.svg"
             alt="Back"
-            width={20}
-            height={20}
+            width={32}
+            height={32}
           />
         </button>
 
