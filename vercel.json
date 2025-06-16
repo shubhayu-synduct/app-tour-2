@@ -1,0 +1,13 @@
+{
+    "rewrites": [
+      {
+        "source": "/__/auth/handler",
+        "destination": "/"
+      },
+      {
+        "source": "/(.*)",
+        "destination": "/"
+      }
+    ]
+  }
+  
