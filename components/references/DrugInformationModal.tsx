@@ -266,12 +266,13 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
         >
           <div className="flex justify-between items-center mb-6">
             <button
-              className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[8px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+              className="flex items-center justify-center bg-[#01257C] text-white w-8 h-8 rounded-[5px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+              style={{ width: 32, height: 32 }}
               onClick={handleBackClick}
             >
               <ChevronLeft size={16} />
               <ChevronLeft size={16} className="-ml-3" />
-              <span>Back</span>
+              {/* <span>Back</span> */}
             </button>
             <button 
               className="p-2 hover:bg-gray-100 rounded-full"
@@ -306,12 +307,13 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
         >
           <div className="flex justify-between items-center mb-6">
             <button
-              className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[10px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+              className="flex items-center justify-center bg-[#01257C] text-white w-8 h-8 rounded-[5px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+              style={{ width: 32, height: 32 }}
               onClick={handleBackClick}
             >
               <ChevronLeft size={16} />
               <ChevronLeft size={16} className="-ml-3" />
-              <span>Back</span>
+              {/* <span>Back</span> */}
             </button>
             <button 
               className="p-2 hover:bg-gray-100 rounded-full"
@@ -341,12 +343,13 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
         <div className="flex-none">
           <div className="flex justify-between items-center mb-6">
             <button
-              className="inline-flex items-center bg-[#214498] text-white px-3 py-1.5 rounded-[10px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+              className="flex items-center justify-center bg-[#01257C] text-white w-8 h-8 rounded-[5px] font-['DM_Sans'] text-sm hover:bg-[#1a3780] transition-colors"
+              style={{ width: 32, height: 32 }}
               onClick={handleBackClick}
             >
               <ChevronLeft size={16} />
               <ChevronLeft size={16} className="-ml-3" />
-              <span>Back</span>
+              {/* <span>Back</span> */}
             </button>
             <button 
               className="p-2 hover:bg-gray-100 rounded-full"

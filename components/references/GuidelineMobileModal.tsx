@@ -347,7 +347,7 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
           <div className="flex items-center gap-3">
             <button 
               onClick={onClose}
-              className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-[#214498] rounded-[5px] hover:bg-[#1B3B8B] transition-colors"
+              className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-[5px] transition-colors"
               style={{ zIndex: 60 }}
             >
               <Image
