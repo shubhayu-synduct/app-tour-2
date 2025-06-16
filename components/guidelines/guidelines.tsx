@@ -138,13 +138,23 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
   }
 
   useEffect(() => {
-    if (
-      guidelines.some(g => g.category === 'National') &&
-      !expandedCategories.includes('National')
-    ) {
-      setExpandedCategories(prev =>
-        prev.includes('National') ? prev : [...prev, 'National']
-      );
+    // Priority order for categories
+    const priorityOrder = ['National', 'Europe', 'International', 'USA'];
+    
+    // Find the first category that has guidelines
+    const firstCategoryWithGuidelines = priorityOrder.find(category => 
+      guidelines.some(g => g.category === category)
+    );
+
+    if (firstCategoryWithGuidelines) {
+      setExpandedCategories(prev => {
+        // If the category is already expanded, return current state
+        if (prev.includes(firstCategoryWithGuidelines)) {
+          return prev;
+        }
+        // Otherwise, add the first category with guidelines
+        return [...prev, firstCategoryWithGuidelines];
+      });
     }
   }, [guidelines]);
 
