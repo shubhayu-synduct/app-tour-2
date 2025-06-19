@@ -228,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     console.log("Protected routes check:", { user: user?.uid, loading, pathname, freshSignIn })
 
-    const isPublicRoute = ['/login', '/signup', '/'].includes(pathname)
+    const isPublicRoute = ['/login', '/signup', '/', '/forgot-password'].includes(pathname) || pathname.startsWith('/reset-password')
 
     // If not authenticated and trying to access protected route
     if (!user && !isPublicRoute) {
