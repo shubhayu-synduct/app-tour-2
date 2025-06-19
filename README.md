@@ -24,7 +24,7 @@ Dr. INFO is a comprehensive web application designed for healthcare professional
 
 ### Getting Started
 
-### Prerequisites
+##### Prerequisites
 
 - Node.js 18 or higher
 - npm or yarn
