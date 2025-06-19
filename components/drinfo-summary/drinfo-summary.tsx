@@ -1022,8 +1022,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   }, [status]);
 
   return (
-    <div className="p-2 sm:p-4 md:p-6 h-full flex flex-col relative">
-      <div className="flex-1 flex flex-col">
+    <div className="p-2 sm:p-4 md:p-6 h-[100dvh] flex flex-col relative overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {isChatLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="flex flex-col items-center space-y-4">
@@ -1037,7 +1037,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
               <div className="flex-1 flex flex-col items-center justify-center">
               </div>
             ) : (
-              <div className="flex-1 overflow-auto mb-4 max-w-4xl mx-auto w-full font-sans overflow-visible px-2 sm:px-4" ref={contentRef}>
+              <div className="flex-1 overflow-y-auto mb-4 max-w-4xl mx-auto w-full font-sans px-2 sm:px-4" ref={contentRef}>
                 {error && (
                   <div className="bg-red-50 text-red-600 p-3 sm:p-4 rounded-lg mb-4">
                     {error}
@@ -1117,7 +1117,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             {(searchPosition === "bottom" || chatHistory.length > 0 || streamedContent.mainSummary) && (
               <>
                 <div ref={inputAnchorRef} style={{ marginBottom: '120px sm:140px' }} />
-                <div className="sticky bottom-0 bg-gray-50 pt-2 pb-4">
+                <div className="sticky bottom-0 bg-gray-50 pt-2 pb-4 z-10">
                   <div className="max-w-4xl mx-auto px-2 sm:px-4">
                     <div className="relative w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4">
                       <div className="relative">

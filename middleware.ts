@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
     path === "/login" || 
     path === "/signup" || 
     path === "/forgot-password" || 
-    path === "/reset-password" ||
+    path.startsWith("/reset-password") ||
     path.startsWith("/_next") ||
     path.startsWith("/api") ||
     path.endsWith(".svg") ||
@@ -72,10 +72,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - forgot-password (password reset flow)
-     * - reset-password (password reset flow)
      * - verify-email (email verification flow)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|forgot-password|reset-password|verify-email).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|verify-email).*)',
   ],
 }

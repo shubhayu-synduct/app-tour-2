@@ -252,7 +252,7 @@ export default function ChatHistory() {
               onFocus={() => {
                 if (searchTerm) setShowSuggestions(true)
               }}
-              className="pl-10 pr-10 h-11 w-full border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base border-[#3771fe44] shadow-[0px_0px_11px_#0000000c]"
+              className="pl-10 pr-10 h-11 w-full border rounded-[2px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base border-[#3771fe44] shadow-[0px_0px_11px_#0000000c]"
               style={{ fontFamily: 'DM Sans, sans-serif', borderColor: 'rgba(55, 113, 254, 0.5)' }}
             />
             {searchTerm && (
@@ -265,7 +265,7 @@ export default function ChatHistory() {
             )}
             {/* Autocomplete suggestions */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-w-xl w-full" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+              <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-[2px] shadow-lg max-w-xl w-full" style={{ fontFamily: 'DM Sans, sans-serif' }}>
                 <ul className="py-1">
                   {suggestions.map((suggestion, index) => (
                     <li 
@@ -284,7 +284,7 @@ export default function ChatHistory() {
             <select
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value as SortOption)}
-              className="appearance-none pl-10 pr-10 h-11 w-full border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base text-[#214498] font-normal"
+              className="appearance-none pl-10 pr-10 h-11 w-full border rounded-[2px] focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base text-[#214498] font-normal"
               style={{ fontFamily: 'DM Sans, sans-serif', color: '#214498', fontWeight: 400, borderColor: 'rgba(55, 113, 254, 0.5)' }}
             >
               <option value="newest" style={{ color: '#214498', fontFamily: 'DM Sans, sans-serif', fontWeight: 'regular' }}>Newest First</option>
@@ -336,7 +336,7 @@ export default function ChatHistory() {
                       <div className="text-lg font-semibold text-[#214498] mb-3" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '16px' }}>{label}</div>
                       <div className="space-y-4">
                         {sessions.map(session => (
-                          <div key={session.id} className="bg-[#F4F7FF] rounded-xl p-4 flex items-start shadow-sm hover:shadow-md transition-shadow relative border" style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}>
+                          <div key={session.id} className="bg-[#F4F7FF] rounded-[2px] p-4 flex items-start shadow-sm hover:shadow-md transition-shadow relative border" style={{ borderColor: 'rgba(55, 113, 254, 0.5)' }}>
                             <Link href={`/dashboard/${session.id}`} className="flex-1 min-w-0 group pr-10">
                               <div className="text-base font-medium mb-2 group-hover:underline truncate overflow-hidden whitespace-nowrap" style={{ fontFamily: 'DM Sans, sans-serif', color: '#223258', fontSize: '16px' }}>
                                 {session.title}
@@ -348,7 +348,7 @@ export default function ChatHistory() {
                             </Link>
                             <button
                               onClick={e => deleteChatSession(session.id, e)}
-                              className="ml-4 p-2 rounded-full transition-colors text-[#223258] absolute top-3 right-3 bg-transparent hover:bg-red-50"
+                              className="ml-4 p-2 rounded-[2px] transition-colors text-[#223258] absolute top-3 right-3 bg-transparent hover:bg-red-50"
                               aria-label="Delete chat"
                             >
                               <Trash2 size={18} />

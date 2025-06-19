@@ -228,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     console.log("Protected routes check:", { user: user?.uid, loading, pathname, freshSignIn })
 
-    const isPublicRoute = ['/login', '/signup', '/'].includes(pathname)
+    const isPublicRoute = ['/login', '/signup', '/', '/forgot-password'].includes(pathname) || pathname.startsWith('/reset-password')
 
     // If not authenticated and trying to access protected route
     if (!user && !isPublicRoute) {
@@ -237,13 +237,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    // If user is authenticated but email not verified (and using email/password auth), show verification modal
-    // Skip verification modal if coming from email verification process
-    const isEmailVerificationRoute = pathname === '/verify-email' || pathname.includes('verify-email')
-    if (user && !user.emailVerified && user.providerData.some(p => p.providerId === 'password') && !isPublicRoute && !isEmailVerificationRoute) {
-      console.log("User email not verified, showing verification modal")
+    // Only show verification modal on signup page
+    const isSignupPage = pathname === '/signup'
+    if (user && !user.emailVerified && user.providerData.some(p => p.providerId === 'password') && isSignupPage) {
+      console.log("User email not verified on signup page, showing verification modal")
       setShowVerificationModal(true)
-      return
+    } else {
+      // Close verification modal if it's open and we're not on the signup page
+      if (showVerificationModal) {
+        setShowVerificationModal(false)
+      }
     }
 
     // If authenticated and on auth pages, redirect to appropriate page
@@ -269,18 +272,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("Checking onboarding status for entry point:", pathname)
       checkUserOnboardingAndRedirect(user)
     }
-  }, [user, loading, pathname, freshSignIn, router])
+  }, [user, loading, pathname, freshSignIn, router, showVerificationModal])
 
   // Function to check user onboarding status and redirect accordingly
   const checkUserOnboardingAndRedirect = async (user: User) => {
     console.log("checkUserOnboardingAndRedirect called for user:", user.uid)
-    
-    // First check if email is verified for email/password users
-    if (!user.emailVerified && user.providerData.some(p => p.providerId === 'password')) {
-      console.log("Email not verified for email/password user, showing verification modal")
-      setShowVerificationModal(true)
-      return
-    }
     
     try {
       const { getFirebaseFirestore } = await import("@/lib/firebase")
@@ -324,9 +320,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("Error checking user onboarding status:", error)
-      // Default to dashboard on error
-      //console.log("Error occurred, setting redirect to dashboard")
-      //setRedirectTo('/dashboard')
     }
   }
 

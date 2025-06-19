@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { getFirebaseFirestore } from '@/lib/firebase'
 import { doc, setDoc } from 'firebase/firestore'
+import { MovingBorder } from "@/components/ui/moving-border";
+import { cn } from "@/lib/utils";
 
 interface AnswerFeedbackProps {
   conversationId: string;
@@ -198,26 +200,48 @@ export default function AnswerFeedback({
     <div className="mt-4 max-w-[684px]">
       {/* Top row: Helpful, Not helpful, Copy */}
       <div ref={buttonContainerRef} className="flex flex-row items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-        <button
-          onClick={() => handleFeedbackClick('helpful')}
-          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('helpful')}`}
-          aria-label="Helpful"
-          title={submittedFeedback.helpful ? "You've already submitted helpful feedback" : "This answer was helpful"}
-          disabled={submittedFeedback.helpful}
-        >
-          <ThumbsUp className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-          <span className="text-xs sm:text-sm">Useful...</span>
-        </button>
-        <button
-          onClick={() => handleFeedbackClick('not_helpful')}
-          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1 ${topBtnStyle('not_helpful')}`}
-          aria-label="Not helpful"
-          title={submittedFeedback.not_helpful ? "You've already submitted not helpful feedback" : "This answer wasn't helpful"}
-          disabled={submittedFeedback.not_helpful}
-        >
-          <ThumbsDown className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
-          <span className="text-xs sm:text-sm">Not Useful...</span>
-        </button>
+        <div className="relative h-8 sm:h-10 w-24 sm:w-32 overflow-hidden bg-transparent p-[1px] rounded-lg">
+          <div className="absolute inset-0">
+            <MovingBorder duration={3000} rx="8px" ry="8px">
+              <div className="h-8 w-20 bg-[radial-gradient(#3771FE_40%,transparent_60%)] opacity-[0.8]" />
+            </MovingBorder>
+          </div>
+          <button
+            onClick={() => handleFeedbackClick('helpful')}
+            className={cn(
+              "relative flex h-full w-full items-center justify-center border rounded-lg transition-all",
+              topBtnStyle('helpful')
+            )}
+            aria-label="Helpful"
+            title={submittedFeedback.helpful ? "You've already submitted helpful feedback" : "This answer was helpful"}
+            disabled={submittedFeedback.helpful}
+          >
+            <ThumbsUp className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+            <span className="text-xs sm:text-sm">Useful...</span>
+          </button>
+        </div>
+
+        <div className="relative h-8 sm:h-10 w-24 sm:w-32 overflow-hidden bg-transparent p-[1px] rounded-lg">
+          <div className="absolute inset-0">
+            <MovingBorder duration={3000} rx="8px" ry="8px">
+              <div className="h-8 w-20 bg-[radial-gradient(#3771FE_40%,transparent_60%)] opacity-[0.8]" />
+            </MovingBorder>
+          </div>
+          <button
+            onClick={() => handleFeedbackClick('not_helpful')}
+            className={cn(
+              "relative flex h-full w-full items-center justify-center border rounded-lg transition-all",
+              topBtnStyle('not_helpful')
+            )}
+            aria-label="Not helpful"
+            title={submittedFeedback.not_helpful ? "You've already submitted not helpful feedback" : "This answer wasn't helpful"}
+            disabled={submittedFeedback.not_helpful}
+          >
+            <ThumbsDown className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+            <span className="text-xs sm:text-sm">Not Useful...</span>
+          </button>
+        </div>
+
         <button
           onClick={handleCopyText}
           className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all flex items-center gap-1 sm:gap-2 ${copied ? 'text-[#3771FE] border-[#3771FE]' : 'text-[#223258] border-[#223258]'} bg-white`}

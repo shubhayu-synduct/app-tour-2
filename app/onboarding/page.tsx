@@ -93,8 +93,6 @@ export default function Onboarding() {
     const requiredFields = {
       firstName: "First Name",
       lastName: "Last Name",
-      yearOfBirth: "Year of Birth",
-      gender: "Gender",
       occupation: "Occupation",
       experience: "Experience",
       placeOfWork: "Place of Work",
@@ -112,7 +110,7 @@ export default function Onboarding() {
       }
     })
 
-    // Age validation: must be at least 18 years old
+    // Age validation: only if year of birth is provided
     if (formData.yearOfBirth) {
       const dob = new Date(formData.yearOfBirth)
       const today = new Date()
@@ -1018,7 +1016,7 @@ export default function Onboarding() {
                 <div>
                   <h4 className="mb-1" style={{ fontFamily: 'DM Sans', color: '#000000', fontWeight: 550, fontSize: '16px' }}>7. In case of Breach</h4>
                   <p className="mb-3" style={{ fontFamily: 'DM Sans', color: '#000000', fontSize: '12px' }}>
-                  Unauthorised use or disclosure triggers a liquidated penalty of EUR 50000 plus compensation for any further proven losses. Synduct GmbH may seek injunctive relief in addition to monetary damages. Full compliance with all applicable data-protection laws, including the GDPR, is mandatory.
+                  Unauthorised use or disclosure triggers a liquidated penalty of EUR 500 plus compensation for any further proven losses. Synduct GmbH may seek injunctive relief in addition to monetary damages. Full compliance with all applicable data-protection laws, including the GDPR, is mandatory.
                   </p>
                 </div>
 
