@@ -17,6 +17,72 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
   if (!citations) {
     return formatWithDummyCitations(text);
   }
+  
+  console.log('Processing text with citations:', { textLength: text.length, citationsCount: Object.keys(citations).length });
+  console.log('Sample of text being processed:', text.substring(0, 500));
+  
+  // First, identify and format drug names for drug citations
+  // Look for HTML-formatted drug names before citations (e.g., <strong><strong>drugname</strong></strong> [1])
+  // Only process drug_database citations
+  const drugMatches = text.match(/<strong><strong>([a-zA-Z][a-zA-Z0-9\-'()]+)<\/strong><\/strong>\s*\[(\d+)\]/g);
+  console.log('Found potential drug matches:', drugMatches);
+  
+  // Collect all matches first, then process in reverse order to avoid index conflicts
+  const matchesToProcess: Array<{match: string, drugName: string, num: string, index: number}> = [];
+  let match;
+  const drugRegex = /<strong><strong>([a-zA-Z][a-zA-Z0-9\-'()]+)<\/strong><\/strong>\s*\[(\d+)\]/g;
+  
+  while ((match = drugRegex.exec(text)) !== null) {
+    const drugName = match[1];
+    const num = match[2];
+    const citation = citations[num];
+    
+    console.log('Found drug match:', { drugName, num, citation, sourceType: citation?.source_type });
+    
+    if (citation && citation.source_type === 'drug_database') {
+      matchesToProcess.push({
+        match: match[0],
+        drugName,
+        num,
+        index: match.index
+      });
+    }
+  }
+  
+  // Process matches in reverse order to maintain correct indices
+  matchesToProcess.reverse().forEach(({match: matchText, drugName, num}) => {
+    const citation = citations[num];
+    const cleanDrugName = drugName.trim();
+    console.log('Processing drug citation:', { drugName: cleanDrugName, citationNumber: num, citation });
+    
+    const clickableDrugName = `<span class="drug-name-clickable" 
+      data-citation-number="${num}"
+      data-citation-title="${citation.title || ''}"
+      data-citation-authors="${citation.authors ? (Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors) : ''}"
+      data-citation-year="${citation.year ? `(${citation.year})` : ''}"
+      data-citation-source="Drugs"
+      data-citation-source-type="${citation.source_type}"
+      data-citation-url="${citation.url || '#'}"
+      data-citation-journal="${citation.journal || ''}"
+      data-citation-doi="${citation.doi || ''}"
+    >${cleanDrugName}</span>`;
+    
+    const citationSpan = `<span class="citation-reference" 
+      data-citation-number="${num}"
+      data-citation-title="${citation.title || ''}"
+      data-citation-authors="${citation.authors ? (Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors) : ''}"
+      data-citation-year="${citation.year ? `(${citation.year})` : ''}"
+      data-citation-source="Drugs"
+      data-citation-source-type="${citation.source_type}"
+      data-citation-url="${citation.url || '#'}"
+      data-citation-journal="${citation.journal || ''}"
+      data-citation-doi="${citation.doi || ''}"
+    ><sup class="citation-number" style="background:#E0E9FF;color:#1F2937;">${num}</sup></span>`;
+    
+    // Replace this specific match in the text
+    text = text.replace(matchText, clickableDrugName + citationSpan);
+  });
+  
   // Replace grouped citations like [1,2,3] or [1, 2, 3]
   text = text.replace(/\[(\d+(?:\s*,\s*\d+)+)\]/g, (match, group) => {
     const nums = group.split(/\s*,\s*/);
