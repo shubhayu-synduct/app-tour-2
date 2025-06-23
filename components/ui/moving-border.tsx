@@ -14,24 +14,37 @@ import { cn } from "@/lib/utils";
 export const MovingBorder = ({
   children,
   duration = 3000,
+  delay = 0,
   rx,
   ry,
   ...otherProps
 }: {
   children: React.ReactNode;
   duration?: number;
+  delay?: number;
   rx?: string;
   ry?: string;
   [key: string]: any;
 }) => {
-  const pathRef = useRef<any>();
+  const pathRef = useRef<any>(null);
   const progress = useMotionValue<number>(0);
+  const startTimeRef = useRef<number | null>(null);
 
   useAnimationFrame((time) => {
+    if (startTimeRef.current === null) {
+      startTimeRef.current = time;
+    }
+    
+    const elapsedTime = time - startTimeRef.current;
+    if (elapsedTime < delay) {
+      return; // Don't start animation until delay has passed
+    }
+    
+    const animationTime = elapsedTime - delay;
     const length = pathRef.current?.getTotalLength();
     if (length) {
       const pxPerMillisecond = length / duration;
-      progress.set((time * pxPerMillisecond) % length);
+      progress.set((animationTime * pxPerMillisecond) % length);
     }
   });
 

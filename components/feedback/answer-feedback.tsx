@@ -202,7 +202,7 @@ export default function AnswerFeedback({
       <div ref={buttonContainerRef} className="flex flex-row items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
         <div className="relative h-8 sm:h-10 w-24 sm:w-32 overflow-hidden bg-transparent p-[1px] rounded-lg">
           <div className="absolute inset-0">
-            <MovingBorder duration={3000} rx="8px" ry="8px">
+            <MovingBorder duration={3000} rx="8px" ry="8px" delay={0}>
               <div className="h-8 w-20 bg-[radial-gradient(#3771FE_40%,transparent_60%)] opacity-[0.8]" />
             </MovingBorder>
           </div>
@@ -223,7 +223,7 @@ export default function AnswerFeedback({
 
         <div className="relative h-8 sm:h-10 w-24 sm:w-32 overflow-hidden bg-transparent p-[1px] rounded-lg">
           <div className="absolute inset-0">
-            <MovingBorder duration={3000} rx="8px" ry="8px">
+            <MovingBorder duration={3000} rx="8px" ry="8px" delay={1500}>
               <div className="h-8 w-20 bg-[radial-gradient(#3771FE_40%,transparent_60%)] opacity-[0.8]" />
             </MovingBorder>
           </div>
