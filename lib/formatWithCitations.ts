@@ -67,20 +67,30 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
       data-citation-doi="${citation.doi || ''}"
     >${cleanDrugName}</span>`;
     
-    const citationSpan = `<span class="citation-reference" 
-      data-citation-number="${num}"
-      data-citation-title="${citation.title || ''}"
-      data-citation-authors="${citation.authors ? (Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors) : ''}"
-      data-citation-year="${citation.year ? `(${citation.year})` : ''}"
-      data-citation-source="Drugs"
-      data-citation-source-type="${citation.source_type}"
-      data-citation-url="${citation.url || '#'}"
-      data-citation-journal="${citation.journal || ''}"
-      data-citation-doi="${citation.doi || ''}"
-    ><sup class="citation-number" style="background:#E0E9FF;color:#1F2937;">${num}</sup></span>`;
+    // Check if this is an implicit drug citation
+    const isImplicit = citation.drug_citation_type === 'implicit';
+    
+    let replacementText = clickableDrugName;
+    
+    // Only add citation number if it's not implicit
+    if (!isImplicit) {
+      const citationSpan = `<span class="citation-reference" 
+        data-citation-number="${num}"
+        data-citation-title="${citation.title || ''}"
+        data-citation-authors="${citation.authors ? (Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors) : ''}"
+        data-citation-year="${citation.year ? `(${citation.year})` : ''}"
+        data-citation-source="Drugs"
+        data-citation-source-type="${citation.source_type}"
+        data-citation-url="${citation.url || '#'}"
+        data-citation-journal="${citation.journal || ''}"
+        data-citation-doi="${citation.doi || ''}"
+      ><sup class="citation-number" style="background:#E0E9FF;color:#1F2937;">${num}</sup></span>`;
+      
+      replacementText += citationSpan;
+    }
     
     // Replace this specific match in the text
-    text = text.replace(matchText, clickableDrugName + citationSpan);
+    text = text.replace(matchText, replacementText);
   });
   
   // Replace grouped citations like [1,2,3] or [1, 2, 3]
@@ -89,6 +99,12 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
     const rendered = nums.map((num: string) => {
       const citation = citations[num];
       if (!citation) return null; // Don't render anything for missing
+      
+      // Skip rendering citation number for implicit drug citations
+      if (citation.source_type === 'drug_database' && citation.drug_citation_type === 'implicit') {
+        return null;
+      }
+      
       const authorText = citation.authors 
         ? (Array.isArray(citation.authors) 
             ? citation.authors.join(', ') 
@@ -119,10 +135,17 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
     if (rendered.length !== nums.length) return match;
     return rendered.join('');
   });
+  
   // Replace single citations like [1]
   text = text.replace(/\[(\d+)\]/g, (match, num: string) => {
     const citation = citations[num];
     if (!citation) return match; // Leave the original text if missing
+    
+    // Skip rendering citation number for implicit drug citations
+    if (citation.source_type === 'drug_database' && citation.drug_citation_type === 'implicit') {
+      return ''; // Remove the citation number entirely for implicit drug citations
+    }
+    
     const authorText = citation.authors 
       ? (Array.isArray(citation.authors) 
           ? citation.authors.join(', ') 
