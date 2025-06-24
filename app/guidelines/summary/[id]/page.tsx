@@ -512,7 +512,7 @@ export default function GuidelineSummaryPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-4">
             {error}
           </div>
         )}
@@ -522,7 +522,7 @@ export default function GuidelineSummaryPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
-          <div className="flex h-[calc(100vh-200px)] bg-gray-50 rounded-lg">
+          <div className="flex h-[calc(100vh-200px)] bg-gray-50">
             {/* Left Panel - Summary and Q&A */}
             <div className={`bg-white border-r border-gray-200 flex flex-col overflow-hidden ${sidebarCollapsed ? 'w-[calc(100%-40px)]' : 'w-1/2'} transition-width duration-300`}>
               <div className="p-6 border-b border-gray-200 overflow-y-auto flex-grow">
@@ -546,7 +546,7 @@ export default function GuidelineSummaryPage() {
                       {message.question && (
                         <div className="mb-4">
                           <p className="text-sm font-medium text-gray-500 mb-2">Your question:</p>
-                          <div className="bg-blue-50 p-3 rounded-lg">
+                          <div className="bg-blue-50 p-3">
                             <p className="text-sm text-gray-800">{message.question}</p>
                           </div>
                         </div>
@@ -566,7 +566,7 @@ export default function GuidelineSummaryPage() {
                   ))}
 
                   {followupError && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-4">
                       {followupError}
                     </div>
                   )}
@@ -581,7 +581,7 @@ export default function GuidelineSummaryPage() {
                     ref={questionInputRef}
                     type="text"
                     placeholder="Ask a question about this guideline..."
-                    className="w-full pl-10 pr-12 py-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-10 pr-12 py-3 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     value={followupQuestion}
                     onChange={(e) => setFollowupQuestion(e.target.value)}
                     onKeyDown={(e) => {
@@ -592,12 +592,12 @@ export default function GuidelineSummaryPage() {
                     disabled={isAskingFollowup}
                   />
                   <button 
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 bg-blue-600 rounded hover:bg-blue-700 text-white ${isAskingFollowup ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 bg-blue-600 hover:bg-blue-700 text-white ${isAskingFollowup ? 'opacity-50 cursor-not-allowed' : ''}`}
                     onClick={askFollowupQuestion}
                     disabled={isAskingFollowup}
                   >
                     {isAskingFollowup ? (
-                      <div className="h-4 w-4 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                      <div className="h-4 w-4 border-t-2 border-b-2 border-white animate-spin"></div>
                     ) : (
                       <Search className="h-4 w-4 text-white" />
                     )}
