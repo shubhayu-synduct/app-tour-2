@@ -7,6 +7,7 @@ interface Citation {
   authors?: string[];
   year?: string | number;
   source_type?: string;
+  drug_citation_type?: string;
 }
 
 interface ReferenceGridProps {
@@ -16,11 +17,24 @@ interface ReferenceGridProps {
 }
 
 export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowAll, getCitationCount }) => {
+  // Filter out implicit drug citations
+  const filteredCitations = Object.entries(citations).filter(([key, citation]) => {
+    // If it's a drug citation and has drug_citation_type === 'implicit', hide it
+    if (citation.source_type === 'drug_database' && citation.drug_citation_type === 'implicit') {
+      return false;
+    }
+    // Otherwise, show it
+    return true;
+  });
+
+  // Create a new citations object with only the filtered entries
+  const visibleCitations = Object.fromEntries(filteredCitations);
+
   return (
     <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 w-full">
       {(() => {
-        const entries = Object.entries(citations);
-        const showAll = getCitationCount(citations) > 3;
+        const entries = filteredCitations;
+        const showAll = getCitationCount(visibleCitations) > 3;
         
         // Mobile view - single citation
         const mobileItems = entries.slice(0, 1).map(([key, citation]) => (
@@ -32,7 +46,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
               border: "1px solid #3771FE",
               width: "100%"
             }}
-            onClick={() => onShowAll(citations)}
+            onClick={() => onShowAll(visibleCitations)}
           >
             <span
               style={{
@@ -85,7 +99,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
               border: "1px solid #3771FE",
               width: "100%"
             }}
-            onClick={() => onShowAll(citations)}
+            onClick={() => onShowAll(visibleCitations)}
           >
             <span
               style={{
@@ -140,7 +154,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 border: "1px solid #3771FE",
                 width: "100%"
               }}
-              onClick={() => onShowAll(citations)}
+              onClick={() => onShowAll(visibleCitations)}
             >
               <p
                 style={{
@@ -152,7 +166,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
                 }}
                 className="text-base"
               >
-                Show All ({getCitationCount(citations)})
+                Show All ({getCitationCount(visibleCitations)})
               </p>
             </div>
           );
