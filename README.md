@@ -73,11 +73,11 @@ The application uses Firebase Authentication for user management:
 - Protected routes with authentication checks
 - Secure session management
 
-### License
+#### License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
+### Acknowledgments
 
 - Medical information is for demonstration purposes only
 - Icons provided by [Lucide](https://lucide.dev/)

@@ -214,7 +214,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
               type="text"
               placeholder="Search Clinical Guidelines . . ."
               className="w-full py-2 sm:py-3 px-4 sm:px-6 border text-gray-600 text-base sm:text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-200"
-              style={{ borderColor: 'rgba(55, 113, 254, 0.5)', fontSize: 'clamp(14px, 1.5vw, 16px)', borderRadius: 5 }}
+              style={{ borderColor: 'rgba(55, 113, 254, 0.5)', fontSize: 'clamp(14px, 1.5vw, 16px)' }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
@@ -228,7 +228,6 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                 onClick={handleSearch}
                 disabled={isLoading}
                 className="bg-blue-500 p-1.5 sm:p-2 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                style={{ borderRadius: 5 }}
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 sm:h-6 sm:w-6 animate-spin" />
@@ -242,7 +241,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
         
         {error && (
           <div
-            className="px-3 sm:px-4 py-2 sm:py-3 rounded-xl mb-4 sm:mb-6"
+            className="px-3 sm:px-4 py-2 sm:py-3 mb-4 sm:mb-6"
             style={{
               background: '#EEF3FF',
               border: '1px solid #A2BDFF',
@@ -263,19 +262,15 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
           </div>
         )}
         
-        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4" style={{ background: '#EEF3FF', borderRadius: 5 }}>
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4" style={{ background: '#EEF3FF' }}>
           {categoryOrder
             .map(category => (
-              <div key={category} className="border px-0 pb-2 sm:pb-4 pt-1 sm:pt-2" style={{ borderColor: '#A2BDFF', borderWidth: 1, borderStyle: 'solid', background: '#fff', borderRadius: 5 }}>
+              <div key={category} className="border px-0 pb-2 sm:pb-4 pt-1 sm:pt-2" style={{ borderColor: '#A2BDFF', borderWidth: 1, borderStyle: 'solid', background: '#fff' }}>
               <button
                 onClick={() => toggleCategory(category)}
                   className="w-full px-3 sm:px-6 py-2 sm:py-4 flex items-center justify-between text-left"
                   style={{
-                    background: '#fff',
-                    borderTopLeftRadius: 5,
-                    borderTopRightRadius: 5,
-                    borderBottomLeftRadius: expandedCategories.includes(category) ? 0 : 5,
-                    borderBottomRightRadius: expandedCategories.includes(category) ? 0 : 5,
+                    background: '#fff'
                   }}
               >
                   <h2 
@@ -310,7 +305,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                         )
                         .map((guideline) => (
                     <div key={guideline.id}>
-                        <div className="p-2 sm:p-4 shadow-sm border" style={{ background: '#fff', borderColor: '#A2BDFF', borderRadius: 5 }}>
+                        <div className="p-2 sm:p-4 shadow-sm border" style={{ background: '#fff', borderColor: '#A2BDFF' }}>
                         <div className="space-y-2 sm:space-y-3">
                           {/* Title as a link */}
                           <a 
@@ -341,7 +336,6 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                                   background: 'rgba(148, 167, 214, 0.2)',
                                   fontWeight: 400,
                                   border: 'none',
-                                  borderRadius: 6,
                                   marginRight: 4,
                                 }}
                               >
@@ -358,7 +352,6 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                                     background: 'rgba(148, 167, 214, 0.2)',
                                     fontWeight: 400,
                                     border: 'none',
-                                    borderRadius: 6,
                                     display: 'inline-block',
                                     wordBreak: 'break-word'
                                   }}
@@ -393,7 +386,6 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                                   fontWeight: 500,
                                   border: 'none',
                                   boxShadow: 'none',
-                                  borderRadius: 5,
                                   opacity: guideline.pdf_saved ? 1 : 0.5,
                                   minWidth: '10px',
                                   fontSize: 'clamp(12px, 1.5vw, 14px)'
