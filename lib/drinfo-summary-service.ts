@@ -12,6 +12,7 @@ export interface Citation {
   source_type?: string;
   journal?: string;
   doi?: string;
+  drug_citation_type?: string;
 }
 
 export interface DrInfoSummaryData {

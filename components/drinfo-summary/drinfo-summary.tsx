@@ -568,7 +568,19 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   }
 
   const getCitationCount = (citations?: Record<string, Citation>) => {
-    return citations ? Object.keys(citations).length : 0;
+    if (!citations) return 0;
+    
+    // Filter out implicit drug citations
+    const visibleCitations = Object.entries(citations).filter(([key, citation]) => {
+      // If it's a drug citation and has drug_citation_type === 'implicit', exclude it
+      if (citation.source_type === 'drug_database' && citation.drug_citation_type === 'implicit') {
+        return false;
+      }
+      // Otherwise, include it
+      return true;
+    });
+    
+    return visibleCitations.length;
   }
 
   const handleShowAllCitations = (citations?: Record<string, Citation>) => {
@@ -1264,19 +1276,27 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         <div className="print-reference-list">
           <h3>References</h3>
           <ol>
-            {Object.values(activeCitations).map((citation, idx) => (
-              <li key={idx}>
-                {citation.title}
-                {citation.authors ? `, ${Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors}` : ''}
-                {citation.year ? `, ${citation.year}` : ''}
-                {citation.url ? (
-                  <>
-                    {', '}
-                    <span style={{wordBreak: 'break-all'}}>{citation.url}</span>
-                  </>
-                ) : ''}
-              </li>
-            ))}
+            {Object.entries(activeCitations)
+              .filter(([key, citation]) => {
+                // Filter out implicit drug citations from print references
+                if (citation.source_type === 'drug_database' && citation.drug_citation_type === 'implicit') {
+                  return false;
+                }
+                return true;
+              })
+              .map(([key, citation], idx) => (
+                <li key={key}>
+                  {citation.title}
+                  {citation.authors ? `, ${Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors}` : ''}
+                  {citation.year ? `, ${citation.year}` : ''}
+                  {citation.url ? (
+                    <>
+                      {', '}
+                      <span style={{wordBreak: 'break-all'}}>{citation.url}</span>
+                    </>
+                  ) : ''}
+                </li>
+              ))}
           </ol>
         </div>
       )}
