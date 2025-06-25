@@ -24,13 +24,15 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
   // First, identify and format drug names for drug citations
   // Look for HTML-formatted drug names before citations (e.g., <strong><strong>drugname</strong></strong> [1])
   // Only process drug_database citations
-  const drugMatches = text.match(/<strong><strong>([a-zA-Z][a-zA-Z0-9\-'()]+)<\/strong><\/strong>\s*\[(\d+)\]/g);
+  // Updated regex to handle multi-word drug names with spaces
+  const drugMatches = text.match(/<strong><strong>([a-zA-Z][a-zA-Z0-9\s\-'()]+)<\/strong><\/strong>\s*\[(\d+)\]/g);
   console.log('Found potential drug matches:', drugMatches);
   
   // Collect all matches first, then process in reverse order to avoid index conflicts
   const matchesToProcess: Array<{match: string, drugName: string, num: string, index: number}> = [];
   let match;
-  const drugRegex = /<strong><strong>([a-zA-Z][a-zA-Z0-9\-'()]+)<\/strong><\/strong>\s*\[(\d+)\]/g;
+  // Updated regex to include \s for spaces in drug names
+  const drugRegex = /<strong><strong>([a-zA-Z][a-zA-Z0-9\s\-'()]+)<\/strong><\/strong>\s*\[(\d+)\]/g;
   
   while ((match = drugRegex.exec(text)) !== null) {
     const drugName = match[1];
