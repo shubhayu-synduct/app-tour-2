@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react'
-import { ArrowRight, ChevronDown, Copy, Search, ExternalLink, X, FileEdit } from 'lucide-react'
+import { ArrowRight, ChevronDown, Copy, Search, ExternalLink, X, FileEdit, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { fetchDrInfoSummary, sendFollowUpQuestion, Citation } from '@/lib/drinfo-summary-service'
 import { getFirebaseFirestore } from '@/lib/firebase'
 import { collection, addDoc, updateDoc, doc, getDoc, getDocs, query as firestoreQuery, where, orderBy, serverTimestamp, FieldPath, setDoc } from 'firebase/firestore'
@@ -15,6 +15,8 @@ import { formatWithCitations, formatWithDummyCitations } from '@/lib/formatWithC
 import { createCitationTooltip } from '@/lib/citationTooltipUtils'
 import { marked } from 'marked'
 import Link from 'next/link'
+import { MovingBorder } from "@/components/ui/moving-border"
+import { cn } from "@/lib/utils"
 
 interface DrInfoSummaryProps {
   user: any;
@@ -144,8 +146,84 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const [activeMode, setActiveMode] = useState<'instant' | 'research'>(initialMode);
   const answerIconRef = useRef<HTMLDivElement>(null);
 
+  // Modal state and timer
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+  const modalTimerRef = useRef<NodeJS.Timeout | null>(null)
+
   const contentRef = useRef<HTMLDivElement>(null)
   const inputAnchorRef = useRef<HTMLDivElement>(null)
+
+  // Modal timer effect
+  useEffect(() => {
+    const startModalTimer = () => {
+      modalTimerRef.current = setTimeout(() => {
+        setShowFeedbackModal(true)
+      }, 45000)
+    }
+
+    // Start the timer when component mounts
+    startModalTimer()
+
+    // Cleanup function
+    return () => {
+      if (modalTimerRef.current) {
+        clearTimeout(modalTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Handle modal close and restart timer
+  const handleModalClose = () => {
+    setShowFeedbackModal(false)
+    
+    // Clear existing timer
+    if (modalTimerRef.current) {
+      clearTimeout(modalTimerRef.current)
+    }
+    
+    // Start new 45-second timer
+    modalTimerRef.current = setTimeout(() => {
+      setShowFeedbackModal(true)
+    }, 45000)
+  }
+
+  // Handle modal button clicks to open feedback forms
+  const handleModalFeedbackClick = (type: 'helpful' | 'not_helpful') => {
+    // Close the modal
+    handleModalClose()
+    
+    // Find the latest assistant message with feedback
+    const latestAssistantMessage = [...messages].reverse().find(msg => 
+      msg.type === 'assistant' && msg.content && msg.answer?.citations
+    )
+    
+    if (latestAssistantMessage) {
+      // Scroll to the bottom to show the feedback forms
+      setTimeout(() => {
+        if (inputAnchorRef.current) {
+          inputAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        }
+        
+        // Find the AnswerFeedback component for the latest message and trigger the feedback form
+        setTimeout(() => {
+          const feedbackButtons = document.querySelectorAll('.flex.flex-row.items-center.gap-2.sm\\:gap-3.mb-3.sm\\:mb-4')
+          const lastFeedbackButton = feedbackButtons[feedbackButtons.length - 1]
+          
+          if (lastFeedbackButton) {
+            const targetButton = lastFeedbackButton.querySelector(
+              type === 'helpful' 
+                ? 'button[aria-label="Helpful"]' 
+                : 'button[aria-label="Not helpful"]'
+            ) as HTMLButtonElement
+            
+            if (targetButton && !targetButton.disabled) {
+              targetButton.click()
+            }
+          }
+        }, 500) // Small delay to ensure scroll is complete
+      }, 100)
+    }
+  }
 
   useEffect(() => {
     if (sessionId) {
@@ -1179,6 +1257,85 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         citations={activeCitations}
         onClose={() => setShowCitationsSidebar(false)}
       />
+      
+      {/* Feedback Reminder Modal */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 font-['DM_Sans']">
+                  Feedback Reminder
+                </h3>
+                <button
+                  onClick={handleModalClose}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-700 font-['DM_Sans'] leading-relaxed mb-4">
+                  This is a reminder to give your valuable feedback. Your input helps us improve our service and provide better answers to your questions.
+                </p>
+                
+                {/* Demo buttons showing the feedback UI */}
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 font-['DM_Sans'] mb-3">
+                    Look for these buttons below each answer to provide feedback:
+                  </p>
+                  <div className="flex flex-row items-center gap-2 sm:gap-3">
+                    <div className="relative h-8 sm:h-10 w-24 sm:w-32 overflow-hidden bg-transparent p-[1px] rounded-lg">
+                      <div className="absolute inset-0">
+                        <MovingBorder duration={3000} rx="8px" ry="8px" delay={0}>
+                          <div className="h-8 w-20 bg-[radial-gradient(#3771FE_40%,transparent_60%)] opacity-[0.8]" />
+                        </MovingBorder>
+                      </div>
+                      <button
+                        onClick={() => handleModalFeedbackClick('helpful')}
+                        className={cn(
+                          "relative flex h-full w-full items-center justify-center border border-[#C8C8C8] text-[#223258] bg-white rounded-lg transition-all hover:border-[#3771FE] hover:text-[#3771FE]"
+                        )}
+                      >
+                        <ThumbsUp className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+                        <span className="text-xs sm:text-sm">Useful...</span>
+                      </button>
+                    </div>
+
+                    <div className="relative h-8 sm:h-10 w-24 sm:w-32 overflow-hidden bg-transparent p-[1px] rounded-lg">
+                      <div className="absolute inset-0">
+                        <MovingBorder duration={3000} rx="8px" ry="8px" delay={1500}>
+                          <div className="h-8 w-20 bg-[radial-gradient(#3771FE_40%,transparent_60%)] opacity-[0.8]" />
+                        </MovingBorder>
+                      </div>
+                      <button
+                        onClick={() => handleModalFeedbackClick('not_helpful')}
+                        className={cn(
+                          "relative flex h-full w-full items-center justify-center border border-[#C8C8C8] text-[#223258] bg-white rounded-lg transition-all hover:border-[#3771FE] hover:text-[#3771FE]"
+                        )}
+                      >
+                        <ThumbsDown className="inline w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+                        <span className="text-xs sm:text-sm">Not Useful...</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end">
+                <button
+                  onClick={handleModalClose}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium font-['DM_Sans'] transition-colors"
+                >
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Print-only reference list at the bottom */}
       {activeCitations && Object.keys(activeCitations).length > 0 && (
         <div className="print-reference-list">
