@@ -149,20 +149,25 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   // Modal state and timer
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const modalTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [questionCount, setQuestionCount] = useState(0)
+  const [hasShownInitialModal, setHasShownInitialModal] = useState(false)
 
   const contentRef = useRef<HTMLDivElement>(null)
   const inputAnchorRef = useRef<HTMLDivElement>(null)
 
-  // Modal timer effect
+  // Feedback modal behavior:
+  // 1. Initial modal appears after 45 seconds (only once)
+  // 2. Subsequent modals appear after every 4 questions (4th, 8th, 12th, 16th, etc.) with 45-second delay
+  // 3. Question count is incremented only for user-initiated searches, not loaded queries
+
+  // Modal timer effect - only show initial modal after 45 seconds
   useEffect(() => {
-    const startModalTimer = () => {
+    if (!hasShownInitialModal) {
       modalTimerRef.current = setTimeout(() => {
         setShowFeedbackModal(true)
+        setHasShownInitialModal(true)
       }, 45000)
     }
-
-    // Start the timer when component mounts
-    startModalTimer()
 
     // Cleanup function
     return () => {
@@ -170,22 +175,45 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         clearTimeout(modalTimerRef.current)
       }
     }
-  }, [])
+  }, [hasShownInitialModal])
 
-  // Handle modal close and restart timer
+  // Handle modal close
   const handleModalClose = () => {
     setShowFeedbackModal(false)
-    
-    // Clear existing timer
-    if (modalTimerRef.current) {
-      clearTimeout(modalTimerRef.current)
-    }
-    
-    // Start new 45-second timer
-    modalTimerRef.current = setTimeout(() => {
-      setShowFeedbackModal(true)
-    }, 45000)
   }
+
+  // Function to check if feedback modal should be shown based on question count
+  const shouldShowFeedbackModal = (count: number) => {
+    if (count === 0) return false
+    const shouldShow = count % 4 === 0 && count > 0; // Show at 4th, 8th, 12th, 16th, etc.
+    console.log("[FEEDBACK] shouldShowFeedbackModal check:", { count, shouldShow });
+    return shouldShow;
+  }
+
+  // Effect to show feedback modal based on question count with 45-second delay
+  useEffect(() => {
+    console.log("[FEEDBACK] Question count:", questionCount, "Has shown initial modal:", hasShownInitialModal);
+    if (hasShownInitialModal && shouldShowFeedbackModal(questionCount)) {
+      console.log("[FEEDBACK] Scheduling modal for question count:", questionCount, "with 45-second delay");
+      // Clear any existing timer
+      if (modalTimerRef.current) {
+        clearTimeout(modalTimerRef.current)
+      }
+      // Set new timer for 45 seconds
+      modalTimerRef.current = setTimeout(() => {
+        setShowFeedbackModal(true)
+      }, 45000)
+    }
+  }, [questionCount, hasShownInitialModal])
+
+  // Cleanup effect to clear timers on unmount
+  useEffect(() => {
+    return () => {
+      if (modalTimerRef.current) {
+        clearTimeout(modalTimerRef.current)
+      }
+    }
+  }, [])
 
   // Handle modal button clicks to open feedback forms
   const handleModalFeedbackClick = (type: 'helpful' | 'not_helpful') => {
@@ -343,6 +371,11 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         
         setChatHistory(messages);
         setSearchPosition("bottom");
+        
+        // Initialize question count based on loaded messages
+        const userMessageCount = messages.filter(msg => msg.type === 'user').length;
+        console.log("[FEEDBACK] Initializing question count from loaded messages:", userMessageCount);
+        setQuestionCount(userMessageCount);
         
         if (messages.length > 0) {
           const lastUserMsg = [...messages].reverse().find(msg => msg.type === 'user');
@@ -571,6 +604,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     if (e) e.preventDefault();
     if (!query.trim()) return;
     setLastQuestion(query);
+    setQuestionCount(prev => {
+      const newCount = prev + 1;
+      console.log("[FEEDBACK] Incrementing question count from", prev, "to", newCount, "via handleSearch");
+      if (newCount % 4 === 0) {
+        console.log("[FEEDBACK] Question", newCount, "reached - modal will appear in 45 seconds");
+      }
+      return newCount;
+    });
     handleSearchWithContent(query, false, activeMode === 'instant' ? 'swift' : 'study');
     setFollowUpQuestion(''); // Clear follow-up input after main search
   };
@@ -579,6 +620,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     e.preventDefault();
     if (!followUpQuestion.trim()) return;
     setLastQuestion(followUpQuestion);
+    setQuestionCount(prev => {
+      const newCount = prev + 1;
+      console.log("[FEEDBACK] Incrementing question count from", prev, "to", newCount, "via handleFollowUpQuestion");
+      if (newCount % 4 === 0) {
+        console.log("[FEEDBACK] Question", newCount, "reached - modal will appear in 45 seconds");
+      }
+      return newCount;
+    });
     
     // Start the search/streaming first to create the answer icon
     handleSearchWithContent(followUpQuestion, true, activeMode === 'instant' ? 'swift' : 'study');
