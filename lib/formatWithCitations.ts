@@ -23,7 +23,7 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
   
   // First, identify and format drug names for drug citations
   // Look for HTML-formatted drug names before citations (e.g., <strong><strong>drugname</strong></strong> [1])
-  // Only process drug_database citations
+  // Process both implicit and explicit drug_database citations
   // Updated regex to handle multi-word drug names with spaces
   const drugMatches = text.match(/<strong><strong>([a-zA-Z][a-zA-Z0-9\s\-'()]+)<\/strong><\/strong>\s*\[(\d+)\]/g);
   console.log('Found potential drug matches:', drugMatches);
@@ -74,7 +74,8 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
     
     let replacementText = clickableDrugName;
     
-    // Only add citation number if it's not implicit
+    // For explicit drug citations, add the citation number (keep it visible)
+    // For implicit drug citations, don't add citation number (keep it hidden)
     if (!isImplicit) {
       const citationSpan = `<span class="citation-reference" 
         data-citation-number="${num}"

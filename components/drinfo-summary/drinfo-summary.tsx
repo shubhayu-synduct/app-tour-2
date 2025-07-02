@@ -799,31 +799,17 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             e.preventDefault();
             e.stopPropagation();
             if (citationObj) {
-              // Check if it's a drug citation and open drug modal directly
-              if (citationObj.source_type === 'drug_database') {
-                setSelectedCitation(citationObj);
-                setShowDrugModal(true);
-              } else {
-                // For other citation types, open the citations sidebar
+              // Only open citations sidebar for non-drug citations
+              if (citationObj.source_type !== 'drug_database') {
                 setSelectedCitation(citationObj);
                 setShowCitationsSidebar(true);
               }
+              // For drug citations, do nothing on click (keep hover tooltip only)
             }
           }
         });
         
-        // Add click handler for all devices (including desktop)
-        ref.addEventListener('click', (e) => {
-          if (citationObj) {
-            // Check if it's a drug citation and open drug modal directly
-            if (citationObj.source_type === 'drug_database') {
-              e.preventDefault();
-              e.stopPropagation();
-              setSelectedCitation(citationObj);
-              setShowDrugModal(true);
-            }
-          }
-        });
+        // Remove the click handler for desktop devices - citation numbers should only show tooltips, not open modals
         
         ref.addEventListener('mouseenter', () => {
           // Only handle hover on devices that support hover
