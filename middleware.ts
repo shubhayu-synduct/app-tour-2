@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
     path === "/signup" || 
     path === "/forgot-password" || 
     path.startsWith("/reset-password") ||
+    path.startsWith("/dashboard/public/") || // Allow access to public shared chats
     path.startsWith("/_next") ||
     path.startsWith("/api") ||
     path.endsWith(".svg") ||
