@@ -1,8 +1,9 @@
 "use client"
 
 // API base URL for DrInfo summary service
- const DRINFO_API_URL = "https://synduct-aisummary.drinfo.ai/chat/stream";
+//  const DRINFO_API_URL = "https://synduct-aisummary.drinfo.ai/chat/stream";
 // const DRINFO_API_URL = "http://localhost:8000/chat/stream";
+const DRINFO_API_URL = "https://ai-summary-stage.duckdns.org/chat/stream";
 export interface Citation {
   title: string;
   url: string;
@@ -11,6 +12,7 @@ export interface Citation {
   source_type?: string;
   journal?: string;
   doi?: string;
+  drug_citation_type?: string;
 }
 
 export interface DrInfoSummaryData {

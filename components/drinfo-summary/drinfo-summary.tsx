@@ -11,6 +11,7 @@ import AnswerFeedback from '../feedback/answer-feedback'
 import { getStatusMessage, StatusType } from '@/lib/status-messages'
 import { ReferencesSidebar } from "@/components/references/ReferencesSidebar"
 import { ReferenceGrid } from "@/components/references/ReferenceGrid"
+import { DrugInformationModal } from "@/components/references/DrugInformationModal"
 import { formatWithCitations, formatWithDummyCitations } from '@/lib/formatWithCitations'
 import { createCitationTooltip } from '@/lib/citationTooltipUtils'
 import { marked } from 'marked'
@@ -134,6 +135,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const [activeCitations, setActiveCitations] = useState<Record<string, Citation> | null>(null)
   const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null)
   const [showGuidelineModal, setShowGuidelineModal] = useState(false)
+  const [showDrugModal, setShowDrugModal] = useState(false)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [isChatLoading, setIsChatLoading] = useState(false)
@@ -699,7 +701,19 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   }
 
   const getCitationCount = (citations?: Record<string, Citation>) => {
-    return citations ? Object.keys(citations).length : 0;
+    if (!citations) return 0;
+    
+    // Filter out implicit drug citations
+    const visibleCitations = Object.entries(citations).filter(([key, citation]) => {
+      // If it's a drug citation and has drug_citation_type === 'implicit', exclude it
+      if (citation.source_type === 'drug_database' && citation.drug_citation_type === 'implicit') {
+        return false;
+      }
+      // Otherwise, include it
+      return true;
+    });
+    
+    return visibleCitations.length;
   }
 
   const handleShowAllCitations = (citations?: Record<string, Citation>) => {
@@ -817,6 +831,20 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         opacity: 0.5;
       }
 
+      .drug-name-clickable {
+        text-decoration: underline !important;
+        color: #214498 !important;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        font-weight: bold !important;
+        display: inline;
+      }
+      
+      .drug-name-clickable:hover {
+        color: #3771FE !important;
+        text-decoration: underline !important;
+      }
+
       @media print {
         body {
           -webkit-print-color-adjust: exact !important;
@@ -859,7 +887,9 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     
     function attachTooltips() {
       const citationRefs = document.querySelectorAll('.citation-reference');
+      const drugNameRefs = document.querySelectorAll('.drug-name-clickable');
       
+      // Handle citation references
       citationRefs.forEach(ref => {
         if (ref.querySelector('.citation-tooltip')) return;
         
@@ -902,11 +932,17 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             e.preventDefault();
             e.stopPropagation();
             if (citationObj) {
-              setSelectedCitation(citationObj);
-              setShowCitationsSidebar(true);
+              // Only open citations sidebar for non-drug citations
+              if (citationObj.source_type !== 'drug_database') {
+                setSelectedCitation(citationObj);
+                setShowCitationsSidebar(true);
+              }
+              // For drug citations, do nothing on click (keep hover tooltip only)
             }
           }
         });
+        
+        // Remove the click handler for desktop devices - citation numbers should only show tooltips, not open modals
         
         ref.addEventListener('mouseenter', () => {
           // Only handle hover on devices that support hover
@@ -945,6 +981,29 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
           }
         });
       });
+      
+      // Handle drug name clicks
+      drugNameRefs.forEach(ref => {
+        const citationNumber = ref.getAttribute('data-citation-number');
+        let citationObj = null;
+        if (citationNumber && activeCitations && activeCitations[citationNumber]) {
+          citationObj = activeCitations[citationNumber];
+        }
+        
+        console.log('Found drug name span:', { citationNumber, citationObj, element: ref });
+        
+        // Add click handler for drug names
+        ref.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Drug name clicked:', { citationNumber, citationObj });
+          if (citationObj && citationObj.source_type === 'drug_database') {
+            console.log('Opening drug modal for:', citationObj.title);
+            setSelectedCitation(citationObj);
+            setShowDrugModal(true);
+          }
+        });
+      });
     }
     
     const handleMouseMove = (e: MouseEvent) => {
@@ -977,7 +1036,18 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       mutations.forEach(mutation => {
         if (mutation.type === 'childList' && 
             mutation.addedNodes.length > 0) {
-          shouldAttach = true;
+          // Check if any added nodes contain citation references or drug names
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const element = node as Element;
+              if (element.querySelector('.citation-reference') || 
+                  element.querySelector('.drug-name-clickable') ||
+                  element.classList.contains('citation-reference') ||
+                  element.classList.contains('drug-name-clickable')) {
+                shouldAttach = true;
+              }
+            }
+          });
         }
       });
       
@@ -1270,10 +1340,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         <button
           onClick={handleShare}
           disabled={!sessionId || messages.length === 0}
-          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#C8C8C8] text-[#223258] rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
-          <Share2 size={16} />
-          <span className="hidden sm:inline">Share Chat</span>
+                      <img src="/Share icon.svg" alt="Share" className="w-5 h-5" />
+          <span className="hidden sm:inline">Share</span>
           <span className="sm:hidden">Share</span>
         </button>
       </div>
@@ -1438,15 +1508,15 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       {/* Share Popup */}
       {showSharePopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
+          <div className="bg-[#FCFDFF] rounded-lg shadow-xl max-w-lg w-full mx-4 border border-[#C8C8C8]">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-semibold text-blue-900">
+              <h2 className="text-2xl font-medium text-blue-900">
                 Shareable public link
               </h2>
               <button 
                 onClick={() => setShowSharePopup(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-[#263969] hover:text-gray-600 transition-colors"
               >
                 <X size={24} />
               </button>
@@ -1462,7 +1532,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                     <span className="text-gray-500">Creating Link...</span>
                   </div>
                 ) : (
-                  <div className="mt-4 flex items-center space-x-2 p-3 bg-gray-50 rounded-lg border">
+                  <div className="mt-4 flex items-center space-x-2 p-3 bg-gray-50 rounded-lg border border-[#C8D8FF]">
                     <input
                       type="text"
                       value={shareLink}
@@ -1526,7 +1596,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                   disabled={!shareLink || isSharing}
                   className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-[#214498] rounded-lg flex items-center justify-center">
                     <Mail className="w-6 h-6 text-white" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">Mail</span>
@@ -1540,7 +1610,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       {/* Feedback Reminder Modal */}
       {showFeedbackModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+          <div className="bg-[#FCFDFF] rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all border border-[#C8C8C8]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 font-['DM_Sans']">
@@ -1548,7 +1618,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                 </h3>
                 <button
                   onClick={handleModalClose}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-[#223258] hover:text-gray-600 transition-colors"
                 >
                   <X size={20} />
                 </button>
@@ -1615,24 +1685,40 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         </div>
       )}
       
+      <DrugInformationModal
+        open={showDrugModal}
+        citation={selectedCitation}
+        onClose={() => {
+          setShowDrugModal(false);
+          setSelectedCitation(null);
+        }}
+      />
       {/* Print-only reference list at the bottom */}
       {activeCitations && Object.keys(activeCitations).length > 0 && (
         <div className="print-reference-list">
           <h3>References</h3>
           <ol>
-            {Object.values(activeCitations).map((citation, idx) => (
-              <li key={idx}>
-                {citation.title}
-                {citation.authors ? `, ${Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors}` : ''}
-                {citation.year ? `, ${citation.year}` : ''}
-                {citation.url ? (
-                  <>
-                    {', '}
-                    <span style={{wordBreak: 'break-all'}}>{citation.url}</span>
-                  </>
-                ) : ''}
-              </li>
-            ))}
+            {Object.entries(activeCitations)
+              .filter(([key, citation]) => {
+                // Filter out implicit drug citations from print references
+                if (citation.source_type === 'drug_database' && citation.drug_citation_type === 'implicit') {
+                  return false;
+                }
+                return true;
+              })
+              .map(([key, citation], idx) => (
+                <li key={key}>
+                  {citation.title}
+                  {citation.authors ? `, ${Array.isArray(citation.authors) ? citation.authors.join(', ') : citation.authors}` : ''}
+                  {citation.year ? `, ${citation.year}` : ''}
+                  {citation.url ? (
+                    <>
+                      {', '}
+                      <span style={{wordBreak: 'break-all'}}>{citation.url}</span>
+                    </>
+                  ) : ''}
+                </li>
+              ))}
           </ol>
         </div>
       )}

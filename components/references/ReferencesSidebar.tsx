@@ -14,6 +14,7 @@ interface Citation {
   journal?: string;
   doi?: string;
   source_type?: string;
+  drug_citation_type?: string;
 }
 
 interface ReferencesSidebarProps {
@@ -49,6 +50,16 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
     const session = getSessionCookie();
     return !!session;
   };
+
+  // Filter out implicit drug citations
+  const filteredCitations = Object.entries(citations).filter(([key, citation]) => {
+    // If it's a drug citation and has drug_citation_type === 'implicit', hide it
+    if (citation.source_type === 'drug_database' && citation.drug_citation_type === 'implicit') {
+      return false;
+    }
+    // Otherwise, show it
+    return true;
+  });
 
   const handleGuidelineClick = (citation: Citation) => {
     if (citation.source_type === 'guideline_database') {
@@ -107,7 +118,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto">
               <div className="space-y-4 sm:space-y-6">
-                {Object.entries(citations).map(([key, citation]) => (
+                {filteredCitations.map(([key, citation]) => (
                   <div
                     key={key}
                     className="mb-3 sm:mb-4 rounded-xl relative flex flex-col"
