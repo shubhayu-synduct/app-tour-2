@@ -34,7 +34,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
     <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 w-full">
       {(() => {
         const entries = filteredCitations;
-        const showAll = getCitationCount(visibleCitations) > 3;
+        const showAll = getCitationCount(visibleCitations) >= 1;
         
         // Mobile view - single citation
         const mobileItems = entries.slice(0, 1).map(([key, citation]) => (
