@@ -74,7 +74,7 @@ export default function DrugInformationPage() {
       try {
         // Get authentication status in background with fallback
         const authStatus = await getCachedAuthStatus();
-        console.log('Using database:', authStatus.database, 'for country:', authStatus.country);
+        // console.log('Using database:', authStatus.database, 'for country:', authStatus.country);
         
         const { getDrugLibrary } = await import('@/lib/authenticated-api');
         const data = await getDrugLibrary(selectedLetter, undefined, 0, authStatus.database);
@@ -99,7 +99,7 @@ export default function DrugInformationPage() {
   
   // Fetch recommendations function
   const fetchRecommendations = async (term: string) => {
-    console.log('fetchRecommendations called with:', term);
+    // console.log('fetchRecommendations called with:', term);
     if (term.trim() === '') {
       setRecommendations([]);
       setShowRecommendations(false);
@@ -109,11 +109,11 @@ export default function DrugInformationPage() {
     try {
       // Get authentication status in background with fallback
       const authStatus = await getCachedAuthStatus();
-      console.log('Search using database:', authStatus.database, 'for country:', authStatus.country);
+      // console.log('Search using database:', authStatus.database, 'for country:', authStatus.country);
       
       const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
       const data = await enhancedSearchDrugs(term, 10, authStatus.database);
-      console.log('API response data:', data);
+      // console.log('API response data:', data);
       
       let transformedData = [];
       
@@ -139,7 +139,7 @@ export default function DrugInformationPage() {
       }
       
       setRecommendations(transformedData);
-      console.log('Recommendations set:', transformedData);
+      // console.log('Recommendations set:', transformedData);
       if (searchInputRef.current) {
         searchInputRef.current.focus();
       }

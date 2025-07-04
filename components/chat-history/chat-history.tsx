@@ -49,68 +49,79 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
     console.log("Fetching chat sessions for user:", user.uid);
     
     const fetchChatSessions = async () => {
-      setLoading(true);
+      if (!user?.uid) return
+
       try {
-        const db = getFirebaseFirestore()
-        console.log("Building Firestore query for user:", user.uid);
+        setLoading(true)
+        // console.log("Fetching chat sessions for user:", user.uid);
         
-        const chatSessionQuery = query(
-          collection(db, "conversations"),
+        const db = getFirebaseFirestore()
+        const conversationsRef = collection(db, "conversations")
+        
+        // console.log("Building Firestore query for user:", user.uid);
+        const q = query(
+          conversationsRef,
           where("userId", "==", user.uid),
           orderBy("updatedAt", "desc")
-        );
-
-        console.log("Executing Firestore query...");
-        const querySnapshot = await getDocs(chatSessionQuery);
-        console.log(`Retrieved ${querySnapshot.size} chat sessions from Firestore`);
+        )
+        
+        // console.log("Executing Firestore query...");
+        const querySnapshot = await getDocs(q)
+        // console.log(`Retrieved ${querySnapshot.size} chat sessions from Firestore`);
         
         if (querySnapshot.empty) {
-          console.log("No chat sessions found for user ID:", user.uid);
+          // console.log("No chat sessions found for user ID:", user.uid);
+          setChatSessions([])
+          return
         }
         
-        const sessions: ChatSession[] = [];
-
+        const sessions: ChatSession[] = []
+        
         // Helper to check if value is a Firestore Timestamp
         function isFirestoreTimestamp(val: any): val is { toMillis: () => number } {
           return val && typeof val === 'object' && typeof val.toMillis === 'function';
         }
-
+        
         querySnapshot.forEach((doc) => {
-          const data = doc.data() as ChatSession;
-          // Convert Firestore Timestamp to number if needed
-          const updatedAt = isFirestoreTimestamp(data.updatedAt)
-            ? data.updatedAt.toMillis()
-            : data.updatedAt;
-          const createdAt = isFirestoreTimestamp(data.createdAt)
-            ? data.createdAt.toMillis()
-            : data.createdAt;
-          // Use the title field or fallback
-          let displayTitle = data.title || "New chat";
-            // Truncate long titles
-            if (displayTitle.length > 60) {
-              displayTitle = displayTitle.substring(0, 57) + '...';
-            }
-          console.log("Chat session document:", {
-            id: doc.id,
-            title: displayTitle,
-            originalTitle: data.title,
-            createdAt: createdAt ? new Date(createdAt).toISOString() : "undefined",
-            updatedAt: updatedAt ? new Date(updatedAt).toISOString() : "undefined"
-          });
+          const data = doc.data()
+          // console.log("Chat session document:", {
+          //   id: doc.id,
+          //   title: data.title,
+          //   createdAt: data.createdAt,
+          //   updatedAt: data.updatedAt,
+          //   userId: data.userId,
+          //   messages: data.messages?.length || 0
+          // });
+          
+          // Convert Firestore timestamps to numbers
+          let createdAt = 0
+          let updatedAt = 0
+          
+          if (data.createdAt) {
+            createdAt = isFirestoreTimestamp(data.createdAt) 
+              ? data.createdAt.toMillis() 
+              : data.createdAt
+          }
+          
+          if (data.updatedAt) {
+            updatedAt = isFirestoreTimestamp(data.updatedAt) 
+              ? data.updatedAt.toMillis() 
+              : data.updatedAt
+          }
+          
           sessions.push({
             id: doc.id,
-            title: displayTitle,
+            title: data.title || 'Untitled Chat',
             createdAt,
             updatedAt,
             userId: data.userId,
-            chatType: 'main'
-          });
-        });
-
-        // Explicitly sort by updatedAt descending (newest first)
-        sessions.sort((a, b) => b.updatedAt - a.updatedAt);
-        setChatSessions(sessions);
-        console.log(`Finished processing ${sessions.length} chat sessions`);
+            messages: data.messages || [],
+            chatType: data.chatType || 'main'
+          })
+        })
+        
+        // console.log(`Finished processing ${sessions.length} chat sessions`);
+        setChatSessions(sessions)
       } catch (err) {
         console.error("Error fetching chat sessions:", err);
         setError("Failed to load chat history");
@@ -131,27 +142,20 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
   };
 
   const deleteChatSession = async (sessionId: string, event: React.MouseEvent) => {
-    // Prevent navigation when clicking the delete button
-    event.preventDefault();
-    event.stopPropagation();
-    
-    if (!confirm("Are you sure you want to delete this chat?")) {
-      return;
-    }
+    event.stopPropagation()
     
     try {
-      console.log("Deleting chat session:", sessionId);
+      // console.log("Deleting chat session:", sessionId);
       const db = getFirebaseFirestore()
-      await deleteDoc(doc(db, "conversations", sessionId));
-      console.log("Chat session deleted successfully");
+      await deleteDoc(doc(db, "conversations", sessionId))
+      // console.log("Chat session deleted successfully");
       
-      // Update the UI by removing the deleted session
-      setChatSessions(prev => prev.filter(session => session.id !== sessionId));
-    } catch (err) {
-      console.error("Error deleting chat session:", err);
-      setError("Failed to delete chat. Please try again.");
+      // Refresh the list by removing from state
+      setChatSessions(prev => prev.filter(session => session.id !== sessionId))
+    } catch (error) {
+      console.error("Error deleting chat session:", error)
     }
-  };
+  }
 
   return (
     <div className="h-full flex flex-col bg-white border-r">

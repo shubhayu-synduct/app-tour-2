@@ -70,11 +70,13 @@ export default function Onboarding() {
         provider.providerId === 'microsoft.com'
       )
       
-      console.log("Email verification status:", { 
-        emailVerified: user.emailVerified, 
-        isOAuthUser,
-        providers: user.providerData.map(p => p.providerId)
-      })
+      // Check if email is verified
+      const emailVerified = user.emailVerified
+      // console.log("Email verification status:", {
+      //   email: user.email,
+      //   verified: emailVerified,
+      //   displayName: user.displayName
+      // });
       
       // Note: We no longer block access for unverified emails
       // Instead, we'll show a reminder within the onboarding flow

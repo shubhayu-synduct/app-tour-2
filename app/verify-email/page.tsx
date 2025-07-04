@@ -19,7 +19,7 @@ function VerifyEmailContent() {
 
   const handleSuccessfulVerification = async () => {
     if (!user) {
-      console.log("No user found after verification, redirecting to onboarding")
+      // console.log("No user found after verification, redirecting to onboarding")
       router.push("/onboarding")
       return
     }
@@ -29,7 +29,7 @@ function VerifyEmailContent() {
     try {
       // Check user's onboarding status
       const { getFirebaseFirestore } = await import("@/lib/firebase")
-      const { doc, getDoc } = await import("firebase/firestore")
+      const { doc, getDoc, setDoc, serverTimestamp } = await import("firebase/firestore")
       
       const db = await getFirebaseFirestore()
       if (!db) {
@@ -38,33 +38,29 @@ function VerifyEmailContent() {
         return
       }
       
-      console.log("Checking onboarding status for user:", user.uid)
+      // Check if user has completed onboarding
+      // console.log("Checking onboarding status for user:", user.uid)
       const userDoc = await getDoc(doc(db, "users", user.uid))
       
       if (userDoc.exists()) {
         const userData = userDoc.data()
-        console.log("User document found:", userData)
-        if (userData?.onboardingCompleted) {
-          console.log("User onboarding completed, redirecting to dashboard")
+        // console.log("User document found:", userData)
+        
+        if (userData.onboardingCompleted) {
+          // console.log("User onboarding completed, redirecting to dashboard")
           router.push('/dashboard')
         } else {
-          console.log("User onboarding not completed, redirecting to onboarding")
+          // console.log("User onboarding not completed, redirecting to onboarding")
           router.push('/onboarding')
         }
       } else {
-        console.log("User document does not exist, creating new user and redirecting to onboarding")
-        
-        // Create user document for new users
-        const { setDoc } = await import("firebase/firestore")
+        // console.log("User document does not exist, creating new user and redirecting to onboarding")
+        // Create new user document
         await setDoc(doc(db, "users", user.uid), {
           email: user.email,
-          displayName: user.displayName,
-          emailVerified: user.emailVerified,
-          onboardingCompleted: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: serverTimestamp(),
+          onboardingCompleted: false
         })
-        
         router.push('/onboarding')
       }
     } catch (error) {
@@ -85,7 +81,7 @@ function VerifyEmailContent() {
         const mode = searchParams.get("mode")
         const apiKey = searchParams.get("apiKey")
 
-        console.log("Verification parameters:", { oobCode: !!oobCode, mode, apiKey: !!apiKey })
+        // console.log("Verification parameters:", { oobCode: !!oobCode, mode, apiKey: !!apiKey })
 
         // Validate required parameters
         if (!oobCode) {
@@ -96,32 +92,33 @@ function VerifyEmailContent() {
           throw new Error("Invalid verification mode")
         }
 
-        try {
-          // Apply the verification code
-          await applyActionCode(auth, oobCode)
-          console.log("Email verification successful!")
-          setVerified(true)
-          setError("") // Clear any existing errors
-          // Redirect to onboarding after successful verification
-          handleSuccessfulVerification()
-        } catch (verificationError: any) {
-          console.error("Verification error details:", {
-            code: verificationError.code,
-            message: verificationError.message,
-            fullError: verificationError
-          })
+        if (oobCode && mode === 'verifyEmail' && apiKey) {
+          try {
+            await applyActionCode(auth, oobCode)
+            // console.log("Email verification successful!")
+            setVerified(true)
+            setError("") // Clear any existing errors
+            // Redirect to onboarding after successful verification
+            handleSuccessfulVerification()
+          } catch (verificationError: any) {
+            console.error("Verification error details:", {
+              code: verificationError.code,
+              message: verificationError.message,
+              fullError: verificationError
+            })
 
-          if (verificationError.code === "auth/invalid-action-code") {
-            if (verificationError.message.includes("already verified")) {
-              setAlreadyVerified(true)
-              setError("") // Clear error when already verified
+            if (verificationError.code === "auth/invalid-action-code") {
+              if (verificationError.message.includes("already verified")) {
+                setAlreadyVerified(true)
+                setError("") // Clear error when already verified
+              } else {
+                setError("This verification link has expired or is invalid. Please request a new verification email.")
+              }
+            } else if (verificationError.code === "auth/expired-action-code") {
+              setError("This verification link has expired. Please request a new verification email.")
             } else {
-              setError("This verification link has expired or is invalid. Please request a new verification email.")
+              setError(`Verification failed: ${verificationError.message || "Unknown error"}`)
             }
-          } else if (verificationError.code === "auth/expired-action-code") {
-            setError("This verification link has expired. Please request a new verification email.")
-          } else {
-            setError(`Verification failed: ${verificationError.message || "Unknown error"}`)
           }
         }
       } catch (err: any) {

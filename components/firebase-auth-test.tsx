@@ -12,11 +12,11 @@ export function FirebaseAuthTest() {
       try {
         // Log environment variables (without exposing sensitive data)
         const envVars = {
-          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "Present" : "Missing",
-          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "Missing",
-          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "Missing",
+          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "present" : "missing",
+          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
         }
-        console.log("Environment variables:", envVars)
+        // console.log("Environment variables:", envVars)
         setConfig(envVars)
 
         // Import Firebase from your existing initialization

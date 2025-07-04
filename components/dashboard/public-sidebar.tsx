@@ -163,24 +163,6 @@ export function PublicSidebar({ isOpen, setIsOpen }: PublicSidebarProps) {
               </Link>
             </nav>
           </div>
-
-          {/* Public Access Notice */}
-          {isOpen && (
-            <div className="mt-auto p-4 border-t border-gray-200">
-              <div className="bg-blue-50 rounded-lg p-3">
-                <p className="text-sm text-blue-800 font-medium mb-1">Public Access</p>
-                <p className="text-xs text-blue-600">
-                  This is a shared chat conversation. Sign in to create your own conversations.
-                </p>
-                <Link 
-                  href="/login"
-                  className="inline-block mt-2 text-xs text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Sign In →
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
       </aside>
     </>

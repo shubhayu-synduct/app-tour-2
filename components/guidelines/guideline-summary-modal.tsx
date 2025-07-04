@@ -121,7 +121,7 @@ export default function GuidelineSummaryModal({
         const data = await response.json()
         // Decode unicode in summary before using it
         const decodedSummary = decodeUnicode(data.summary)
-        console.log('Summary API response:', decodedSummary)
+        // console.log('Summary API response:', decodedSummary)
         setSummary({ ...data, summary: decodedSummary })
         
         // Add the initial summary to the chat history

@@ -115,8 +115,6 @@ export default function ChatHistory() {
           })
         })
 
-        console.log("[LOAD] Loaded messages:", sessions);
-
         setChatSessions(sessions)
       } catch (err) {
         console.error("Error fetching chat sessions:", err)

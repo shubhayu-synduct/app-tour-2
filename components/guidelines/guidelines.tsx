@@ -110,9 +110,12 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
       }
       
       const data = await response.json()
-      console.log('API response:', data);
-      setGuidelines(Array.isArray(data) ? data : [])
-      setRetryCount(0)
+      // console.log('API response:', data);
+      
+      if (data && data.guidelines) {
+        setGuidelines(Array.isArray(data.guidelines) ? data.guidelines : [])
+        setRetryCount(0)
+      }
     } catch (err: any) {
       console.error('Error searching guidelines:', err)
       setError(err.message || 'Search failed. Please try again.')
@@ -160,7 +163,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
 
   useEffect(() => {
     if (selectedGuideline) {
-      console.log('Selected guideline:', selectedGuideline);
+      // console.log('Selected guideline:', selectedGuideline);
     }
   }, [selectedGuideline]);
 
