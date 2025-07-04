@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { X, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { GuidelineSummaryModal } from "./GuidelineSummaryModal";
 import { DrugInformationModal } from "./DrugInformationModal";
 import { GuidelineMobileModal } from "./GuidelineMobileModal";
+import { getSessionCookie } from "@/lib/auth-service";
 
 interface Citation {
   title: string;
@@ -26,6 +28,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
   const [showGuidelineModal, setShowGuidelineModal] = useState(false);
   const [showDrugModal, setShowDrugModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -43,6 +46,11 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
 
   if (!open || !citations) return null;
 
+  const checkAuthentication = () => {
+    const session = getSessionCookie();
+    return !!session;
+  };
+
   // Filter out implicit drug citations
   const filteredCitations = Object.entries(citations).filter(([key, citation]) => {
     // If it's a drug citation and has drug_citation_type === 'implicit', hide it
@@ -55,6 +63,12 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
 
   const handleGuidelineClick = (citation: Citation) => {
     if (citation.source_type === 'guideline_database') {
+      if (!checkAuthentication()) {
+        // Redirect to login if not authenticated
+        router.push('/login');
+        onClose(); // Close the sidebar
+        return;
+      }
       setSelectedCitation(citation);
       setShowGuidelineModal(true);
     }
@@ -62,6 +76,12 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
 
   const handleDrugClick = (citation: Citation) => {
     if (citation.source_type === 'drug_database') {
+      if (!checkAuthentication()) {
+        // Redirect to login if not authenticated
+        router.push('/login');
+        onClose(); // Close the sidebar
+        return;
+      }
       setSelectedCitation(citation);
       setShowDrugModal(true);
     }
