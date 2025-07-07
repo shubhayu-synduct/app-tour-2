@@ -98,21 +98,29 @@ export default function AnswerFeedback({
         timestamp: new Date().toISOString()
       };
 
-      // console.log('Attempting to save feedback to Firebase:', {
-      //   conversationId,
-      //   threadId,
-      //   feedbackType,
-      //   feedbackData
-      // });
+      console.log('Attempting to save feedback to Firebase:', {
+        conversationId,
+        threadId,
+        feedbackType,
+        feedbackData
+      });
 
       if (!threadId) {
-        throw new Error('Thread ID is required to save feedback');
+        throw new Error('Thread ID not available yet');
       }
 
       const db = getFirebaseFirestore();
-      const feedbackRef = doc(db, "feedback", threadId);
+      const feedbackRef = doc(db, 
+        'conversations', 
+        conversationId, 
+        'threads', 
+        threadId, 
+        'feedback', 
+        feedbackType
+      );
+
       await setDoc(feedbackRef, feedbackData);
-      // console.log('Feedback saved successfully to Firebase');
+      console.log('Feedback saved successfully to Firebase');
 
       setThankYou(true);
       setShowForm(null);

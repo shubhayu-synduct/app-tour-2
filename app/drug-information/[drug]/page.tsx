@@ -187,10 +187,10 @@ export default function DrugDetailPage() {
     
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        // console.log('Searching for term:', searchTerm);
+        console.log('Searching for term:', searchTerm);
         const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
         const data = await enhancedSearchDrugs(searchTerm.trim(), 10);
-        // console.log('Response data:', data);
+        console.log('Response data:', data);
         
         let transformedData = [];
         

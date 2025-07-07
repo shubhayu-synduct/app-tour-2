@@ -154,13 +154,13 @@ export default function GuidelineSummaryPage() {
     const alphaStartWord = getAlphaOnly(cleanedStartWord);
     const alphaEndWord = getAlphaOnly(cleanedEndWord);
     
-    // console.log(`Searching for extract between "${alphaStartWord}" and "${alphaEndWord}" in reference [${refNumber}]`);
+    console.log(`Searching for extract between "${alphaStartWord}" and "${alphaEndWord}" in reference [${refNumber}]`);
     
     // Look for match of alpha-only start_word
     const startPos = alphaSourceText.indexOf(alphaStartWord);
     
     if (startPos === -1) {
-      // console.error(`Could not find start_word "${alphaStartWord}" in reference [${refNumber}]`);
+      console.error(`Could not find start_word "${alphaStartWord}" in reference [${refNumber}]`);
       // Return the full text with a note
       return {
         fullText: sourceText,
@@ -179,7 +179,7 @@ export default function GuidelineSummaryPage() {
     const endPosInRemaining = remainingAlphaText.indexOf(alphaEndWord);
     
     if (endPosInRemaining === -1) {
-      // console.error(`Found start_word but could not find end_word "${alphaEndWord}" in reference [${refNumber}]`);
+      console.error(`Found start_word but could not find end_word "${alphaEndWord}" in reference [${refNumber}]`);
       // Return the full text but highlight from the start word to a reasonable point
       const excerptLength = 400; // A reasonable excerpt length
       const endOfExcerpt = Math.min(originalStartPos + excerptLength, cleanedSourceText.length);
@@ -230,9 +230,7 @@ export default function GuidelineSummaryPage() {
   }, [summary])
 
   const handleReferenceClick = useCallback((refNumber: string, occurrenceIndex: number) => {
-    // console.log(`Reference clicked: ${refNumber}, Occurrence: ${occurrenceIndex}`)
-    
-    // Toggle: if the same reference is clicked again, close the panel and clear activeReference
+    console.log(`Reference clicked: ${refNumber}, Occurrence: ${occurrenceIndex}`)
     
     // Get the text for this reference and occurrence
     const result = extractReferenceText(refNumber, occurrenceIndex)

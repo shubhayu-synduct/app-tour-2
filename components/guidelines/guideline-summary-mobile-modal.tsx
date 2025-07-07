@@ -352,12 +352,12 @@ export default function GuidelineSummaryMobileModal({
   };
 
   const handleSearchClick = () => {
-    // console.log('Dashboard button clicked');
-    router.push('/dashboard');
+    console.log('Dashboard button clicked');
+    router.push("/dashboard");
   };
 
   const handleCloseClick = () => {
-    // console.log('Close button clicked');
+    console.log('Close button clicked');
     onClose();
   };
 

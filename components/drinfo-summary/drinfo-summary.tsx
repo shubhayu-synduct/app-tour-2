@@ -194,12 +194,15 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const shouldShowFeedbackModal = (count: number) => {
     if (count === 0) return false
     const shouldShow = count % 4 === 0 && count > 0; // Show at 4th, 8th, 12th, 16th, etc.
+    console.log("[FEEDBACK] shouldShowFeedbackModal check:", { count, shouldShow });
     return shouldShow;
   }
 
   // Effect to show feedback modal based on question count with 45-second delay
   useEffect(() => {
+    console.log("[FEEDBACK] Question count:", questionCount, "Has shown initial modal:", hasShownInitialModal);
     if (hasShownInitialModal && shouldShowFeedbackModal(questionCount)) {
+      console.log("[FEEDBACK] Scheduling modal for question count:", questionCount, "with 45-second delay");
       // Clear any existing timer
       if (modalTimerRef.current) {
         clearTimeout(modalTimerRef.current)
@@ -268,21 +271,21 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       }
     } else {
       setChatHistory([]);
-      // console.log("Ready for new chat session");
+      console.log("Ready for new chat session");
     }
   }, [sessionId]);
 
   useEffect(() => {
     if (user) {
       const userId = user.uid || user.id;
-      // console.log("DrInfoSummary component initialized with user:", {
-      //   userId,
-      //   hasUid: !!user.uid,
-      //   hasId: !!user.id,
-      //   authenticationType: user.uid ? "Firebase Auth" : "Custom Auth",
-      // });
+      console.log("DrInfoSummary component initialized with user:", {
+        userId,
+        hasUid: !!user.uid,
+        hasId: !!user.id,
+        authenticationType: user.uid ? "Firebase Auth" : "Custom Auth",
+      });
     } else {
-      // console.log("DrInfoSummary component initialized with NO USER");
+      console.log("DrInfoSummary component initialized with NO USER");
     }
   }, [user]);
 
@@ -331,14 +334,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const loadChatSession = async (sessionId: string) => {
     setIsChatLoading(true);
     try {
-      // console.log("[LOAD] Loading chat session with ID:", sessionId);
+      console.log("[LOAD] Loading chat session with ID:", sessionId);
       const db = getFirebaseFirestore();
       
       const sessionDocRef = doc(db, "conversations", sessionId);
       const sessionDoc = await getDoc(sessionDocRef);
       
       if (sessionDoc.exists()) {
-        // console.log("[LOAD] Session document exists, loading threads...");
+        console.log("[LOAD] Session document exists, loading threads...");
         
         const threadsRef = collection(db, "conversations", sessionId, "threads");
         const threadsQueryRef = firestoreQuery(threadsRef, orderBy("user_message.timestamp"));
@@ -379,7 +382,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         
         // Initialize question count based on loaded messages
         const userMessageCount = messages.filter(msg => msg.type === 'user').length;
-        // console.log("[FEEDBACK] Initializing question count from loaded messages:", userMessageCount);
+        console.log("[FEEDBACK] Initializing question count from loaded messages:", userMessageCount);
         setQuestionCount(userMessageCount);
         
         if (messages.length > 0) {
@@ -415,19 +418,19 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             setStatus('complete');
           }
           
-          // console.log('[LOAD] Raw assistant content:', lastAssistantMsg.answer.mainSummary);
-          // console.log('[LOAD] Raw assistant citations:', citations);
-          // console.log('[LOAD] streamedContent:', {
-          //   mainSummary: lastAssistantMsg.answer.mainSummary,
-          //   sections: lastAssistantMsg.answer.sections || []
-          // });
-          // console.log('[LOAD] completeData:', {
-          //   processed_content: lastAssistantMsg.answer.mainSummary,
-          //   sections: lastAssistantMsg.answer.sections || [],
-          //   citations,
-          //   status: 'complete',
-          //   references: []
-          // });
+          console.log('[LOAD] Raw assistant content:', lastAssistantMsg.answer.mainSummary);
+          console.log('[LOAD] Raw assistant citations:', citations);
+          console.log('[LOAD] streamedContent:', {
+            mainSummary: lastAssistantMsg.answer.mainSummary,
+            sections: lastAssistantMsg.answer.sections || []
+          });
+          console.log('[LOAD] completeData:', {
+            processed_content: lastAssistantMsg.answer.mainSummary,
+            sections: lastAssistantMsg.answer.sections || [],
+            citations,
+            status: 'complete',
+            references: []
+          });
         }
         
         const lastMessage = messages[messages.length - 1];

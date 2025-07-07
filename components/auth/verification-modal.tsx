@@ -27,11 +27,10 @@ export function VerificationModal({ email, onClose, redirectToLogin = false }: V
           if (user) {
             await user.reload() // Refresh user data from Firebase
             if (user.emailVerified) {
-              // console.log("Email verified, closing modal")
+              console.log("Email verified, closing modal")
               onClose()
-              if (redirectToLogin) {
-                router.push('/login')
-              }
+              // Trigger a page refresh to update auth state
+              window.location.reload()
             }
           }
         } catch (error) {

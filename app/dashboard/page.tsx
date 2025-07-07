@@ -153,10 +153,10 @@ export default function Dashboard() {
       suggestionTimeoutRef.current = setTimeout(() => {
         // Only generate new suggestions if there's a meaningful change
         if (hasMeaningfulChange(query)) {
-          // console.log("Generating new suggestions for:", query);
+          console.log("Generating new suggestions for:", query);
           generateAISuggestions(query);
         } else {
-          // console.log("Using existing suggestions for:", query);
+          console.log("Using existing suggestions for:", query);
           // Keep showing existing suggestions that match
           const matchingQueries = previousQueries
             .filter(prevQuery => prevQuery.toLowerCase().startsWith(query.toLowerCase()))
@@ -264,12 +264,12 @@ export default function Dashboard() {
     if (!query.trim() || !user) return
     
     setIsLoading(true)
-    // console.log("[DASHBOARD] Creating new chat session for query:", query);
+    console.log("[DASHBOARD] Creating new chat session for query:", query);
     
     try {
       // Create a new session ID using uuidv4
       const sessionId = uuidv4();
-      // console.log("[DASHBOARD] Generated new sessionId:", sessionId);
+      console.log("[DASHBOARD] Generated new sessionId:", sessionId);
       
       // Create chat session in Firebase first
       const userMessage = {
@@ -290,23 +290,23 @@ export default function Dashboard() {
         status: 'pending'
       }
       
-      // console.log("[DASHBOARD] Adding document to Firebase");
+      console.log("[DASHBOARD] Adding document to Firebase");
       
       // Add document to Firebase with the pre-generated sessionId
       const db = getFirebaseFirestore();
       await setDoc(doc(db, "conversations", sessionId), newChatSession);
-      // console.log("[DASHBOARD] Chat session created with ID:", sessionId);
+      console.log("[DASHBOARD] Chat session created with ID:", sessionId);
       
       // Store the query in session storage so the chat page can use it
       sessionStorage.setItem(`chat_query_${sessionId}`, query);
       sessionStorage.setItem(`chat_needs_answer_${sessionId}`, "true");
       sessionStorage.setItem(`chat_mode_${sessionId}`, activeMode);
-      // console.log("[DASHBOARD] Stored query in session storage with key:", `chat_query_${sessionId}`);
-      // console.log("[DASHBOARD] Set flag to fetch answer:", `chat_needs_answer_${sessionId}`);
-      // console.log("[DASHBOARD] Stored mode:", activeMode);
+      console.log("[DASHBOARD] Stored query in session storage with key:", `chat_query_${sessionId}`);
+      console.log("[DASHBOARD] Set flag to fetch answer:", `chat_needs_answer_${sessionId}`);
+      console.log("[DASHBOARD] Stored mode:", activeMode);
       
       // Navigate to the dynamic chat page with the session ID
-      // console.log("[DASHBOARD] Redirecting to:", `/dashboard/${sessionId}`);
+      console.log("[DASHBOARD] Redirecting to:", `/dashboard/${sessionId}`);
       router.push(`/dashboard/${sessionId}`);
     } catch (error) {
       console.error("[DASHBOARD] Error creating chat session:", error);
