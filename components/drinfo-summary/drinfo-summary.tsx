@@ -1,10 +1,10 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react'
-import { ArrowRight, ChevronDown, Copy, Search, ExternalLink, X, FileEdit, ThumbsUp, ThumbsDown, Share2, Check, Mail } from 'lucide-react'
+import { ArrowRight, ChevronDown, Copy, Search, ExternalLink, X, FileEdit, ThumbsUp, ThumbsDown, Share2, Check, Mail, RotateCcw } from 'lucide-react'
 import { fetchDrInfoSummary, sendFollowUpQuestion, Citation } from '@/lib/drinfo-summary-service'
 import { getFirebaseFirestore } from '@/lib/firebase'
-import { collection, addDoc, updateDoc, doc, getDoc, getDocs, query as firestoreQuery, where, orderBy, serverTimestamp, FieldPath, setDoc } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, doc, getDoc, getDocs, query as firestoreQuery, where, orderBy, serverTimestamp, FieldPath, setDoc, deleteDoc } from 'firebase/firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter, usePathname } from 'next/navigation'
 import AnswerFeedback from '../feedback/answer-feedback'
@@ -1332,6 +1332,176 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     }
   }, [status]);
 
+  const [reloadingMessageId, setReloadingMessageId] = useState<string | null>(null);
+
+  const handleReload = async (assistantMessageId: string) => {
+    if (!sessionId || !user) return;
+
+    // Find the assistant message and its corresponding user message
+    const assistantMsgIndex = messages.findIndex(msg => msg.id === assistantMessageId);
+    if (assistantMsgIndex === -1) return;
+
+    const assistantMsg = messages[assistantMsgIndex];
+    const userMsg = messages[assistantMsgIndex - 1];
+    
+    if (!userMsg || userMsg.type !== 'user') return;
+
+    setReloadingMessageId(assistantMessageId);
+    console.log('[RELOAD] Starting complete reload - deleting thread:', assistantMsg.threadId);
+    console.log('[RELOAD] Question to reload:', userMsg.content);
+    
+    try {
+      const userId = user.uid || user.id;
+      const db = getFirebaseFirestore();
+
+      // Step 1: Delete the entire thread from Firebase (both question and answer)
+      if (assistantMsg.threadId) {
+        const threadRef = doc(db, "conversations", sessionId, "threads", assistantMsg.threadId);
+        await deleteDoc(threadRef);
+        console.log('[RELOAD] Successfully deleted thread from Firebase:', assistantMsg.threadId);
+      }
+
+      // Step 2: Remove both user and assistant messages from UI state
+      setMessages(prev => prev.filter(msg => 
+        msg.id !== userMsg.id && msg.id !== assistantMessageId
+      ));
+      console.log('[RELOAD] Removed messages from UI');
+
+      // Step 3: Create fresh messages for the reload
+      const tempThreadId = Date.now().toString();
+      const freshUserMsg = {
+        id: `user-${tempThreadId}`,
+        type: 'user' as const,
+        content: userMsg.content, 
+        timestamp: Date.now(),
+        questionType: userMsg.questionType || 'main' as const,
+        threadId: tempThreadId
+      };
+
+      const freshAssistantMsg = {
+        id: `assistant-${tempThreadId}`,
+        type: 'assistant' as const,
+        content: '',
+        timestamp: Date.now() + 1,
+        answer: {
+          mainSummary: '',
+          sections: [],
+          citations: {}
+        },
+        threadId: tempThreadId
+      };
+
+      // Add fresh messages to UI
+      setMessages(prev => [...prev, freshUserMsg, freshAssistantMsg]);
+      console.log('[RELOAD] Added fresh messages to UI');
+
+      // Step 4: Start fresh API call
+      let hasCompleted = false;
+      let streamedContent = '';
+
+      fetchDrInfoSummary(
+        userMsg.content,
+        (chunk: string) => {
+          if (hasCompleted) return;
+          streamedContent += chunk;
+          // Update the fresh assistant message with streamed content
+          setMessages(prev => prev.map(msg =>
+            msg.id === `assistant-${tempThreadId}`
+              ? { 
+                  ...msg, 
+                  content: streamedContent, 
+                  answer: { ...msg.answer, mainSummary: streamedContent, sections: [] }
+                }
+              : msg
+          ));
+        },
+        (newStatus: string, message?: string) => {
+          if (hasCompleted) return;
+          setStatus(newStatus as StatusType);
+          console.log('[RELOAD] Status update:', newStatus);
+        },
+        async (data: DrInfoSummaryData) => {
+          if (hasCompleted) return;
+          hasCompleted = true;
+          
+          try {
+            console.log('[RELOAD] Received fresh data:', data);
+            
+            if (!data.thread_id) {
+              throw new Error('Thread ID not received from backend');
+            }
+
+            // Update messages with the thread ID from backend
+            setMessages(prev => prev.map(msg =>
+              msg.threadId === tempThreadId
+                ? { ...msg, threadId: data.thread_id! }
+                : msg
+            ));
+
+            // Update the assistant message with final content
+            setMessages(prev => prev.map(msg =>
+              msg.id === `assistant-${tempThreadId}`
+                ? {
+                    ...msg,
+                    content: data?.processed_content || '',
+                    answer: {
+                      mainSummary: data?.processed_content || '',
+                      sections: [],
+                      citations: data?.citations ? Object.entries(data.citations).reduce((acc, [key, citation]) => ({
+                        ...acc,
+                        [key]: {
+                          ...citation,
+                          source_type: citation.source_type || 'internet'
+                        }
+                      }), {}) : {},
+                    },
+                  }
+                : msg
+            ));
+
+            // Update active citations
+            setActiveCitations(data?.citations ? Object.entries(data.citations).reduce((acc, [key, citation]) => ({
+              ...acc,
+              [key]: {
+                ...citation,
+                source_type: citation.source_type || 'internet'
+              }
+            }), {}) : {});
+
+            setStatus('complete');
+            setIsLoading(false);
+            
+            console.log('[RELOAD] Successfully completed reload with new thread:', data.thread_id);
+
+          } catch (error) {
+            console.error('[RELOAD] Error in final processing:', error);
+            setError('Failed to complete reload. Please try again.');
+          } finally {
+            setReloadingMessageId(null);
+            setTimeout(() => {
+              if (hasCompleted) {
+                setIsStreaming(false);
+                setStatusMessage(null);
+              }
+            }, 2000);
+          }
+        },
+        { 
+          sessionId: sessionId, 
+          userId, 
+          is_follow_up: userMsg.questionType === 'follow-up', 
+          mode: activeMode === 'instant' ? 'swift' : 'study',
+          country: userCountry
+        }
+      );
+
+    } catch (error) {
+      console.error('[RELOAD] Error during complete reload:', error);
+      setError('Failed to reload. Please try again.');
+      setReloadingMessageId(null);
+    }
+  };
+
   return (
     <div className="p-2 sm:p-4 md:p-6 h-[100dvh] flex flex-col relative overflow-hidden">
       {/* Top Bar with Share Button */}
@@ -1427,6 +1597,9 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                   conversationId={sessionId || ''}
                                   threadId={msg.threadId}
                                   answerText={msg.content || ''}
+                                  onReload={() => handleReload(msg.id)}
+                                  isReloading={reloadingMessageId === msg.id}
+                                  messageId={msg.id}
                                 />
                               </div>
                             </div>
