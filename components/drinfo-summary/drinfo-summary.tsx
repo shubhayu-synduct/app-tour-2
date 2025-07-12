@@ -1,10 +1,10 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react'
-import { ArrowRight, ChevronDown, Copy, Search, ExternalLink, X, FileEdit, ThumbsUp, ThumbsDown, Share2, Check, Mail } from 'lucide-react'
+import { ArrowRight, ChevronDown, Copy, Search, ExternalLink, X, FileEdit, ThumbsUp, ThumbsDown, Share2, Check, Mail, RotateCcw } from 'lucide-react'
 import { fetchDrInfoSummary, sendFollowUpQuestion, Citation } from '@/lib/drinfo-summary-service'
 import { getFirebaseFirestore } from '@/lib/firebase'
-import { collection, addDoc, updateDoc, doc, getDoc, getDocs, query as firestoreQuery, where, orderBy, serverTimestamp, FieldPath, setDoc } from 'firebase/firestore'
+import { collection, addDoc, updateDoc, doc, getDoc, getDocs, query as firestoreQuery, where, orderBy, serverTimestamp, FieldPath, setDoc, deleteDoc } from 'firebase/firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter, usePathname } from 'next/navigation'
 import AnswerFeedback from '../feedback/answer-feedback'
@@ -119,6 +119,15 @@ interface DrInfoSummaryData {
 }
 
 const KNOWN_STATUSES: StatusType[] = ['processing', 'searching', 'summarizing', 'formatting', 'complete'];
+
+// Helper: map backend → frontend source_type values
+const normalizeSourceType = (src: string | undefined): string => {
+  if (!src) return "internet";
+  const s = src.toLowerCase();
+  if (s.includes("guideline")) return "guidelines_database";
+  if (s.includes("drug"))      return "drug_database";
+  return "internet";           // journals / web
+};
 
 export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'research' }: DrInfoSummaryProps) {
   const [query, setQuery] = useState('')
@@ -262,6 +271,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   }
 
   useEffect(() => {
+    console.log("[EFFECT] Session loading effect triggered, sessionId:", sessionId);
+    
     if (sessionId) {
       loadChatSession(sessionId);
       // Read the mode from sessionStorage
@@ -571,7 +582,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       isChatLoading,
       query,
       hasFetched,
-      chatHistory,
+      chatHistory: chatHistory.length,
       lastQuestion
     });
     
@@ -1086,6 +1097,11 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       return;
     }
 
+    // Determine parent_thread_id for Firebase thread-based follow-up detection
+    const parentThreadId = isFollowUp && messages.length > 0 
+      ? messages[messages.length - 1]?.threadId  // Get the last assistant message's thread ID
+      : undefined;
+
     // Add user message
     const tempThreadId = Date.now().toString();
     setMessages(prev => [
@@ -1194,7 +1210,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       { 
         sessionId: sessionId, 
         userId, 
-        is_follow_up: isFollowUp, 
+        parent_thread_id: parentThreadId, 
         mode: activeMode === 'instant' ? 'swift' : 'study',
         country: userCountry // Add country to the options
       }
@@ -1332,6 +1348,178 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     }
   }, [status]);
 
+  const [reloadingMessageId, setReloadingMessageId] = useState<string | null>(null);
+
+  const handleReload = async (assistantMessageId: string) => {
+    if (!sessionId || !user) return;
+
+    // Find the assistant message and its corresponding user message
+    const assistantMsgIndex = messages.findIndex(msg => msg.id === assistantMessageId);
+    if (assistantMsgIndex === -1) return;
+
+    const assistantMsg = messages[assistantMsgIndex];
+    const userMsg = messages[assistantMsgIndex - 1];
+    
+    if (!userMsg || userMsg.type !== 'user') return;
+
+    setReloadingMessageId(assistantMessageId);
+    console.log('[RELOAD] Starting complete reload - deleting thread:', assistantMsg.threadId);
+    console.log('[RELOAD] Question to reload:', userMsg.content);
+    
+    try {
+      const userId = user.uid || user.id;
+      const db = getFirebaseFirestore();
+
+      // Step 1: Delete the entire thread from Firebase (both question and answer)
+      if (assistantMsg.threadId) {
+        const threadRef = doc(db, "conversations", sessionId, "threads", assistantMsg.threadId);
+        await deleteDoc(threadRef);
+        console.log('[RELOAD] Successfully deleted thread from Firebase:', assistantMsg.threadId);
+      }
+
+      // Step 2: Remove both user and assistant messages from UI state
+      setMessages(prev => prev.filter(msg => 
+        msg.id !== userMsg.id && msg.id !== assistantMessageId
+      ));
+      console.log('[RELOAD] Removed messages from UI');
+
+      // Step 3: Create fresh messages for the reload
+      const tempThreadId = Date.now().toString();
+      const freshUserMsg = {
+        id: `user-${tempThreadId}`,
+        type: 'user' as const,
+        content: userMsg.content, 
+        timestamp: Date.now(),
+        questionType: userMsg.questionType || 'main' as const,
+        threadId: tempThreadId
+      };
+
+      const freshAssistantMsg = {
+        id: `assistant-${tempThreadId}`,
+        type: 'assistant' as const,
+        content: '',
+        timestamp: Date.now() + 1,
+        answer: {
+          mainSummary: '',
+          sections: [],
+          citations: {}
+        },
+        threadId: tempThreadId
+      };
+
+      // Add fresh messages to UI
+      setMessages(prev => [...prev, freshUserMsg, freshAssistantMsg]);
+      console.log('[RELOAD] Added fresh messages to UI');
+
+      // Step 4: Start fresh API call
+      let hasCompleted = false;
+      let streamedContent = '';
+
+      fetchDrInfoSummary(
+        userMsg.content,
+        (chunk: string) => {
+          if (hasCompleted) return;
+          streamedContent += chunk;
+          // Update the fresh assistant message with streamed content
+          setMessages(prev => prev.map(msg =>
+            msg.id === `assistant-${tempThreadId}`
+              ? { 
+                  ...msg, 
+                  content: streamedContent, 
+                  answer: { ...msg.answer, mainSummary: streamedContent, sections: [] }
+                }
+              : msg
+          ));
+        },
+        (newStatus: string, message?: string) => {
+          if (hasCompleted) return;
+          setStatus(newStatus as StatusType);
+          console.log('[RELOAD] Status update:', newStatus);
+        },
+        async (data: DrInfoSummaryData) => {
+          if (hasCompleted) return;
+          hasCompleted = true;
+          
+          try {
+            console.log('[RELOAD] Received fresh data:', data);
+            
+            if (!data.thread_id) {
+              throw new Error('Thread ID not received from backend');
+            }
+
+            // Update messages with the thread ID from backend
+            setMessages(prev => prev.map(msg =>
+              msg.threadId === tempThreadId
+                ? { ...msg, threadId: data.thread_id! }
+                : msg
+            ));
+
+            // Update the assistant message with final content
+            setMessages(prev => prev.map(msg =>
+              msg.id === `assistant-${tempThreadId}`
+                ? {
+                    ...msg,
+                    content: data?.processed_content || '',
+                    answer: {
+                      mainSummary: data?.processed_content || '',
+                      sections: [],
+                      citations: data?.citations ? Object.entries(data.citations).reduce((acc, [key, citation]) => ({
+                        ...acc,
+                        [key]: {
+                          ...citation,
+                          source_type: normalizeSourceType(citation.source_type)
+                        }
+                      }), {}) : {},
+                    },
+                    status: 'complete', // Reset status
+                  }
+                : msg
+            ));
+
+            // Update active citations
+            setActiveCitations(data?.citations ? Object.entries(data.citations).reduce((acc, [key, citation]) => ({
+              ...acc,
+              [key]: {
+                ...citation,
+                source_type: normalizeSourceType(citation.source_type)
+              }
+            }), {}) : {});
+
+            setStatus('complete');
+            setIsLoading(false);
+            
+            console.log('[RELOAD] Successfully completed reload with new thread:', data.thread_id);
+
+          } catch (error) {
+            console.error('[RELOAD] Error updating messages:', error);
+            setError('Failed to complete reload. Please try again.');
+          } finally {
+            setReloadingMessageId(null);
+            setTimeout(() => {
+              if (hasCompleted) {
+                setIsStreaming(false);
+                setStatusMessage(null);
+              }
+            }, 2000);
+          }
+        },
+        { 
+          sessionId: sessionId, 
+          userId, 
+          parent_thread_id: userMsg.questionType === 'follow-up' ? 
+            messages.find(m => m.id === userMsg.id && m.type === 'user')?.threadId : undefined, 
+          mode: activeMode === 'instant' ? 'swift' : 'study',
+          country: userCountry
+        }
+      );
+
+    } catch (error) {
+      console.error('[RELOAD] Error during complete reload:', error);
+      setError('Failed to reload. Please try again.');
+      setReloadingMessageId(null);
+    }
+  };
+
   return (
     <div className="p-2 sm:p-4 md:p-6 h-[100dvh] flex flex-col relative overflow-hidden">
       {/* Top Bar with Share Button */}
@@ -1393,7 +1581,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                               )}
                             </div>
                           </div>
-                          {msg.content && (
+                          {/* Show content during streaming or when complete */}
+                          {(msg.content || (idx === messages.length - 1 && isStreaming)) && (
                             <div className="mb-4 sm:mb-6">
                               <div
                                 className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-base sm:text-base prose-h2:text-base prose-h2:font-semibold prose-h3:text-base prose-h3:font-semibold"
@@ -1402,10 +1591,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                   __html:
                                     idx === messages.length - 1 && status !== 'complete'
                                       ? formatWithDummyCitations(
-                                          marked.parse(addDummyCitations(msg.content), { async: false })
+                                          marked.parse(addDummyCitations(msg.content || ''), { async: false })
                                         )
                                       : formatWithCitations(
-                                          marked.parse(msg.content, { async: false }),
+                                          marked.parse(msg.content || '', { async: false }),
                                           msg.answer?.citations
                                         ),
                                 }}
@@ -1508,9 +1697,9 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       {/* Share Popup */}
       {showSharePopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#FCFDFF] rounded-lg shadow-xl max-w-lg w-full mx-4 border border-[#C8C8C8]">
+          <div className="bg-[#FCFDFF] rounded-lg shadow-xl max-w-xl w-full mx-4 border border-[#C8C8C8]">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6">
               <h2 className="text-2xl font-medium text-blue-900">
                 Shareable public link
               </h2>
@@ -1523,7 +1712,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="px-6">
               {/* Link Creation Status */}
               <div className="mb-6">
                 {isSharing ? (
@@ -1542,25 +1731,30 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                     <button
                       onClick={copyToClipboard}
                       disabled={!shareLink}
-                      className="flex items-center space-x-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white text-base rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isCopied ? (
                         <>
-                          <Check size={16} />
+                          <Check size={18} />
                           <span>Copied!</span>
                         </>
                       ) : (
                         <>
-                          <Copy size={16} />
-                          <span>Copy</span>
+                          <Copy size={18} />
+                          <span>Copy link</span>
                         </>
                       )}
                     </button>
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Share Options */}
+            {/* Border line */}
+            <div className="border-t border-gray-200"></div>
+
+            {/* Share Options */}
+            <div className="px-6">
               <div className="flex justify-center space-x-8">
                 {/* LinkedIn */}
                 <button 
@@ -1568,8 +1762,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                   disabled={!shareLink || isSharing}
                   className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <div className="w-12 h-12 bg-[#0077B5] rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-[#0077B5] flex items-center justify-center" style={{ borderRadius: '5px' }}>
+                    <svg className="w-[70%] h-[70%] text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                     </svg>
                   </div>
@@ -1582,8 +1776,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                   disabled={!shareLink || isSharing}
                   className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <div className="w-12 h-12 bg-[#25D366] rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-[#25D366] flex items-center justify-center" style={{ borderRadius: '5px' }}>
+                    <svg className="w-[70%] h-[70%] text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.531 3.488"/>
                     </svg>
                   </div>
@@ -1596,8 +1790,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                   disabled={!shareLink || isSharing}
                   className="flex flex-col items-center space-y-2 p-4 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <div className="w-12 h-12 bg-[#214498] rounded-lg flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 bg-[#214498] flex items-center justify-center" style={{ borderRadius: '5px' }}>
+                    <Mail className="w-[70%] h-[70%] text-white" />
                   </div>
                   <span className="text-sm font-medium text-gray-700">Mail</span>
                 </button>

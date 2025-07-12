@@ -2,8 +2,9 @@
 
 // API base URL for DrInfo summary service
 //  const DRINFO_API_URL = "https://synduct-aisummary.drinfo.ai/chat/stream";
-// const DRINFO_API_URL = "http://localhost:8000/chat/stream";
+//const DRINFO_API_URL = "http://localhost:8000/chat/stream";
 const DRINFO_API_URL = "https://ai-summary-stage.duckdns.org/chat/stream";
+// const DRINFO_API_URL = "https://synduct-aisummary.drinfo.ai/chat/stream";
 export interface Citation {
   title: string;
   url: string;
@@ -19,6 +20,7 @@ export interface DrInfoSummaryData {
   short_summary?: string;
   processed_content?: string;
   citations?: Record<string, Citation>;
+  thread_id?: string;
 }
 
 export interface StreamingResponse {
@@ -31,7 +33,7 @@ export interface StreamingResponse {
 interface DrInfoSummaryOptions {
   sessionId?: string;
   userId?: string;
-  is_follow_up?: boolean;
+  parent_thread_id?: string;  // Changed from is_follow_up to parent_thread_id
   mode?: string;
   country?: string;
 }
@@ -56,16 +58,15 @@ export async function fetchDrInfoSummary(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json"
+        "Accept": "text/event-stream"
       },
       body: JSON.stringify({
         query,
-        session_id: options?.sessionId || "",
-        is_follow_up: options?.is_follow_up || false,
-        userId: options?.userId || "",
-        language: "string",
-        country: options?.country || "",
-        ...(options?.mode ? { mode: options.mode } : {})
+        userId: options?.userId || "anonymous_user",
+        session_id: options?.sessionId || undefined,
+        language: "English",
+        country: options?.country || "US",
+        parent_thread_id: options?.parent_thread_id || null  // Use Firebase thread-based approach
       })
     });
 
@@ -107,27 +108,43 @@ export async function fetchDrInfoSummary(
           const jsonStr = line.substring(6);
           try {
             chunkCount++;
-            const chunk = JSON.parse(jsonStr) as StreamingResponse;
+            const chunk = JSON.parse(jsonStr);
             
-            if (chunk.status === "processing" || chunk.status === "summarizing") {
-              console.log(`[API] Status update: ${chunk.status}`, chunk.message);
-              onStatus(chunk.status, chunk.message);
-            } else if (chunk.status === "chunk" && typeof chunk.data === "string") {
-              hasReceivedContent = true;
-              contentReceived += chunk.data;
-              onChunk(chunk.data);
-            } else if (chunk.status === "formatting response") {
-              console.log("[API] Formatting response:", chunk.message);
-              onStatus("formatting", chunk.message);
-            } else if (chunk.status === "complete" && chunk.data && typeof chunk.data === "object") {
-              console.log("[API] Received complete response", chunk.data);
-              const completeData = chunk.data as DrInfoSummaryData;
-              console.log('[API] Received completeData:', completeData);
-                hasCalledComplete = true;
-              onComplete(completeData);
-            } else {
-              console.log("[API] Unhandled chunk status:", chunk.status);
-            }
+                         // Handle status updates and streaming  
+             if (chunk.type === "status" || chunk.status === "processing" || chunk.status === "summarizing" || chunk.status === "formatting response" || chunk.status === "analyzing" || chunk.status === "searching" || chunk.status === "generating" || chunk.status === "formatting") {
+               console.log(`[API] Status update: ${chunk.status}`, chunk.message);
+               onStatus(chunk.status, chunk.message || chunk.data);
+             } else if ((chunk.status === "chunk" && typeof chunk.data === "string") || (chunk.type === "content" && typeof chunk.data === "string")) {
+               // Streaming content chunks - handle both legacy and LangChain formats
+               console.log("[API] Streaming chunk received:", chunk.data?.substring(0, 50) + "...");
+               hasReceivedContent = true;
+               contentReceived += chunk.data;
+               onChunk(chunk.data);
+               // Small additional delay in frontend for smoother visual streaming
+               await new Promise(resolve => setTimeout(resolve, 20));
+             } else if (chunk.status === "complete" && chunk.data && typeof chunk.data === "object") {
+               // Complete response with citations
+               console.log("[API] Received complete response", chunk.data);
+               const completeData = chunk.data as DrInfoSummaryData;
+               console.log('[API] Received completeData:', completeData);
+               console.log('[API] Thread ID in complete data:', completeData.thread_id);
+               if (!hasCalledComplete) {
+                 hasCalledComplete = true;
+                 onComplete(completeData);
+               }
+             } else if (chunk.type === "session_id" && chunk.session_id) {
+               // Session ID received for follow-up questions
+               console.log("[API] Session ID:", chunk.session_id);
+               // Store session ID for follow-up questions
+             } else if (chunk.status === "error" || chunk.type === "error") {
+               // Error handling
+               const errorMsg = chunk.data || chunk.error || "Unknown error";
+               console.error("[API] Error from server:", errorMsg);
+               throw new Error(errorMsg);
+             } else {
+               // Log unhandled chunks for debugging
+               console.log("[API] Unhandled chunk:", chunk);
+             }
           } catch (error) {
             console.error("[API] Error parsing streaming response:", error, "Raw data:", jsonStr);
           }
@@ -157,7 +174,8 @@ export async function sendFollowUpQuestion(
   onStatus: (status: string, message?: string) => void,
   onComplete: (data: DrInfoSummaryData) => void,
   sessionId: string,
-  userId: string
+  userId: string,
+  parentThreadId?: string
 ): Promise<void> {
   console.log("Sending follow-up question:", followUpQuestion);
   
@@ -167,7 +185,7 @@ export async function sendFollowUpQuestion(
       onChunk,
       onStatus,
       onComplete,
-      { is_follow_up: true, sessionId, userId }
+      { parent_thread_id: parentThreadId, sessionId, userId }
     );
   } catch (error) {
     console.error("Error sending follow-up question:", error);

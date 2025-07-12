@@ -62,7 +62,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
   });
 
   const handleGuidelineClick = (citation: Citation) => {
-    if (citation.source_type === 'guideline_database') {
+    if (citation.source_type === 'guidelines_database') {  // Fixed: backend sends 'guidelines_database' (with 's')
       if (!checkAuthentication()) {
         // Redirect to login if not authenticated
         router.push('/login');
@@ -163,7 +163,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                             }}
                              className="sm:text-sm md:text-base"
                           >
-                            {citation.source_type === 'guideline_database'
+                            {citation.source_type === 'guidelines_database'  // Fixed: backend sends 'guidelines_database' (with 's')
                               ? 'Guidelines'
                               : citation.source_type === 'drug_database'
                                 ? 'Drugs'
@@ -211,7 +211,7 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                       </div>
                     </div>
                     <div className="flex justify-end mt-4 pr-4 pb-4">
-                      {citation.source_type === 'guideline_database' && (
+                      {citation.source_type === 'guidelines_database' && (  // Fixed: backend sends 'guidelines_database' (with 's')
                         <button
                           className="flex flex-row items-center justify-center gap-x-2 rounded-[5px] px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors"
                           style={{

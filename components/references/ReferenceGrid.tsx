@@ -62,7 +62,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
               }}
               className="text-xs sm:text-sm md:text-base"
             >
-              {citation.source_type === 'guideline_database'
+              {citation.source_type === 'guidelines_database'  // Fixed: backend sends 'guidelines_database' (with 's')
                 ? 'Guidelines'
                 : citation.source_type === 'drug_database'
                 ? 'Drugs'
@@ -115,7 +115,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
               }}
               className="text-xs sm:text-sm md:text-base"
             >
-              {citation.source_type === 'guideline_database'
+              {citation.source_type === 'guidelines_database'  // Fixed: backend sends 'guidelines_database' (with 's')
                 ? 'Guidelines'
                 : citation.source_type === 'drug_database'
                 ? 'Drugs'
