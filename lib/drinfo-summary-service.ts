@@ -66,7 +66,8 @@ export async function fetchDrInfoSummary(
         session_id: options?.sessionId || undefined,
         language: "English",
         country: options?.country || "US",
-        parent_thread_id: options?.parent_thread_id || null  // Use Firebase thread-based approach
+        parent_thread_id: options?.parent_thread_id || null,  // Use Firebase thread-based approach
+        mode: options?.mode || "study"  // Add mode parameter with default fallback
       })
     });
 
@@ -175,7 +176,8 @@ export async function sendFollowUpQuestion(
   onComplete: (data: DrInfoSummaryData) => void,
   sessionId: string,
   userId: string,
-  parentThreadId?: string
+  parentThreadId?: string,
+  mode?: string
 ): Promise<void> {
   console.log("Sending follow-up question:", followUpQuestion);
   
@@ -185,10 +187,10 @@ export async function sendFollowUpQuestion(
       onChunk,
       onStatus,
       onComplete,
-      { parent_thread_id: parentThreadId, sessionId, userId }
+      { parent_thread_id: parentThreadId, sessionId, userId, mode }
     );
   } catch (error) {
     console.error("Error sending follow-up question:", error);
     throw error;
   }
-} 
+}
