@@ -3,7 +3,6 @@
 Dr. INFO is a comprehensive web application designed for healthcare professionals to access evidence-based medical information, clinical guidelines, drug information, and other healthcare resources in one centralized platform.
 ###########
 ###### Features
-#######
 - **Dr. INFO Summary**: AI-powered medical information summaries from trusted sources
 - **Clinical Guidelines**: Access to evidence-based clinical practice guidelines 
 - **Drug Information**: Comprehensive medication database with dosing, side effects, and more

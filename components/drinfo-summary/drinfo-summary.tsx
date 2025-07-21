@@ -120,6 +120,15 @@ interface DrInfoSummaryData {
 
 const KNOWN_STATUSES: StatusType[] = ['processing', 'searching', 'summarizing', 'formatting', 'complete'];
 
+// Helper: map backend → frontend source_type values
+const normalizeSourceType = (src: string | undefined): string => {
+  if (!src) return "internet";
+  const s = src.toLowerCase();
+  if (s.includes("guideline")) return "guidelines_database";
+  if (s.includes("drug"))      return "drug_database";
+  return "internet";           // journals / web
+};
+
 export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'research' }: DrInfoSummaryProps) {
   const [query, setQuery] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -262,6 +271,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   }
 
   useEffect(() => {
+    console.log("[EFFECT] Session loading effect triggered, sessionId:", sessionId);
+    
     if (sessionId) {
       loadChatSession(sessionId);
       // Read the mode from sessionStorage
@@ -571,7 +582,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       isChatLoading,
       query,
       hasFetched,
-      chatHistory,
+      chatHistory: chatHistory.length,
       lastQuestion
     });
     
@@ -1086,6 +1097,11 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       return;
     }
 
+    // Determine parent_thread_id for Firebase thread-based follow-up detection
+    const parentThreadId = isFollowUp && messages.length > 0 
+      ? messages[messages.length - 1]?.threadId  // Get the last assistant message's thread ID
+      : undefined;
+
     // Add user message
     const tempThreadId = Date.now().toString();
     setMessages(prev => [
@@ -1194,7 +1210,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       { 
         sessionId: sessionId, 
         userId, 
-        is_follow_up: isFollowUp, 
+        parent_thread_id: parentThreadId, 
         mode: activeMode === 'instant' ? 'swift' : 'study',
         country: userCountry // Add country to the options
       }
@@ -1451,10 +1467,11 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                         ...acc,
                         [key]: {
                           ...citation,
-                          source_type: citation.source_type || 'internet'
+                          source_type: normalizeSourceType(citation.source_type)
                         }
                       }), {}) : {},
                     },
+                    status: 'complete', // Reset status
                   }
                 : msg
             ));
@@ -1464,7 +1481,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
               ...acc,
               [key]: {
                 ...citation,
-                source_type: citation.source_type || 'internet'
+                source_type: normalizeSourceType(citation.source_type)
               }
             }), {}) : {});
 
@@ -1474,7 +1491,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             console.log('[RELOAD] Successfully completed reload with new thread:', data.thread_id);
 
           } catch (error) {
-            console.error('[RELOAD] Error in final processing:', error);
+            console.error('[RELOAD] Error updating messages:', error);
             setError('Failed to complete reload. Please try again.');
           } finally {
             setReloadingMessageId(null);
@@ -1489,7 +1506,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         { 
           sessionId: sessionId, 
           userId, 
-          is_follow_up: userMsg.questionType === 'follow-up', 
+          parent_thread_id: userMsg.questionType === 'follow-up' ? 
+            messages.find(m => m.id === userMsg.id && m.type === 'user')?.threadId : undefined,
           mode: activeMode === 'instant' ? 'swift' : 'study',
           country: userCountry
         }
@@ -1563,7 +1581,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                               )}
                             </div>
                           </div>
-                          {msg.content && (
+                          {/* Show content during streaming or when complete */}
+                          {(msg.content || (idx === messages.length - 1 && isStreaming)) && (
                             <div className="mb-4 sm:mb-6">
                               <div
                                 className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-base sm:text-base prose-h2:text-base prose-h2:font-semibold prose-h3:text-base prose-h3:font-semibold"
@@ -1572,10 +1591,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                   __html:
                                     idx === messages.length - 1 && status !== 'complete'
                                       ? formatWithDummyCitations(
-                                          marked.parse(addDummyCitations(msg.content), { async: false })
+                                          marked.parse(addDummyCitations(msg.content || ''), { async: false })
                                         )
                                       : formatWithCitations(
-                                          marked.parse(msg.content, { async: false }),
+                                          marked.parse(msg.content || '', { async: false }),
                                           msg.answer?.citations
                                         ),
                                 }}
@@ -1905,4 +1924,4 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       )}
     </div>
   )
-} 
+}
