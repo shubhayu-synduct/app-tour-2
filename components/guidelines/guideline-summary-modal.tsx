@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { GuidelineMarkdown } from './guideline-markdown'
+import { logger } from '@/lib/logger'
 
 interface Summary {
   title: string;
@@ -121,7 +122,7 @@ export default function GuidelineSummaryModal({
         const data = await response.json()
         // Decode unicode in summary before using it
         const decodedSummary = decodeUnicode(data.summary)
-        console.log('Summary API response:', decodedSummary)
+        logger.debug('Summary API response:', decodedSummary)
         setSummary({ ...data, summary: decodedSummary })
         
         // Add the initial summary to the chat history
@@ -139,7 +140,7 @@ export default function GuidelineSummaryModal({
           setProcessedMarkdown(processMarkdown(decodedSummary))
         }
       } catch (err: any) {
-        console.error('Error fetching summary:', err)
+        logger.error('Error fetching summary:', err)
         setError(err.message || 'Failed to fetch summary')
       } finally {
         setIsLoading(false)
@@ -344,7 +345,7 @@ export default function GuidelineSummaryModal({
       
       setFollowupQuestion('')
     } catch (err: any) {
-      console.error('Error asking followup question:', err)
+      logger.error('Error asking followup question:', err)
       setFollowupError(err.message || 'Failed to get answer')
       setChatHistory(prev => prev.slice(0, -1))
     } finally {
@@ -918,4 +919,4 @@ export default function GuidelineSummaryModal({
       `}</style>
     </div>
   );
-} 
+}

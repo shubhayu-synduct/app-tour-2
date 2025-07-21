@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { getUserStatus } from '@/lib/authenticated-api';
 import { Globe, User, Database, Info, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { logger } from '@/lib/logger';
 
 interface UserStatus {
   authenticated: boolean;
@@ -43,7 +44,7 @@ export default function UserStatusIndicator({
         const status = await getUserStatus();
         setUserStatus(status);
       } catch (err) {
-        console.error('Error fetching user status:', err);
+        logger.error('Error fetching user status:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch user status');
       } finally {
         setIsLoading(false);
@@ -158,4 +159,4 @@ export function CompactUserStatusIndicator({ className = "" }: { className?: str
       showDetails={false}
     />
   );
-} 
+}

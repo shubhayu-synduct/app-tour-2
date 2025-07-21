@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, Search, ExternalLink, FileText } from 'lucide-react';
 import Image from 'next/image';
 import { GuidelineMarkdown } from '../guidelines/guideline-markdown';
+import { logger } from '@/lib/logger';
 
 interface Citation {
   title: string;
@@ -121,7 +122,7 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
           setProcessedMarkdown(processMarkdown(decodedSummary));
         }
       } catch (err: any) {
-        console.error('Error fetching summary:', err);
+        logger.error('Error fetching summary:', err);
         setError(err.message || 'Failed to fetch summary');
       } finally {
         setIsLoading(false);
@@ -313,7 +314,7 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
       
       setFollowupQuestion('');
     } catch (err: any) {
-      console.error('Error asking followup question:', err);
+      logger.error('Error asking followup question:', err);
       setFollowupError(err.message || 'Failed to get answer');
       setChatHistory(prev => prev.slice(0, -1));
     } finally {
@@ -787,4 +788,4 @@ export const GuidelineMobileModal: React.FC<GuidelineMobileModalProps> = ({ open
       `}</style>
     </div>
   );
-}; 
+};

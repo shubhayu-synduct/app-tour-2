@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import type { User } from "firebase/auth"
 import { getSessionCookie, setSessionCookie, clearSessionCookie } from "@/lib/auth-service"
 import { VerificationModal } from "@/components/auth/verification-modal"
+import { logger } from "@/lib/logger"
 
 type AuthContextType = {
   user: User | null
@@ -50,13 +51,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Handle redirects in a separate useEffect
   useEffect(() => {
     if (redirectTo && redirectTo !== pathname) {
-      console.log(`Executing redirect to: ${redirectTo}`)
+      logger.authLog(`Executing redirect to: ${redirectTo}`)
       router.push(redirectTo)
       
       // Fallback: If router.push doesn't work within 1 second, use window.location.href
       const fallbackTimer = setTimeout(() => {
         if (window.location.pathname === pathname && pathname !== redirectTo) {
-          console.log(`Router.push to ${redirectTo} didn't work, using window.location.href`)
+          logger.authLog(`Router.push to ${redirectTo} didn't work, using window.location.href`)
           window.location.href = redirectTo
         }
       }, 1000)
@@ -79,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // If auth listener is already set up, don't set it up again
     if (globalThis.__authListenerSetup) {
-      console.log("Auth listener already set up, skipping setup.")
+      logger.authLog("Auth listener already set up, skipping setup.")
       // Sync with global state if it exists
       if (globalThis.__authUser !== undefined) {
         setUser(globalThis.__authUser)
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    console.log("Setting up new auth listener...")
+    logger.authLog("Setting up new auth listener...")
     let mounted = true
     let initialLoad = true
     
@@ -101,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const auth = await getFirebaseAuth()
         if (!auth) {
-          console.error("Auth not initialized")
+          logger.error("Auth not initialized")
           if (mounted) setLoading(false)
           return
         }
@@ -113,21 +114,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Clear any pending logout timer.
           if (user) {
             if (logoutTimer.current) {
-              console.log("Fast Refresh detected: Cancelling pending logout.")
+              logger.authLog("Fast Refresh detected: Cancelling pending logout.")
               clearTimeout(logoutTimer.current)
               logoutTimer.current = null
             }
             
-            console.log(`Auth state changed: User logged in (ID: ${user.uid})`)
+            logger.authLog(`Auth state changed: User logged in (ID: ${user.uid})`)
             globalThis.__authUser = user
             setUser(user)
             
             // Only mark as fresh sign-in if this is NOT the initial load
             if (!initialLoad) {
-              console.log("Fresh sign-in detected")
+              logger.authLog("Fresh sign-in detected")
               setFreshSignIn(true)
             } else {
-              console.log("Session restored from existing auth")
+              logger.authLog("Session restored from existing auth")
             }
             
             const currentSession = getSessionCookie()
@@ -137,9 +138,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } else {
             // If user is null, it could be a real logout or a Fast Refresh blip.
             // Don't act immediately. Set a timer.
-            console.log("Auth state changed: User logged out event received. Starting timer...")
+            logger.authLog("Auth state changed: User logged out event received. Starting timer...")
             logoutTimer.current = setTimeout(() => {
-              console.log("Timer finished. Executing logout.")
+              logger.authLog("Timer finished. Executing logout.")
               globalThis.__authUser = null
               setUser(null)
               clearSessionCookie()
@@ -152,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setLoading(false)
           initialLoad = false // Mark that initial load is complete
         }, (error) => {
-          console.error("Auth state change error:", error)
+          logger.error("Auth state change error:", error)
           if (mounted) {
             globalThis.__authLoading = false
             setLoading(false)
@@ -161,10 +162,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         globalThis.__authListenerSetup = true
         globalThis.__authUnsubscribe = authUnsubscribe
-        console.log("Auth listener set up globally.")
+        logger.authLog("Auth listener set up globally.")
 
       } catch (error) {
-        console.error("Error setting up auth state listener:", error)
+        logger.error("Error setting up auth state listener:", error)
         if (mounted) {
             globalThis.__authLoading = false
             setLoading(false)
@@ -196,7 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // A logout happened in another tab. If we are logged in, we must sync.
           if (data.action === "logout" && currentUser) {
-            console.log("Cross-tab logout detected. Reloading to sync state.")
+            logger.authLog("Cross-tab logout detected. Reloading to sync state.")
             window.location.reload()
             return
           }
@@ -205,7 +206,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (data.action === "login") {
             // If we are logged out OR logged in as a different user, we must sync.
             if (!currentUser || (currentUser && currentUser.uid !== data.uid)) {
-              console.log("Cross-tab login/user-switch detected. Reloading to sync state.")
+              logger.authLog("Cross-tab login/user-switch detected. Reloading to sync state.")
               window.location.reload()
               return
             }
@@ -213,7 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Otherwise, the event is for the same logged-in user, so we do nothing.
 
         } catch (error) {
-          console.error("Error handling cross-tab auth sync:", error)
+          logger.error("Error handling cross-tab auth sync:", error)
         }
       }
     }
@@ -226,7 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return // Don't redirect while loading
     
-    console.log("Protected routes check:", { user: user?.uid, loading, pathname, freshSignIn })
+    logger.authLog("Protected routes check:", { user: user?.uid, loading, pathname, freshSignIn })
 
     const isPublicRoute = ['/login', '/signup', '/', '/forgot-password'].includes(pathname) || 
       pathname.startsWith('/reset-password') ||
@@ -234,7 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // If not authenticated and trying to access protected route
     if (!user && !isPublicRoute) {
-      console.log("Redirecting to login from:", pathname)
+      logger.authLog("Redirecting to login from:", pathname)
       setRedirectTo('/login')
       return
     }
@@ -242,7 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Only show verification modal on signup page
     const isSignupPage = pathname === '/signup'
     if (user && !user.emailVerified && user.providerData.some(p => p.providerId === 'password') && isSignupPage) {
-      console.log("User email not verified on signup page, showing verification modal")
+      logger.authLog("User email not verified on signup page, showing verification modal")
       setShowVerificationModal(true)
     } else {
       // Close verification modal if it's open and we're not on the signup page
@@ -254,10 +255,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // If authenticated and on auth pages, redirect to appropriate page
     if (user && (pathname === '/login' || pathname === '/signup')) {
       if (freshSignIn) {
-        console.log("Fresh sign-in detected on auth page, checking onboarding status...")
+        logger.authLog("Fresh sign-in detected on auth page, checking onboarding status...")
         setFreshSignIn(false) // Reset the flag
       } else {
-        console.log("User is authenticated (session restored), redirecting from auth page...")
+        logger.authLog("User is authenticated (session restored), redirecting from auth page...")
       }
       checkUserOnboardingAndRedirect(user)
       return
@@ -271,14 +272,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     if (shouldCheckOnboarding) {
-      console.log("Checking onboarding status for entry point:", pathname)
+      logger.authLog("Checking onboarding status for entry point:", pathname)
       checkUserOnboardingAndRedirect(user)
     }
   }, [user, loading, pathname, freshSignIn, router, showVerificationModal])
 
   // Function to check user onboarding status and redirect accordingly
   const checkUserOnboardingAndRedirect = async (user: User) => {
-    console.log("checkUserOnboardingAndRedirect called for user:", user.uid)
+    logger.authLog("checkUserOnboardingAndRedirect called for user:", user.uid)
     
     try {
       const { getFirebaseFirestore } = await import("@/lib/firebase")
@@ -286,25 +287,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const db = await getFirebaseFirestore()
       if (!db) {
-        console.error("Firestore not available")
+        logger.error("Firestore not available")
         return
       }
       
-      console.log("Fetching user document for:", user.uid)
+      logger.authLog("Fetching user document for:", user.uid)
       const userDoc = await getDoc(doc(db, "users", user.uid))
       
       if (userDoc.exists()) {
         const userData = userDoc.data()
-        console.log("User document found:", userData)
+        logger.authLog("User document found:", userData)
         if (userData?.onboardingCompleted) {
-          console.log("User onboarding completed, setting redirect to dashboard")
+          logger.authLog("User onboarding completed, setting redirect to dashboard")
           setRedirectTo('/dashboard')
         } else {
-          console.log("User onboarding not completed, setting redirect to onboarding")
+          logger.authLog("User onboarding not completed, setting redirect to onboarding")
           setRedirectTo('/onboarding')
         }
       } else {
-        console.log("User document does not exist, creating new user and setting redirect to onboarding")
+        logger.authLog("User document does not exist, creating new user and setting redirect to onboarding")
         
         // Create user document for new users
         const { setDoc } = await import("firebase/firestore")
@@ -317,11 +318,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           updatedAt: new Date().toISOString()
         })
         
-        console.log("New user document created, setting redirect to onboarding")
+        logger.authLog("New user document created, setting redirect to onboarding")
         setRedirectTo('/onboarding')
       }
     } catch (error) {
-      console.error("Error checking user onboarding status:", error)
+      logger.error("Error checking user onboarding status:", error)
     }
   }
 

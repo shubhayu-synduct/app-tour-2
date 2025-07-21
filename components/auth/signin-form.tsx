@@ -9,6 +9,7 @@ import { setSessionCookie } from "@/lib/auth-service"
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth"
 import { doc, getDoc } from "firebase/firestore"
 import { getFirebaseAuth, getFirebaseFirestore, getGoogleProvider, getMicrosoftProvider } from "@/lib/firebase"
+import { logger } from "@/lib/logger"
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -109,7 +110,7 @@ export function SignInForm() {
       // AuthProvider will handle the redirect based on onboarding status
       
     } catch (err: any) {
-      console.error("Error during sign in:", err)
+      logger.error("Error during sign in:", err)
       setError(parseFirebaseError(err))
     } finally {
       setLoading(false)
@@ -134,7 +135,7 @@ export function SignInForm() {
       // AuthProvider will handle the redirect based on onboarding status
       
     } catch (err: any) {
-      console.error("Google sign in error:", err)
+      logger.error("Google sign in error:", err)
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Sign-in was cancelled')
       } else if (err.code === 'auth/popup-blocked') {
@@ -165,7 +166,7 @@ export function SignInForm() {
       // AuthProvider will handle the redirect based on onboarding status
       
     } catch (err: any) {
-      console.error("Microsoft sign in error:", err)
+      logger.error("Microsoft sign in error:", err)
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Sign-in was cancelled')
       } else if (err.code === 'auth/popup-blocked') {
@@ -274,4 +275,4 @@ export function SignInForm() {
       </div>
     </form>
   )
-} 
+}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { X } from "lucide-react"
+import { logger } from "@/lib/logger"
 
 interface VerificationModalProps {
   email: string
@@ -27,14 +28,14 @@ export function VerificationModal({ email, onClose, redirectToLogin = false }: V
           if (user) {
             await user.reload() // Refresh user data from Firebase
             if (user.emailVerified) {
-              console.log("Email verified, closing modal")
+              logger.authLog("Email verified, closing modal")
               onClose()
               // Trigger a page refresh to update auth state
               window.location.reload()
             }
           }
         } catch (error) {
-          console.error("Error checking email verification:", error)
+          logger.error("Error checking email verification:", error)
         }
       }
 
@@ -88,7 +89,7 @@ export function VerificationModal({ email, onClose, redirectToLogin = false }: V
         setResendMessage("Please sign in again to resend the verification email.")
       }
     } catch (error: any) {
-      console.error("Error resending verification email:", error)
+      logger.error("Error resending verification email:", error)
       setResendMessage(error.message || "Failed to resend verification email. Please try again.")
     } finally {
       setResending(false)
@@ -156,4 +157,4 @@ export function VerificationModal({ email, onClose, redirectToLogin = false }: V
       </div>
     </div>
   )
-} 
+}

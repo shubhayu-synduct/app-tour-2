@@ -24,6 +24,7 @@ import { SidebarHistory } from "./sidebar-history"
 import { useAuth } from '@/hooks/use-auth'
 import { doc, getDoc } from 'firebase/firestore'
 import { getFirebaseFirestore } from '@/lib/firebase'
+import { logger } from '@/lib/logger'
 
 interface SidebarProps {
   isOpen: boolean;
@@ -57,7 +58,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           })
         }
       } catch (error) {
-        console.error("Error fetching user profile:", error)
+        logger.error("Error fetching user profile:", error)
       }
     }
 
@@ -104,7 +105,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       // Redirect to login page
       router.push("/login")
     } catch (error) {
-      console.error("Error signing out:", error)
+      logger.error("Error signing out:", error)
     }
   }
 

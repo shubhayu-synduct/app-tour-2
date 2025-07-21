@@ -115,7 +115,7 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
       }
       setOpenSections(initialOpenSections);
     } catch (error) {
-      console.error('Error fetching drug data:', error);
+      // console.error('Error fetching drug data:', error);
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
@@ -141,10 +141,10 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
     
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        console.log('Searching for term:', searchTerm);
+        // console.log('Searching for term:', searchTerm);
         const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
         const data = await enhancedSearchDrugs(searchTerm.trim(), 10);
-        console.log('Response data:', data);
+        // console.log('Response data:', data);
         
         let transformedData = [];
         
@@ -175,7 +175,7 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
           searchInputRef.current.focus();
         }
       } catch (error) {
-        console.error('Error fetching recommendations:', error);
+        // console.error('Error fetching recommendations:', error);
       }
     }, 300); // 300ms debounce
     
@@ -592,4 +592,4 @@ export const DrugInformationModal: React.FC<DrugInformationModalProps> = ({ open
       </div>
     </div>
   );
-}; 
+};

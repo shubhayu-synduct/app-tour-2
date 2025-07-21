@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm';
 import React from 'react';
 import Image from 'next/image';
 import DrugsLinksIcon from '@/components/ui/DrugsLinksIcon';
+import { logger } from '@/lib/logger';
 
 interface DrugData {
   name: string;
@@ -156,7 +157,7 @@ export default function DrugDetailPage() {
         }
         setOpenSections(initialOpenSections);
       } catch (error) {
-        console.error('Error fetching drug data:', error);
+        logger.error('Error fetching drug data:', error);
         setError(error instanceof Error ? error.message : 'An unknown error occurred');
       } finally {
         setLoading(false);
@@ -187,10 +188,10 @@ export default function DrugDetailPage() {
     
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        console.log('Searching for term:', searchTerm);
+        logger.debug('Searching for term:', searchTerm);
         const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
         const data = await enhancedSearchDrugs(searchTerm.trim(), 10);
-        console.log('Response data:', data);
+        logger.debug('Response data:', data);
         
         let transformedData = [];
         
@@ -221,7 +222,7 @@ export default function DrugDetailPage() {
           searchInputRef.current.focus();
         }
       } catch (error) {
-        console.error('Error fetching recommendations:', error);
+        logger.error('Error fetching recommendations:', error);
       }
     }, 300); // 300ms debounce
     
@@ -553,4 +554,4 @@ export default function DrugDetailPage() {
       {user && <DrugDetailContent />}
     </DashboardLayout>
   );
-} 
+}

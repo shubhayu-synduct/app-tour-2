@@ -6,6 +6,7 @@ import { getFirebaseFirestore } from '@/lib/firebase'
 import { doc, setDoc } from 'firebase/firestore'
 import { MovingBorder } from "@/components/ui/moving-border";
 import { cn } from "@/lib/utils";
+import { logger } from '@/lib/logger';
 
 interface AnswerFeedbackProps {
   conversationId: string;
@@ -104,7 +105,7 @@ export default function AnswerFeedback({
         timestamp: new Date().toISOString()
       };
 
-      console.log('Attempting to save feedback to Firebase:', {
+      logger.debug('Attempting to save feedback to Firebase:', {
         conversationId,
         threadId,
         feedbackType,
@@ -126,7 +127,7 @@ export default function AnswerFeedback({
       );
 
       await setDoc(feedbackRef, feedbackData);
-      console.log('Feedback saved successfully to Firebase');
+      logger.debug('Feedback saved successfully to Firebase');
 
       setThankYou(true);
       setShowForm(null);
@@ -139,7 +140,7 @@ export default function AnswerFeedback({
         [feedbackType]: true
       }));
     } catch (error) {
-      console.error('Error saving feedback to Firebase:', error);
+      logger.error('Error saving feedback to Firebase:', error);
       setValidationMessage('Failed to save feedback. Please try again.');
       setTimeout(() => {
         setValidationMessage('');
@@ -156,7 +157,7 @@ export default function AnswerFeedback({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      logger.error('Failed to copy:', error);
     }
   };
 
@@ -366,4 +367,4 @@ export default function AnswerFeedback({
       )}
     </div>
   );
-} 
+}

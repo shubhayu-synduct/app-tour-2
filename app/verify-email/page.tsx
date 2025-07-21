@@ -6,6 +6,7 @@ import { getAuth, applyActionCode } from "firebase/auth"
 import Image from "next/image"
 import { getFirebaseAuth } from "@/lib/firebase"
 import { useAuth } from "@/hooks/use-auth"
+import { logger } from "@/lib/logger"
 
 function VerifyEmailContent() {
   const router = useRouter()
@@ -19,7 +20,7 @@ function VerifyEmailContent() {
 
   const handleSuccessfulVerification = async () => {
     if (!user) {
-      console.log("No user found after verification, redirecting to onboarding")
+      logger.info("No user found after verification, redirecting to onboarding")
       router.push("/onboarding")
       return
     }
@@ -33,26 +34,26 @@ function VerifyEmailContent() {
       
       const db = await getFirebaseFirestore()
       if (!db) {
-        console.error("Firestore not available")
+        logger.error("Firestore not available")
         router.push("/onboarding")
         return
       }
       
-      console.log("Checking onboarding status for user:", user.uid)
+      logger.info("Checking onboarding status for user:", user.uid)
       const userDoc = await getDoc(doc(db, "users", user.uid))
       
       if (userDoc.exists()) {
         const userData = userDoc.data()
-        console.log("User document found:", userData)
+        logger.info("User document found:", userData)
         if (userData?.onboardingCompleted) {
-          console.log("User onboarding completed, redirecting to dashboard")
+          logger.info("User onboarding completed, redirecting to dashboard")
           router.push('/dashboard')
         } else {
-          console.log("User onboarding not completed, redirecting to onboarding")
+          logger.info("User onboarding not completed, redirecting to onboarding")
           router.push('/onboarding')
         }
       } else {
-        console.log("User document does not exist, creating new user and redirecting to onboarding")
+        logger.info("User document does not exist, creating new user and redirecting to onboarding")
         
         // Create user document for new users
         const { setDoc } = await import("firebase/firestore")
@@ -68,7 +69,7 @@ function VerifyEmailContent() {
         router.push('/onboarding')
       }
     } catch (error) {
-      console.error("Error checking user onboarding status:", error)
+      logger.error("Error checking user onboarding status:", error)
       // Default to onboarding on error for new email verification
       router.push('/onboarding')
     }
@@ -85,7 +86,7 @@ function VerifyEmailContent() {
         const mode = searchParams.get("mode")
         const apiKey = searchParams.get("apiKey")
 
-        console.log("Verification parameters:", { oobCode: !!oobCode, mode, apiKey: !!apiKey })
+        logger.info("Verification parameters:", { oobCode: !!oobCode, mode, apiKey: !!apiKey })
 
         // Validate required parameters
         if (!oobCode) {
@@ -99,13 +100,13 @@ function VerifyEmailContent() {
         try {
           // Apply the verification code
           await applyActionCode(auth, oobCode)
-          console.log("Email verification successful!")
+          logger.info("Email verification successful!")
           setVerified(true)
           setError("") // Clear any existing errors
           // Redirect to onboarding after successful verification
           handleSuccessfulVerification()
         } catch (verificationError: any) {
-          console.error("Verification error details:", {
+          logger.error("Verification error details:", {
             code: verificationError.code,
             message: verificationError.message,
             fullError: verificationError
@@ -125,7 +126,7 @@ function VerifyEmailContent() {
           }
         }
       } catch (err: any) {
-        console.error("Error in verification process:", {
+        logger.error("Error in verification process:", {
           message: err.message,
           code: err.code,
           fullError: err
@@ -269,4 +270,4 @@ export default function VerifyEmail() {
       <VerifyEmailContent />
     </Suspense>
   )
-} 
+}

@@ -7,6 +7,7 @@ import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { useAuth } from "@/hooks/use-auth";
 import Image from 'next/image';
 import { getCachedAuthStatus, UserAuthStatus } from '@/lib/background-auth';
+import { logger } from '@/lib/logger';
 
 
 interface Drug {
@@ -74,21 +75,21 @@ export default function DrugInformationPage() {
       try {
         // Get authentication status in background with fallback
         const authStatus = await getCachedAuthStatus();
-        console.log('Using database:', authStatus.database, 'for country:', authStatus.country);
+        logger.debug('Using database:', authStatus.database, 'for country:', authStatus.country);
         
         const { getDrugLibrary } = await import('@/lib/authenticated-api');
         const data = await getDrugLibrary(selectedLetter, undefined, 0, authStatus.database);
         setDrugs(data.drugs);
         setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching drugs:', error);
+        logger.error('Error fetching drugs:', error);
         // Fallback: try with English database
         try {
           const { getDrugLibrary } = await import('@/lib/authenticated-api');
           const data = await getDrugLibrary(selectedLetter, undefined, 0, 'english');
           setDrugs(data.drugs);
         } catch (fallbackError) {
-          console.error('Fallback also failed:', fallbackError);
+          logger.error('Fallback also failed:', fallbackError);
         }
         setIsLoading(false);
       }
@@ -99,7 +100,7 @@ export default function DrugInformationPage() {
   
   // Fetch recommendations function
   const fetchRecommendations = async (term: string) => {
-    console.log('fetchRecommendations called with:', term);
+    logger.debug('fetchRecommendations called with:', term);
     if (term.trim() === '') {
       setRecommendations([]);
       setShowRecommendations(false);
@@ -109,11 +110,11 @@ export default function DrugInformationPage() {
     try {
       // Get authentication status in background with fallback
       const authStatus = await getCachedAuthStatus();
-      console.log('Search using database:', authStatus.database, 'for country:', authStatus.country);
+      logger.debug('Search using database:', authStatus.database, 'for country:', authStatus.country);
       
       const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
       const data = await enhancedSearchDrugs(term, 10, authStatus.database);
-      console.log('API response data:', data);
+      logger.debug('API response data:', data);
       
       let transformedData = [];
       
@@ -139,12 +140,12 @@ export default function DrugInformationPage() {
       }
       
       setRecommendations(transformedData);
-      console.log('Recommendations set:', transformedData);
+      logger.debug('Recommendations set:', transformedData);
       if (searchInputRef.current) {
         searchInputRef.current.focus();
       }
     } catch (error) {
-      console.error('Error fetching recommendations:', error);
+      logger.error('Error fetching recommendations:', error);
       // Fallback: try with English database
       try {
         const { enhancedSearchDrugs } = await import('@/lib/authenticated-api');
@@ -170,7 +171,7 @@ export default function DrugInformationPage() {
         }
         setRecommendations(transformedData);
       } catch (fallbackError) {
-        console.error('Search fallback also failed:', fallbackError);
+        logger.error('Search fallback also failed:', fallbackError);
         setRecommendations([]);
       }
     }
@@ -485,4 +486,4 @@ export default function DrugInformationPage() {
       </div>
     </DashboardLayout>
   );
-} 
+}

@@ -1,5 +1,7 @@
 "use client"
 
+import { logger } from './logger';
+
 // API base URL for DrInfo summary service
 //  const DRINFO_API_URL = "https://synduct-aisummary.drinfo.ai/chat/stream";
 const DRINFO_API_URL = "https://ai-summary-stage.duckdns.org/chat/stream";
@@ -46,12 +48,12 @@ export async function fetchDrInfoSummary(
   onComplete: (data: DrInfoSummaryData) => void,
   options?: DrInfoSummaryOptions
 ): Promise<void> {
-  console.log("[API] Initiating API request for query:", query);
+  logger.apiLog("Initiating API request for query:", query);
   
   let hasCalledComplete = false;
   
   try {
-    console.log("[API] About to send fetch request to:", DRINFO_API_URL);
+    logger.apiLog("About to send fetch request to:", DRINFO_API_URL);
     const response = await fetch(DRINFO_API_URL, {
       method: "POST",
       headers: {
@@ -71,11 +73,11 @@ export async function fetchDrInfoSummary(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`[API] Request failed with status ${response.status}:`, errorText);
+      logger.error(`[API] Request failed with status ${response.status}:`, errorText);
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    console.log("[API] Response received, status:", response.status);
+    logger.apiLog("Response received, status:", response.status);
     
     const reader = response.body?.getReader();
     if (!reader) {
@@ -92,7 +94,7 @@ export async function fetchDrInfoSummary(
     while (true) {
       const { done, value } = await reader.read();
       if (done) {
-        console.log("[API] Stream complete, received", chunkCount, "chunks");
+        logger.apiLog("Stream complete, received", `${chunkCount} chunks`);
         break;
       }
       
@@ -111,11 +113,11 @@ export async function fetchDrInfoSummary(
             
                          // Handle status updates and streaming  
              if (chunk.type === "status" || chunk.status === "processing" || chunk.status === "summarizing" || chunk.status === "formatting response" || chunk.status === "analyzing" || chunk.status === "searching" || chunk.status === "generating" || chunk.status === "formatting") {
-               console.log(`[API] Status update: ${chunk.status}`, chunk.message);
+               logger.apiLog(`Status update: ${chunk.status}`, chunk.message);
                onStatus(chunk.status, chunk.message || chunk.data);
              } else if ((chunk.status === "chunk" && typeof chunk.data === "string") || (chunk.type === "content" && typeof chunk.data === "string")) {
                // Streaming content chunks - handle both legacy and LangChain formats
-               console.log("[API] Streaming chunk received:", chunk.data?.substring(0, 50) + "...");
+               logger.apiLog("Streaming chunk received:", chunk.data?.substring(0, 50) + "...");
                hasReceivedContent = true;
                contentReceived += chunk.data;
                onChunk(chunk.data);
@@ -123,35 +125,35 @@ export async function fetchDrInfoSummary(
                await new Promise(resolve => setTimeout(resolve, 20));
              } else if (chunk.status === "complete" && chunk.data && typeof chunk.data === "object") {
                // Complete response with citations
-               console.log("[API] Received complete response", chunk.data);
+               logger.apiLog("Received complete response", chunk.data);
                const completeData = chunk.data as DrInfoSummaryData;
-               console.log('[API] Received completeData:', completeData);
-               console.log('[API] Thread ID in complete data:', completeData.thread_id);
+               logger.apiLog('Received completeData:', completeData);
+               logger.apiLog('Thread ID in complete data:', completeData.thread_id);
                if (!hasCalledComplete) {
                  hasCalledComplete = true;
                  onComplete(completeData);
                }
              } else if (chunk.type === "session_id" && chunk.session_id) {
                // Session ID received for follow-up questions
-               console.log("[API] Session ID:", chunk.session_id);
+               logger.apiLog("Session ID:", chunk.session_id);
                // Store session ID for follow-up questions
              } else if (chunk.status === "error" || chunk.type === "error") {
                // Error handling
                const errorMsg = chunk.data || chunk.error || "Unknown error";
-               console.error("[API] Error from server:", errorMsg);
+               logger.error("[API] Error from server:", errorMsg);
                throw new Error(errorMsg);
              } else {
                // Log unhandled chunks for debugging
-               console.log("[API] Unhandled chunk:", chunk);
+               logger.apiLog("Unhandled chunk:", chunk);
              }
           } catch (error) {
-            console.error("[API] Error parsing streaming response:", error, "Raw data:", jsonStr);
+            logger.error("[API] Error parsing streaming response:", error, "Raw data:", jsonStr);
           }
         }
       }
     }
   } catch (error) {
-    console.error("[API] Error in fetchDrInfoSummary:", error);
+    logger.error("[API] Error in fetchDrInfoSummary:", error);
     
     // Ensure we always return something even on error
     if (!hasCalledComplete) {
@@ -177,7 +179,7 @@ export async function sendFollowUpQuestion(
   parentThreadId?: string,
   mode?: string
 ): Promise<void> {
-  console.log("Sending follow-up question:", followUpQuestion);
+  logger.apiLog("Sending follow-up question:", followUpQuestion);
   
   try {
     await fetchDrInfoSummary(
@@ -188,7 +190,7 @@ export async function sendFollowUpQuestion(
       { parent_thread_id: parentThreadId, sessionId, userId, mode }
     );
   } catch (error) {
-    console.error("Error sending follow-up question:", error);
+    logger.error("Error sending follow-up question:", error);
     throw error;
   }
 }

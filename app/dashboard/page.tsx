@@ -10,7 +10,8 @@ import { getFirebaseFirestore } from '@/lib/firebase'
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { ArrowRight, X, Search } from "lucide-react"
 import { v4 as uuidv4 } from 'uuid'
-import { GoogleGenAI } from '@google/genai'
+import { logger } from '@/lib/logger';
+// Removed GoogleGenAI import - now using secure server-side API
 
 // Define the interface for the message structure
 interface ChatMessage {
@@ -22,11 +23,7 @@ interface ChatMessage {
 }
 
 // Initialize the Google AI
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY
-if (!GEMINI_API_KEY) {
-  throw new Error('NEXT_PUBLIC_GEMINI_API_KEY is not defined');
-}
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+// Removed client-side Gemini API usage - now using secure server-side API
 
 export default function Dashboard() {
   const router = useRouter()
@@ -91,53 +88,47 @@ export default function Dashboard() {
     if (!input.trim() || input.length < 3) return;
     
     try {
-      const prompt = `Given this medical question: "${input}", suggest 3 possible ways to complete this question. 
-      Return ONLY a JSON array of strings, where each string is a complete question that starts with the exact input text.
-      Example: if input is "What are the", return ["What are the symptoms of diabetes?", "What are the treatment options?", "What are the risk factors?"]`;
-      
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-001',
-        contents: prompt,
+      const response = await fetch('/api/suggestions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          query: input, 
+          previousQueries 
+        }),
       });
       
-      const text = response.text;
-      if (!text) {
-        console.error("No text received from AI response");
-        return;
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
       }
       
-      try {
-        // Clean the response text by removing markdown formatting
-        const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
-        const aiSuggestions = JSON.parse(cleanText);
-        if (Array.isArray(aiSuggestions)) {
-          // Get previous queries suggestions that start with the current input
-          const matchingQueries = previousQueries.filter(prevQuery => 
-            prevQuery.toLowerCase().startsWith(input.toLowerCase())
-          ).sort();
-          
-          // Combine and update suggestions in a single state update
-          setSuggestions([...matchingQueries, ...aiSuggestions].slice(0, 5));
-        }
-      } catch (e) {
-        console.error("Error parsing AI suggestions:", e);
-        // Fallback to simple array if JSON parsing fails
-        const fallbackSuggestions = text
-          .split('\n')
-          .map(line => line.trim())
-          .filter(line => line && !line.startsWith('```'))
-          .slice(0, 3);
-
-        // Get previous queries suggestions that start with the current input
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      const aiSuggestions = data.suggestions || [];
+      
+      if (Array.isArray(aiSuggestions)) {
+        // Get previous queries suggestions that start with the current input (autocomplete)
         const matchingQueries = previousQueries.filter(prevQuery => 
           prevQuery.toLowerCase().startsWith(input.toLowerCase())
-        ).sort();
+        ).sort().slice(0, 2); // Limit to 2 autocomplete suggestions
         
-        // Combine and update suggestions in a single state update
-        setSuggestions([...matchingQueries, ...fallbackSuggestions].slice(0, 5));
+        // Ensure we have exactly 3 AI suggestions, then add autocomplete
+        const finalSuggestions = [...matchingQueries, ...aiSuggestions.slice(0, 3)];
+        setSuggestions(finalSuggestions);
       }
     } catch (error) {
-      console.error("Error generating AI suggestions:", error);
+      logger.error("Error generating AI suggestions:", error);
+      // Fallback to previous queries only (autocomplete)
+      const matchingQueries = previousQueries.filter(prevQuery => 
+        prevQuery.toLowerCase().startsWith(input.toLowerCase())
+      ).sort();
+      
+      setSuggestions(matchingQueries.slice(0, 3));
     }
   };
 
@@ -153,15 +144,15 @@ export default function Dashboard() {
       suggestionTimeoutRef.current = setTimeout(() => {
         // Only generate new suggestions if there's a meaningful change
         if (hasMeaningfulChange(query)) {
-          console.log("Generating new suggestions for:", query);
+          logger.debug("Generating new suggestions for:", query);
           generateAISuggestions(query);
         } else {
-          console.log("Using existing suggestions for:", query);
+          logger.debug("Using existing suggestions for:", query);
           // Keep showing existing suggestions that match
           const matchingQueries = previousQueries
             .filter(prevQuery => prevQuery.toLowerCase().startsWith(query.toLowerCase()))
             .sort()
-            .slice(0, 5);
+            .slice(0, 3);
           
           // Only update suggestions if we have matching queries
           if (matchingQueries.length > 0) {
@@ -219,7 +210,7 @@ export default function Dashboard() {
 
         setPreviousQueries(Array.from(queries) as string[]);
       } catch (err) {
-        console.error("Error fetching previous queries:", err);
+        logger.error("Error fetching previous queries:", err);
       }
     };
 
@@ -264,12 +255,12 @@ export default function Dashboard() {
     if (!query.trim() || !user) return
     
     setIsLoading(true)
-    console.log("[DASHBOARD] Creating new chat session for query:", query);
+    logger.debug("[DASHBOARD] Creating new chat session for query:", query);
     
     try {
       // Create a new session ID using uuidv4
       const sessionId = uuidv4();
-      console.log("[DASHBOARD] Generated new sessionId:", sessionId);
+      logger.debug("[DASHBOARD] Generated new sessionId:", sessionId);
       
       // Create chat session in Firebase first
       const userMessage = {
@@ -290,26 +281,26 @@ export default function Dashboard() {
         status: 'pending'
       }
       
-      console.log("[DASHBOARD] Adding document to Firebase");
+      logger.debug("[DASHBOARD] Adding document to Firebase");
       
       // Add document to Firebase with the pre-generated sessionId
       const db = getFirebaseFirestore();
       await setDoc(doc(db, "conversations", sessionId), newChatSession);
-      console.log("[DASHBOARD] Chat session created with ID:", sessionId);
+      logger.debug("[DASHBOARD] Chat session created with ID:", sessionId);
       
       // Store the query in session storage so the chat page can use it
       sessionStorage.setItem(`chat_query_${sessionId}`, query);
       sessionStorage.setItem(`chat_needs_answer_${sessionId}`, "true");
       sessionStorage.setItem(`chat_mode_${sessionId}`, activeMode);
-      console.log("[DASHBOARD] Stored query in session storage with key:", `chat_query_${sessionId}`);
-      console.log("[DASHBOARD] Set flag to fetch answer:", `chat_needs_answer_${sessionId}`);
-      console.log("[DASHBOARD] Stored mode:", activeMode);
+      logger.debug("[DASHBOARD] Stored query in session storage with key:", `chat_query_${sessionId}`);
+      logger.debug("[DASHBOARD] Set flag to fetch answer:", `chat_needs_answer_${sessionId}`);
+      logger.debug("[DASHBOARD] Stored mode:", activeMode);
       
       // Navigate to the dynamic chat page with the session ID
-      console.log("[DASHBOARD] Redirecting to:", `/dashboard/${sessionId}`);
+      logger.debug("[DASHBOARD] Redirecting to:", `/dashboard/${sessionId}`);
       router.push(`/dashboard/${sessionId}`);
     } catch (error) {
-      console.error("[DASHBOARD] Error creating chat session:", error);
+      logger.error("[DASHBOARD] Error creating chat session:", error);
       setIsLoading(false);
       alert("Failed to create chat. Please try again.");
     }

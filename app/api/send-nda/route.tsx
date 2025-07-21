@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
+import { logger } from '@/lib/logger'
 
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -8,7 +9,7 @@ export async function POST(request: Request) {
   try {
     // Check if Resend API key is configured
     if (!process.env.RESEND_API_KEY) {
-      console.error("RESEND_API_KEY is not configured")
+      logger.error("RESEND_API_KEY is not configured")
       return NextResponse.json(
         { error: "Email service is not configured" },
         { status: 500 }
@@ -18,14 +19,14 @@ export async function POST(request: Request) {
     const { userName, userEmail, digitalSignature, address } = await request.json()
 
     if (!userName || !userEmail || !digitalSignature || !address) {
-      console.error("Missing required fields:", { userName, userEmail, digitalSignature, address })
+      logger.error("Missing required fields:", { userName, userEmail, digitalSignature, address })
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       )
     }
 
-    console.log("Sending email to:", userEmail)
+    logger.apiLog("Sending email to:", userEmail)
 
     // Get current date in a formatted string
     const currentDate = new Date().toLocaleDateString('en-US', {
@@ -175,18 +176,18 @@ export async function POST(request: Request) {
     })
 
     if (!emailResponse) {
-      console.error("Failed to send email - no response from Resend")
+      logger.error("Failed to send email - no response from Resend")
       throw new Error('Failed to send email')
     }
 
-    console.log("Email sent successfully")
+    logger.apiLog("Email sent successfully")
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error("Error sending email:", error)
+    logger.error("Error sending email:", error)
     return NextResponse.json(
       { error: error.message || "Failed to send email" },
       { status: 500 }
     )
   }
-} 
+}

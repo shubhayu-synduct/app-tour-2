@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Mail } from "lucide-react"
 import { getFirebaseAuth } from "@/lib/firebase"
 import { sendPasswordResetEmail } from "firebase/auth"
+import { logger } from "@/lib/logger"
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
@@ -31,7 +32,7 @@ export default function ForgotPasswordPage() {
       })
       setSuccess(true)
     } catch (err: any) {
-      console.error("Password reset error:", err)
+      logger.error("Password reset error:", err)
       
       // Handle specific Firebase auth errors
       switch (err.code) {
@@ -130,4 +131,4 @@ export default function ForgotPasswordPage() {
       </div>
     </div>
   )
-} 
+}

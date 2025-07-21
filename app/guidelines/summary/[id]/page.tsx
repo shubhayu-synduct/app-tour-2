@@ -8,6 +8,7 @@ import { ArrowLeft, Search, ExternalLink, X, ChevronRight, ChevronLeft } from 'l
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { logger } from '@/lib/logger'
 
 interface Summary {
   title: string;
@@ -101,7 +102,7 @@ export default function GuidelineSummaryPage() {
           setProcessedMarkdown(processMarkdown(data.summary))
         }
       } catch (err: any) {
-        console.error('Error fetching summary:', err)
+        logger.error('Error fetching summary:', err)
         setError(err.message || 'Failed to fetch summary')
       } finally {
         setIsLoading(false)
@@ -154,13 +155,13 @@ export default function GuidelineSummaryPage() {
     const alphaStartWord = getAlphaOnly(cleanedStartWord);
     const alphaEndWord = getAlphaOnly(cleanedEndWord);
     
-    console.log(`Searching for extract between "${alphaStartWord}" and "${alphaEndWord}" in reference [${refNumber}]`);
+    logger.debug(`Searching for extract between "${alphaStartWord}" and "${alphaEndWord}" in reference [${refNumber}]`);
     
     // Look for match of alpha-only start_word
     const startPos = alphaSourceText.indexOf(alphaStartWord);
     
     if (startPos === -1) {
-      console.error(`Could not find start_word "${alphaStartWord}" in reference [${refNumber}]`);
+      logger.error(`Could not find start_word "${alphaStartWord}" in reference [${refNumber}]`);
       // Return the full text with a note
       return {
         fullText: sourceText,
@@ -179,7 +180,7 @@ export default function GuidelineSummaryPage() {
     const endPosInRemaining = remainingAlphaText.indexOf(alphaEndWord);
     
     if (endPosInRemaining === -1) {
-      console.error(`Found start_word but could not find end_word "${alphaEndWord}" in reference [${refNumber}]`);
+      logger.error(`Found start_word but could not find end_word "${alphaEndWord}" in reference [${refNumber}]`);
       // Return the full text but highlight from the start word to a reasonable point
       const excerptLength = 400; // A reasonable excerpt length
       const endOfExcerpt = Math.min(originalStartPos + excerptLength, cleanedSourceText.length);
@@ -230,13 +231,13 @@ export default function GuidelineSummaryPage() {
   }, [summary])
 
   const handleReferenceClick = useCallback((refNumber: string, occurrenceIndex: number) => {
-    console.log(`Reference clicked: ${refNumber}, Occurrence: ${occurrenceIndex}`)
+    logger.debug(`Reference clicked: ${refNumber}, Occurrence: ${occurrenceIndex}`)
     
     // Get the text for this reference and occurrence
     const result = extractReferenceText(refNumber, occurrenceIndex)
     
     if (!result) {
-      console.error(`Could not find text for reference ${refNumber}, occurrence ${occurrenceIndex}`)
+      logger.error(`Could not find text for reference ${refNumber}, occurrence ${occurrenceIndex}`)
       // Provide a fallback text when extract is not found
       const fallbackText = `The text extract for reference [${refNumber}] (occurrence ${occurrenceIndex + 1}) is not available. This may be due to incomplete data from the API or a processing error.`
       
@@ -327,7 +328,7 @@ export default function GuidelineSummaryPage() {
       // Clear the input field
       setFollowupQuestion('')
     } catch (err: any) {
-      console.error('Error asking followup question:', err)
+      logger.error('Error asking followup question:', err)
       setFollowupError(err.message || 'Failed to get answer')
       
       // Remove the last message if there was an error
@@ -804,4 +805,4 @@ export default function GuidelineSummaryPage() {
       `}</style>
     </DashboardLayout>
   )
-} 
+}

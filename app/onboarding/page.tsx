@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { Check } from "lucide-react"
 import Image from "next/image"
+import { logger } from "@/lib/logger"
 
 export default function Onboarding() {
   const router = useRouter()
@@ -70,7 +71,7 @@ export default function Onboarding() {
         provider.providerId === 'microsoft.com'
       )
       
-      console.log("Email verification status:", { 
+      logger.debug("Email verification status:", { 
         emailVerified: user.emailVerified, 
         isOAuthUser,
         providers: user.providerData.map(p => p.providerId)
@@ -225,7 +226,7 @@ export default function Onboarding() {
 
       setRegistrationSuccess(true)
     } catch (err: any) {
-      console.error("Error during onboarding:", err)
+      logger.error("Error during onboarding:", err)
       setError(err.message || "An error occurred during onboarding")
     } finally {
       setLoading(false)

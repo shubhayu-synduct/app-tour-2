@@ -1,6 +1,7 @@
 "use client"
 
 import { getFirebaseAuth } from './firebase';
+import { logger } from './logger';
 
 // Backend API base URL - update this to match your backend
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'https://synduct-drugsummary.drinfo.ai';
@@ -40,9 +41,9 @@ export async function makeAuthenticatedRequest(
     
     const idToken = await user.getIdToken();
     headers['Authorization'] = `Bearer ${idToken}`;
-    console.log(`Making authenticated request to ${endpoint} for user: ${user.email}`);
+    logger.apiLog(`Making authenticated request to ${endpoint} for user: ${user.email}`);
   } catch (error) {
-    console.error('Authentication error:', error);
+    logger.error('Authentication error:', error);
     throw new Error('Authentication required. Please sign in to access drug information.');
   }
 
@@ -228,4 +229,4 @@ export async function getGeoLocation(): Promise<any> {
   }
 
   return response.json();
-} 
+}

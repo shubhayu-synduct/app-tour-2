@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { collection, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore'
 import { getFirebaseFirestore } from '@/lib/firebase'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ id: docRef.id })
         }
       } catch (error) {
-        console.error("Error saving chat session:", error)
+        logger.error("Error saving chat session:", error);
         return NextResponse.json(
           { error: 'Failed to save chat session' },
           { status: 500 }
@@ -74,10 +75,10 @@ export async function POST(req: NextRequest) {
     }
     
   } catch (error) {
-    console.error("Error in chat save API:", error)
+    logger.error("Error in chat save API:", error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     )
   }
-} 
+}

@@ -10,6 +10,7 @@ import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns'
 import { MessageSquare, Trash2, Search, ArrowUpDown, X, Clock } from 'lucide-react'
 import { doc, deleteDoc } from 'firebase/firestore'
 import { getSessionCookie } from '@/lib/auth-service'
+import { logger } from '@/lib/logger'
 
 interface ChatMessage {
   id: string;
@@ -115,11 +116,11 @@ export default function ChatHistory() {
           })
         })
 
-        console.log("[LOAD] Loaded messages:", sessions);
+        logger.debug("[LOAD] Loaded messages:", sessions);
 
         setChatSessions(sessions)
       } catch (err) {
-        console.error("Error fetching chat sessions:", err)
+        logger.error("Error fetching chat sessions:", err)
         setError("Failed to load chat history")
       } finally {
         setLoading(false)
@@ -205,7 +206,7 @@ export default function ChatHistory() {
       // Update the UI by removing the deleted session
       setChatSessions(prev => prev.filter(session => session.id !== sessionId))
     } catch (err) {
-      console.error("Error deleting chat session:", err)
+      logger.error("Error deleting chat session:", err)
       setError("Failed to delete chat. Please try again.")
     }
   }
@@ -366,4 +367,4 @@ export default function ChatHistory() {
       </div>
     </DashboardLayout>
   )
-} 
+}

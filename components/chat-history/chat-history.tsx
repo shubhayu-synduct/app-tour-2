@@ -8,6 +8,7 @@ import { PlusCircle, MessageSquare, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { User } from 'firebase/auth'
+import { logger } from '@/lib/logger'
 
 interface ChatSession {
   id: string;
@@ -46,13 +47,13 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
       return;
     }
 
-    console.log("Fetching chat sessions for user:", user.uid);
+    logger.debug("Fetching chat sessions for user:", user.uid);
     
     const fetchChatSessions = async () => {
       setLoading(true);
       try {
         const db = getFirebaseFirestore()
-        console.log("Building Firestore query for user:", user.uid);
+        logger.debug("Building Firestore query for user:", user.uid);
         
         const chatSessionQuery = query(
           collection(db, "conversations"),
@@ -60,12 +61,12 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
           orderBy("updatedAt", "desc")
         );
 
-        console.log("Executing Firestore query...");
+        logger.debug("Executing Firestore query...");
         const querySnapshot = await getDocs(chatSessionQuery);
-        console.log(`Retrieved ${querySnapshot.size} chat sessions from Firestore`);
+        logger.debug(`Retrieved ${querySnapshot.size} chat sessions from Firestore`);
         
         if (querySnapshot.empty) {
-          console.log("No chat sessions found for user ID:", user.uid);
+          logger.debug("No chat sessions found for user ID:", user.uid);
         }
         
         const sessions: ChatSession[] = [];
@@ -90,7 +91,7 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
             if (displayTitle.length > 60) {
               displayTitle = displayTitle.substring(0, 57) + '...';
             }
-          console.log("Chat session document:", {
+          logger.debug("Chat session document:", {
             id: doc.id,
             title: displayTitle,
             originalTitle: data.title,
@@ -110,9 +111,9 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
         // Explicitly sort by updatedAt descending (newest first)
         sessions.sort((a, b) => b.updatedAt - a.updatedAt);
         setChatSessions(sessions);
-        console.log(`Finished processing ${sessions.length} chat sessions`);
+        logger.debug(`Finished processing ${sessions.length} chat sessions`);
       } catch (err) {
-        console.error("Error fetching chat sessions:", err);
+        logger.error("Error fetching chat sessions:", err);
         setError("Failed to load chat history");
       } finally {
         setLoading(false);
@@ -140,15 +141,15 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
     }
     
     try {
-      console.log("Deleting chat session:", sessionId);
+      logger.debug("Deleting chat session:", sessionId);
       const db = getFirebaseFirestore()
       await deleteDoc(doc(db, "conversations", sessionId));
-      console.log("Chat session deleted successfully");
+      logger.debug("Chat session deleted successfully");
       
       // Update the UI by removing the deleted session
       setChatSessions(prev => prev.filter(session => session.id !== sessionId));
     } catch (err) {
-      console.error("Error deleting chat session:", err);
+      logger.error("Error deleting chat session:", err);
       setError("Failed to delete chat. Please try again.");
     }
   };
@@ -229,4 +230,4 @@ export function ChatHistory({ user, onNewChat, refreshTrigger = 0 }: ChatHistory
       </div>
     </div>
   )
-} 
+}

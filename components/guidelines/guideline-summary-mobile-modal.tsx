@@ -3,6 +3,7 @@ import { ArrowLeft, ExternalLink, FileText } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { GuidelineMarkdown } from './guideline-markdown';
+import { logger } from '@/lib/logger';
 
 interface Citation {
   title: string;
@@ -135,7 +136,7 @@ export default function GuidelineSummaryMobileModal({
           setProcessedMarkdown(processMarkdown(decodedSummary));
         }
       } catch (err: any) {
-        console.error('Error fetching summary:', err);
+        logger.error('Error fetching summary:', err);
         setError(err.message || 'Failed to fetch summary');
       } finally {
         setIsLoading(false);
@@ -327,7 +328,7 @@ export default function GuidelineSummaryMobileModal({
       
       setFollowupQuestion('');
     } catch (err: any) {
-      console.error('Error asking followup question:', err);
+      logger.error('Error asking followup question:', err);
       setFollowupError(err.message || 'Failed to get answer');
       setChatHistory(prev => prev.slice(0, -1));
     } finally {
@@ -352,12 +353,12 @@ export default function GuidelineSummaryMobileModal({
   };
 
   const handleSearchClick = () => {
-    console.log('Dashboard button clicked');
+    logger.debug('Dashboard button clicked');
     router.push("/dashboard");
   };
 
   const handleCloseClick = () => {
-    console.log('Close button clicked');
+    logger.debug('Close button clicked');
     onClose();
   };
 
@@ -806,4 +807,4 @@ export default function GuidelineSummaryMobileModal({
       `}</style>
     </div>
   );
-} 
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // The URL for the external guidelines API
 const GUIDELINES_API_URL = 'https://synduct-guidelines.drinfo.ai/summarize';
@@ -37,10 +38,10 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error: any) {
-    console.error('Error in summarize route:', error);
+    logger.error('Error in summarize route:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
   }
-} 
+}

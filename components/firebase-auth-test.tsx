@@ -16,7 +16,7 @@ export function FirebaseAuthTest() {
           authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "Missing",
           projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "Missing",
         }
-        console.log("Environment variables:", envVars)
+        // console.log("Environment variables:", envVars)
         setConfig(envVars)
 
         // Import Firebase from your existing initialization
@@ -40,7 +40,7 @@ export function FirebaseAuthTest() {
           await signInWithEmailAndPassword(auth, "test@example.com", "password123")
           setStatus("Sign-in successful (unexpected)")
         } catch (signInError: any) {
-          console.error("Sign-in error:", signInError)
+          // console.error("Sign-in error:", signInError)
           setError(signInError.message)
           
           // If we get auth/invalid-credential, it means Firebase is working but the credentials are wrong
@@ -54,7 +54,7 @@ export function FirebaseAuthTest() {
           }
         }
       } catch (err: any) {
-        console.error("Firebase test error:", err)
+        // console.error("Firebase test error:", err)
         setError(err.message)
         setStatus("Firebase initialization failed")
       }
@@ -97,4 +97,4 @@ export function FirebaseAuthTest() {
       </div>
     </div>
   )
-} 
+}

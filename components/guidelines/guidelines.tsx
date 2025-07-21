@@ -7,6 +7,7 @@ import GuidelineSummaryMobileModal from './guideline-summary-mobile-modal'
 import { useAuth } from '@/hooks/use-auth'
 import { getFirebaseFirestore } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
+import { logger } from '@/lib/logger'
 
 interface Guideline {
   id: number;
@@ -75,7 +76,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
             }
           }
         } catch (error) {
-          console.error("Error fetching user country:", error);
+          logger.error("Error fetching user country:", error);
         }
       }
     };
@@ -110,11 +111,11 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
       }
       
       const data = await response.json()
-      console.log('API response:', data);
+      logger.debug('API response:', data);
       setGuidelines(Array.isArray(data) ? data : [])
       setRetryCount(0)
     } catch (err: any) {
-      console.error('Error searching guidelines:', err)
+      logger.error('Error searching guidelines:', err)
       setError(err.message || 'Search failed. Please try again.')
       setGuidelines([])
     } finally {
@@ -160,7 +161,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
 
   useEffect(() => {
     if (selectedGuideline) {
-      console.log('Selected guideline:', selectedGuideline);
+      logger.debug('Selected guideline:', selectedGuideline);
     }
   }, [selectedGuideline]);
 
@@ -463,4 +464,4 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
       )}
     </div>
   )
-} 
+}

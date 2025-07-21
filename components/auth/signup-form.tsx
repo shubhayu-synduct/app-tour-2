@@ -11,6 +11,7 @@ import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "
 import { getFirebaseFirestore } from "@/lib/firebase"
 import { doc, setDoc } from "firebase/firestore"
 import { VerificationModal } from "./verification-modal"
+import { logger } from "@/lib/logger"
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -116,7 +117,7 @@ export function SignUpForm() {
       // Show verification modal instead of redirecting
       setShowVerificationModal(true)
     } catch (err: any) {
-      console.error("Error during sign up:", err)
+      logger.error("Error during sign up:", err)
       setError(parseFirebaseError(err))
     } finally {
       setLoading(false)
@@ -161,7 +162,7 @@ export function SignUpForm() {
         // AuthProvider will handle the redirect to onboarding
       }
     } catch (err: any) {
-      console.error("Google sign up error:", err)
+      logger.error("Google sign up error:", err)
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Sign-up was cancelled')
       } else if (err.code === 'auth/popup-blocked') {
@@ -212,7 +213,7 @@ export function SignUpForm() {
         // AuthProvider will handle the redirect to onboarding
       }
     } catch (err: any) {
-      console.error("Microsoft sign up error:", err)
+      logger.error("Microsoft sign up error:", err)
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Sign-up was cancelled')
       } else if (err.code === 'auth/popup-blocked') {
@@ -321,4 +322,4 @@ export function SignUpForm() {
       )}
     </>
   )
-} 
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // The URL for the external guidelines search API
 const GUIDELINES_API_URL = 'https://synduct-guidelines.drinfo.ai/search';
@@ -7,7 +8,7 @@ const GUIDELINES_API_URL = 'https://synduct-guidelines.drinfo.ai/search';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('Search request body:', body);
+    logger.apiLog('Search request body:', body);
     
     // Forward the request to the actual API
     const response = await fetch(GUIDELINES_API_URL, {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     // Check if the response is successful
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      console.error('API Error Response:', {
+      logger.error('API Error Response:', {
         status: response.status,
         statusText: response.statusText,
         errorData
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     
     // Parse the response data
     const data = await response.json();
-    console.log('API Response:', data);
+    logger.apiLog('API Response:', data);
     
     // Transform the nested response into a flat array
     const transformedData = Object.values(data).flat().map((item: any) => {
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(transformedData);
     
   } catch (apiError: any) {
-    console.error('Guidelines API error:', {
+    logger.error('Guidelines API error:', {
       message: apiError.message,
       stack: apiError.stack,
       cause: apiError.cause
@@ -98,4 +99,4 @@ export async function POST(request: NextRequest) {
       );
     }
   }
-} 
+}

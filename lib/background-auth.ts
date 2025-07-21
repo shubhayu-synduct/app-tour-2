@@ -1,6 +1,7 @@
 "use client"
 
 import { getFirebaseAuth } from './firebase';
+import { logger } from './logger';
 
 export interface UserAuthStatus {
   isAuthenticated: boolean;
@@ -63,7 +64,7 @@ export async function verifyAuthenticationBackground(timeoutMs: number = 60000):
         });
 
       } catch (error) {
-        console.warn('Background authentication failed:', error);
+        logger.warn('Background authentication failed:', error);
         resolve(fallbackResult);
       }
     });
@@ -71,7 +72,7 @@ export async function verifyAuthenticationBackground(timeoutMs: number = 60000):
     // Create a timeout promise
     const timeoutPromise = new Promise<UserAuthStatus>((resolve) => {
       setTimeout(() => {
-        console.warn('Authentication verification timed out, falling back to English database');
+        logger.warn('Authentication verification timed out, falling back to English database');
         resolve(fallbackResult);
       }, timeoutMs);
     });
@@ -79,11 +80,11 @@ export async function verifyAuthenticationBackground(timeoutMs: number = 60000):
     // Race between authentication and timeout
     const result = await Promise.race([authPromise, timeoutPromise]);
     
-    console.log('Background authentication result:', result);
+    logger.authLog('Background authentication result:', result);
     return result;
 
   } catch (error) {
-    console.warn('Background authentication error:', error);
+    logger.warn('Background authentication error:', error);
     return fallbackResult;
   }
 }
@@ -142,4 +143,4 @@ export async function getCachedAuthStatus(): Promise<UserAuthStatus> {
   cacheTimestamp = now;
   
   return authStatus;
-} 
+}

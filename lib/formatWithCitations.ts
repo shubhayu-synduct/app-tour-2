@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 // --- Dummy citation rendering for streaming phase ---
 export function formatWithDummyCitations(html: string): string {
   // Match [1], [1,2], [1, 2, 3], etc. (allowing spaces)
@@ -18,15 +20,15 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
     return formatWithDummyCitations(text);
   }
   
-  console.log('Processing text with citations:', { textLength: text.length, citationsCount: Object.keys(citations).length });
-  console.log('Sample of text being processed:', text.substring(0, 500));
+  logger.debug('Processing text with citations:', { textLength: text.length, citationsCount: Object.keys(citations).length });
+  logger.debug('Sample of text being processed:', text.substring(0, 500));
   
   // First, identify and format drug names for drug citations
   // Look for HTML-formatted drug names before citations (e.g., <strong><strong>drugname</strong></strong> [1])
   // Process both implicit and explicit drug_database citations
   // Updated regex to handle multi-word drug names with spaces
   const drugMatches = text.match(/<strong><strong>([a-zA-Z][a-zA-Z0-9\s\-'()]+)<\/strong><\/strong>\s*\[(\d+)\]/g);
-  console.log('Found potential drug matches:', drugMatches);
+  logger.debug('Found potential drug matches:', drugMatches);
   
   // Collect all matches first, then process in reverse order to avoid index conflicts
   const matchesToProcess: Array<{match: string, drugName: string, num: string, index: number}> = [];
@@ -39,7 +41,7 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
     const num = match[2];
     const citation = citations[num];
     
-    console.log('Found drug match:', { drugName, num, citation, sourceType: citation?.source_type });
+    logger.debug('Found drug match:', { drugName, num, citation, sourceType: citation?.source_type });
     
     if (citation && citation.source_type === 'drug_database') {
       matchesToProcess.push({
@@ -55,7 +57,7 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
   matchesToProcess.reverse().forEach(({match: matchText, drugName, num}) => {
     const citation = citations[num];
     const cleanDrugName = drugName.trim();
-    console.log('Processing drug citation:', { drugName: cleanDrugName, citationNumber: num, citation });
+    logger.debug('Processing drug citation:', { drugName: cleanDrugName, citationNumber: num, citation });
     
     const clickableDrugName = `<span class="drug-name-clickable" 
       data-citation-number="${num}"
@@ -176,4 +178,4 @@ export const formatWithCitations = (text: string, citations?: Record<string, any
     ><sup class="citation-number" style="background:#E0E9FF;color:#1F2937;">${num}</sup></span>`;
   });
   return text;
-}; 
+};

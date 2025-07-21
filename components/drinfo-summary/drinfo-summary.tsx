@@ -18,6 +18,7 @@ import { marked } from 'marked'
 import Link from 'next/link'
 import { MovingBorder } from "@/components/ui/moving-border"
 import { cn } from "@/lib/utils"
+import { logger } from '@/lib/logger'
 
 interface DrInfoSummaryProps {
   user: any;
@@ -203,15 +204,15 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const shouldShowFeedbackModal = (count: number) => {
     if (count === 0) return false
     const shouldShow = count % 4 === 0 && count > 0; // Show at 4th, 8th, 12th, 16th, etc.
-    console.log("[FEEDBACK] shouldShowFeedbackModal check:", { count, shouldShow });
+    logger.debug("[FEEDBACK] shouldShowFeedbackModal check:", { count, shouldShow });
     return shouldShow;
   }
 
   // Effect to show feedback modal based on question count with 75-second delay
   useEffect(() => {
-    console.log("[FEEDBACK] Question count:", questionCount, "Has shown initial modal:", hasShownInitialModal);
+    logger.debug("[FEEDBACK] Question count:", questionCount, "Has shown initial modal:", hasShownInitialModal);
     if (hasShownInitialModal && shouldShowFeedbackModal(questionCount)) {
-      console.log("[FEEDBACK] Scheduling modal for question count:", questionCount, "with 75-second delay");
+      logger.debug("[FEEDBACK] Scheduling modal for question count:", questionCount, "with 75-second delay");
       // Clear any existing timer
       if (modalTimerRef.current) {
         clearTimeout(modalTimerRef.current)
@@ -271,7 +272,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   }
 
   useEffect(() => {
-    console.log("[EFFECT] Session loading effect triggered, sessionId:", sessionId);
+    logger.debug("[EFFECT] Session loading effect triggered, sessionId:", sessionId);
     
     if (sessionId) {
       loadChatSession(sessionId);
@@ -282,21 +283,21 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       }
     } else {
       setChatHistory([]);
-      console.log("Ready for new chat session");
+      logger.debug("Ready for new chat session");
     }
   }, [sessionId]);
 
   useEffect(() => {
     if (user) {
       const userId = user.uid || user.id;
-      console.log("DrInfoSummary component initialized with user:", {
+      logger.debug("DrInfoSummary component initialized with user:", {
         userId,
         hasUid: !!user.uid,
         hasId: !!user.id,
         authenticationType: user.uid ? "Firebase Auth" : "Custom Auth",
       });
     } else {
-      console.log("DrInfoSummary component initialized with NO USER");
+      logger.debug("DrInfoSummary component initialized with NO USER");
     }
   }, [user]);
 
@@ -323,7 +324,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             }
           }
         } catch (error) {
-          console.error("Error fetching user country:", error);
+          logger.error("Error fetching user country:", error);
         }
       }
     };
@@ -336,7 +337,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     if (messages.length > 0) {
       const lastAssistantMsg = [...messages].reverse().find(msg => msg.type === 'assistant');
       if (lastAssistantMsg?.answer?.citations) {
-        console.log('[CITATIONS] Setting citations from messages:', lastAssistantMsg.answer.citations);
+        logger.debug('[CITATIONS] Setting citations from messages:', lastAssistantMsg.answer.citations);
         setActiveCitations(lastAssistantMsg.answer.citations);
       }
     }
@@ -345,14 +346,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const loadChatSession = async (sessionId: string) => {
     setIsChatLoading(true);
     try {
-      console.log("[LOAD] Loading chat session with ID:", sessionId);
+      logger.debug("[LOAD] Loading chat session with ID:", sessionId);
       const db = getFirebaseFirestore();
       
       const sessionDocRef = doc(db, "conversations", sessionId);
       const sessionDoc = await getDoc(sessionDocRef);
       
       if (sessionDoc.exists()) {
-        console.log("[LOAD] Session document exists, loading threads...");
+        logger.debug("[LOAD] Session document exists, loading threads...");
         
         const threadsRef = collection(db, "conversations", sessionId, "threads");
         const threadsQueryRef = firestoreQuery(threadsRef, orderBy("user_message.timestamp"));
@@ -393,7 +394,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         
         // Initialize question count based on loaded messages
         const userMessageCount = messages.filter(msg => msg.type === 'user').length;
-        console.log("[FEEDBACK] Initializing question count from loaded messages:", userMessageCount);
+        logger.debug("[FEEDBACK] Initializing question count from loaded messages:", userMessageCount);
         setQuestionCount(userMessageCount);
         
         if (messages.length > 0) {
@@ -410,7 +411,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             : {};
           
           // Set activeCitations immediately when loading from history
-          console.log('[LOAD] Setting citations from history:', citations);
+          logger.debug('[LOAD] Setting citations from history:', citations);
           setActiveCitations(citations);
           
           setStreamedContent({
@@ -429,13 +430,13 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             setStatus('complete');
           }
           
-          console.log('[LOAD] Raw assistant content:', lastAssistantMsg.answer.mainSummary);
-          console.log('[LOAD] Raw assistant citations:', citations);
-          console.log('[LOAD] streamedContent:', {
+          logger.debug('[LOAD] Raw assistant content:', lastAssistantMsg.answer.mainSummary);
+          logger.debug('[LOAD] Raw assistant citations:', citations);
+          logger.debug('[LOAD] streamedContent:', {
             mainSummary: lastAssistantMsg.answer.mainSummary,
             sections: lastAssistantMsg.answer.sections || []
           });
-          console.log('[LOAD] completeData:', {
+          logger.debug('[LOAD] completeData:', {
             processed_content: lastAssistantMsg.answer.mainSummary,
             sections: lastAssistantMsg.answer.sections || [],
             citations,
@@ -446,7 +447,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         
         const lastMessage = messages[messages.length - 1];
         if (lastMessage && lastMessage.type === 'user') {
-          console.log("[LOAD] Found user message without assistant response, will trigger API call:", lastMessage.content);
+          logger.debug("[LOAD] Found user message without assistant response, will trigger API call:", lastMessage.content);
           setQuery(lastMessage.content);
           setLastQuestion(lastMessage.content);
         } else {
@@ -454,7 +455,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
           const needsAnswer = sessionStorage.getItem(`chat_needs_answer_${sessionId}`);
           
           if (storedQuery && needsAnswer === 'true') {
-            console.log("[LOAD] Found stored query in sessionStorage:", storedQuery);
+            logger.debug("[LOAD] Found stored query in sessionStorage:", storedQuery);
             setQuery(storedQuery);
             setLastQuestion(storedQuery);
             sessionStorage.removeItem(`chat_query_${sessionId}`);
@@ -462,7 +463,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
           }
         }
       } else {
-        console.error("[LOAD] Session not found for ID:", sessionId);
+        logger.error("[LOAD] Session not found for ID:", sessionId);
         setError("The chat session is being created. If this message persists, please try refreshing the page.");
         
         if (typeof window !== 'undefined') {
@@ -475,7 +476,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         }
       }
     } catch (err) {
-      console.error("[LOAD] Error loading chat session:", err);
+      logger.error("[LOAD] Error loading chat session:", err);
       setError("Failed to load chat session. Please try refreshing the page.");
     } finally {
       setIsChatLoading(false);
@@ -483,14 +484,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   };
 
   const saveChatSession = async (messages: ChatMessage[]): Promise<string | null> => {
-    console.log("Attempting to save chat session...");
-    console.log("User object:", user);
-    console.log("Current sessionId:", sessionId);
+    logger.debug("Attempting to save chat session...");
+    logger.debug("User object:", user);
+    logger.debug("Current sessionId:", sessionId);
     
     const userId = user?.uid || user?.id;
     
     if (!userId || !sessionId) {
-      console.warn("User not authenticated or no session ID, chat history not saved");
+      logger.warn("User not authenticated or no session ID, chat history not saved");
       return null;
     }
 
@@ -529,10 +530,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         updatedAt: serverTimestamp()
       });
 
-      console.log("Successfully saved chat session and threads");
+      logger.debug("Successfully saved chat session and threads");
       return sessionId;
     } catch (err) {
-      console.error("Error saving chat session:", err);
+      logger.error("Error saving chat session:", err);
       return null;
     }
   };
@@ -577,7 +578,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   }
 
   useEffect(() => {
-    console.log("[SEARCH] Component state update:", {
+    logger.debug("[SEARCH] Component state update:", {
       sessionID: sessionId,
       isChatLoading,
       query,
@@ -587,8 +588,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     });
     
     if (!isChatLoading && query && !hasFetched) {
-      console.log("[SEARCH] Triggering search with query:", query);
-      console.log("[SEARCH] Using mode:", activeMode === 'instant' ? 'swift' : 'study');
+      logger.debug("[SEARCH] Triggering search with query:", query);
+      logger.debug("[SEARCH] Using mode:", activeMode === 'instant' ? 'swift' : 'study');
       setHasFetched(true);
       setTimeout(() => {
           handleSearchWithContent(query, false, activeMode === 'instant' ? 'swift' : 'study');
@@ -625,9 +626,9 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     setLastQuestion(query);
     setQuestionCount(prev => {
       const newCount = prev + 1;
-      console.log("[FEEDBACK] Incrementing question count from", prev, "to", newCount, "via handleSearch");
+      logger.debug("[FEEDBACK] Incrementing question count from", prev, "to", newCount, "via handleSearch");
       if (newCount % 4 === 0) {
-        console.log("[FEEDBACK] Question", newCount, "reached - modal will appear in 45 seconds");
+        logger.debug("[FEEDBACK] Question", newCount, "reached - modal will appear in 45 seconds");
       }
       return newCount;
     });
@@ -641,9 +642,9 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     setLastQuestion(followUpQuestion);
     setQuestionCount(prev => {
       const newCount = prev + 1;
-      console.log("[FEEDBACK] Incrementing question count from", prev, "to", newCount, "via handleFollowUpQuestion");
+      logger.debug("[FEEDBACK] Incrementing question count from", prev, "to", newCount, "via handleFollowUpQuestion");
       if (newCount % 4 === 0) {
-        console.log("[FEEDBACK] Question", newCount, "reached - modal will appear in 45 seconds");
+        logger.debug("[FEEDBACK] Question", newCount, "reached - modal will appear in 45 seconds");
       }
       return newCount;
     });
@@ -664,10 +665,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   };
 
   const parseContent = (content: string) => {
-    console.log("Parsing content length:", content.length);
+    logger.debug("Parsing content length:", content.length);
     
     if (!content || content.trim() === '') {
-      console.log("Empty content received");
+      logger.debug("Empty content received");
       return { mainSummary: '', sections: [] };
     }
     
@@ -678,7 +679,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       const headerMatch = content.match(/#{2,3}\s.+/g);
       
       if (headerMatch && headerMatch.length > 0) {
-        console.log("Found sections in content:", headerMatch.length);
+        logger.debug("Found sections in content:", headerMatch.length);
         const parts = content.split(/(?=#{2,3}\s.+)/);
         
         mainSummary = parts[0];
@@ -696,14 +697,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
           }
         }
       } else {
-        console.log("No sections found in content");
+        logger.debug("No sections found in content");
       }
       
       mainSummary = mainSummary.replace(/---+\s*$/, '').trim();
       
       return { mainSummary, sections };
     } catch (error) {
-      console.error("Error parsing content:", error);
+      logger.error("Error parsing content:", error);
       return { 
         mainSummary: content.trim(), 
         sections: [] 
@@ -1001,15 +1002,15 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
           citationObj = activeCitations[citationNumber];
         }
         
-        console.log('Found drug name span:', { citationNumber, citationObj, element: ref });
+        logger.debug('Found drug name span:', { citationNumber, citationObj, element: ref });
         
         // Add click handler for drug names
         ref.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          console.log('Drug name clicked:', { citationNumber, citationObj });
+          logger.debug('Drug name clicked:', { citationNumber, citationObj });
           if (citationObj && citationObj.source_type === 'drug_database') {
-            console.log('Opening drug modal for:', citationObj.title);
+            logger.debug('Opening drug modal for:', citationObj.title);
             setSelectedCitation(citationObj);
             setShowDrugModal(true);
           }
@@ -1202,7 +1203,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             }
           }, 2000);
         } catch (error) {
-          console.error('Error updating messages:', error);
+          logger.error('Error updating messages:', error);
           setError('Failed to update messages. Please try again.');
           setIsLoading(false);
         }
@@ -1229,7 +1230,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   // Share functionality
   const handleShare = async () => {
     if (!sessionId || !user) {
-      console.error('Cannot share: missing sessionId or user');
+      logger.error('Cannot share: missing sessionId or user');
       return;
     }
 
@@ -1294,9 +1295,9 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       const shareableLink = `${window.location.origin}/dashboard/public/${publicChatRef.id}`;
       setShareLink(shareableLink);
       
-      console.log('Chat shared successfully:', publicChatRef.id);
+      logger.debug('Chat shared successfully:', publicChatRef.id);
     } catch (error) {
-      console.error('Error sharing chat:', error);
+      logger.error('Error sharing chat:', error);
       setShareLink('');
     } finally {
       setIsSharing(false);
@@ -1311,7 +1312,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      logger.error('Failed to copy to clipboard:', error);
     }
   };
 
@@ -1363,8 +1364,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     if (!userMsg || userMsg.type !== 'user') return;
 
     setReloadingMessageId(assistantMessageId);
-    console.log('[RELOAD] Starting complete reload - deleting thread:', assistantMsg.threadId);
-    console.log('[RELOAD] Question to reload:', userMsg.content);
+    logger.debug('[RELOAD] Starting complete reload - deleting thread:', assistantMsg.threadId);
+    logger.debug('[RELOAD] Question to reload:', userMsg.content);
     
     try {
       const userId = user.uid || user.id;
@@ -1374,14 +1375,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       if (assistantMsg.threadId) {
         const threadRef = doc(db, "conversations", sessionId, "threads", assistantMsg.threadId);
         await deleteDoc(threadRef);
-        console.log('[RELOAD] Successfully deleted thread from Firebase:', assistantMsg.threadId);
+        logger.debug('[RELOAD] Successfully deleted thread from Firebase:', assistantMsg.threadId);
       }
 
       // Step 2: Remove both user and assistant messages from UI state
       setMessages(prev => prev.filter(msg => 
         msg.id !== userMsg.id && msg.id !== assistantMessageId
       ));
-      console.log('[RELOAD] Removed messages from UI');
+      logger.debug('[RELOAD] Removed messages from UI');
 
       // Step 3: Create fresh messages for the reload
       const tempThreadId = Date.now().toString();
@@ -1409,7 +1410,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
 
       // Add fresh messages to UI
       setMessages(prev => [...prev, freshUserMsg, freshAssistantMsg]);
-      console.log('[RELOAD] Added fresh messages to UI');
+      logger.debug('[RELOAD] Added fresh messages to UI');
 
       // Step 4: Start fresh API call
       let hasCompleted = false;
@@ -1434,14 +1435,14 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
         (newStatus: string, message?: string) => {
           if (hasCompleted) return;
           setStatus(newStatus as StatusType);
-          console.log('[RELOAD] Status update:', newStatus);
+          logger.debug('[RELOAD] Status update:', newStatus);
         },
         async (data: DrInfoSummaryData) => {
           if (hasCompleted) return;
           hasCompleted = true;
           
           try {
-            console.log('[RELOAD] Received fresh data:', data);
+            logger.debug('[RELOAD] Received fresh data:', data);
             
             if (!data.thread_id) {
               throw new Error('Thread ID not received from backend');
@@ -1488,10 +1489,10 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             setStatus('complete');
             setIsLoading(false);
             
-            console.log('[RELOAD] Successfully completed reload with new thread:', data.thread_id);
+            logger.debug('[RELOAD] Successfully completed reload with new thread:', data.thread_id);
 
           } catch (error) {
-            console.error('[RELOAD] Error updating messages:', error);
+            logger.error('[RELOAD] Error updating messages:', error);
             setError('Failed to complete reload. Please try again.');
           } finally {
             setReloadingMessageId(null);
@@ -1514,7 +1515,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
       );
 
     } catch (error) {
-      console.error('[RELOAD] Error during complete reload:', error);
+      logger.error('[RELOAD] Error during complete reload:', error);
       setError('Failed to reload. Please try again.');
       setReloadingMessageId(null);
     }
