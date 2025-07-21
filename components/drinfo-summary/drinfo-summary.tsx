@@ -164,17 +164,17 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
   const inputAnchorRef = useRef<HTMLDivElement>(null)
 
   // Feedback modal behavior:
-  // 1. Initial modal appears after 45 seconds (only once)
-  // 2. Subsequent modals appear after every 4 questions (4th, 8th, 12th, 16th, etc.) with 45-second delay
+  // 1. Initial modal appears after 75 seconds (only once)
+  // 2. Subsequent modals appear after every 4 questions (4th, 8th, 12th, 16th, etc.) with 75-second delay
   // 3. Question count is incremented only for user-initiated searches, not loaded queries
 
-  // Modal timer effect - only show initial modal after 45 seconds
+  // Modal timer effect - only show initial modal after 75 seconds
   useEffect(() => {
     if (!hasShownInitialModal) {
       modalTimerRef.current = setTimeout(() => {
         setShowFeedbackModal(true)
         setHasShownInitialModal(true)
-      }, 45000)
+      }, 75000)
     }
 
     // Cleanup function
@@ -198,19 +198,19 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     return shouldShow;
   }
 
-  // Effect to show feedback modal based on question count with 45-second delay
+  // Effect to show feedback modal based on question count with 75-second delay
   useEffect(() => {
     console.log("[FEEDBACK] Question count:", questionCount, "Has shown initial modal:", hasShownInitialModal);
     if (hasShownInitialModal && shouldShowFeedbackModal(questionCount)) {
-      console.log("[FEEDBACK] Scheduling modal for question count:", questionCount, "with 45-second delay");
+      console.log("[FEEDBACK] Scheduling modal for question count:", questionCount, "with 75-second delay");
       // Clear any existing timer
       if (modalTimerRef.current) {
         clearTimeout(modalTimerRef.current)
       }
-      // Set new timer for 45 seconds
+      // Set new timer for 75 seconds
       modalTimerRef.current = setTimeout(() => {
         setShowFeedbackModal(true)
-      }, 45000)
+      }, 75000)
     }
   }, [questionCount, hasShownInitialModal])
 
@@ -1597,8 +1597,11 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                   conversationId={sessionId || ''}
                                   threadId={msg.threadId}
                                   answerText={msg.content || ''}
-                                  onReload={() => handleReload(msg.id)}
-                                  isReloading={reloadingMessageId === msg.id}
+                                  // Only show retry for the last assistant message
+                                  {...(idx === messages.length - 1 ? {
+                                    onReload: () => handleReload(msg.id),
+                                    isReloading: reloadingMessageId === msg.id
+                                  } : {})}
                                   messageId={msg.id}
                                 />
                               </div>
