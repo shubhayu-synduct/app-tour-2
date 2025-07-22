@@ -3,8 +3,8 @@
 import { logger } from './logger';
 
 // API base URL for DrInfo summary service
-//  const DRINFO_API_URL = "https://synduct-aisummary.drinfo.ai/chat/stream";
-const DRINFO_API_URL = "https://ai-summary-stage.duckdns.org/chat/stream";
+ const DRINFO_API_URL = "https://synduct-aisummary.drinfo.ai/chat/stream";
+// const DRINFO_API_URL = "https://ai-summary-stage.duckdns.org/chat/stream";
 export interface Citation {
   title: string;
   url: string;
