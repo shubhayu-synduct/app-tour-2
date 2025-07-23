@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { POST as geminiHandler } from './gemini/route';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,26 +13,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call the secure Gemini API route
-    const geminiResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/suggestions/gemini`, {
+    // Create a new request object for the Gemini handler
+    const geminiRequest = new Request(request.url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query, previousQueries }),
+      headers: request.headers,
+      body: JSON.stringify({ query, previousQueries })
     });
 
-    if (!geminiResponse.ok) {
-      const errorData = await geminiResponse.json();
-      return NextResponse.json(
-        { error: errorData.error || 'Failed to generate suggestions' },
-        { status: geminiResponse.status }
-      );
-    }
-
-    const data = await geminiResponse.json();
-    return NextResponse.json(data);
+    // Call the Gemini handler directly instead of making HTTP request
+    const geminiResponse = await geminiHandler(geminiRequest as NextRequest);
+    
+    // Return the response from Gemini handler
+    return geminiResponse;
   } catch (error) {
+    console.error('Error in suggestions route:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
