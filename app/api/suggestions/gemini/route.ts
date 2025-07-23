@@ -7,9 +7,15 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 if (!GEMINI_API_KEY) {
   console.error('GEMINI_API_KEY is not configured on server-side');
+  console.error('Available env vars:', Object.keys(process.env).filter(key => key.includes('GEMINI')));
 }
 
-const ai = GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
+let ai: GoogleGenAI | null = null;
+try {
+  ai = GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
+} catch (initError) {
+  console.error('Failed to initialize GoogleGenAI:', initError);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,9 +61,14 @@ Each suggestion should be a complete medical search term or phrase.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: prompt
+      contents: [{ role: 'user', parts: [{ text: prompt }] }]
     });
-    const text = response.text;
+    
+    if (!response.candidates || response.candidates.length === 0) {
+      throw new Error('No candidates in response');
+    }
+    
+    const text = response.candidates[0]?.content?.parts?.[0]?.text;
 
     if (!text) {
       return NextResponse.json(
@@ -133,8 +144,17 @@ Each suggestion should be a complete medical search term or phrase.`;
     }
   } catch (error) {
     console.error('Error generating AI suggestions:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      apiKeyExists: !!GEMINI_API_KEY,
+      aiInitialized: !!ai
+    });
     return NextResponse.json(
-      { error: 'Failed to generate suggestions' },
+      { 
+        error: 'Failed to generate suggestions',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
