@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import Image from 'next/image';
 import { getCachedAuthStatus, UserAuthStatus } from '@/lib/background-auth';
 import { logger } from '@/lib/logger';
+import { useDrugTour } from '@/components/TourContext';
 
 
 interface Drug {
@@ -237,9 +238,30 @@ export default function DrugInformationPage() {
     };
   }, []);
 
+  const { startTour } = useDrugTour();
+  const [showTourPrompt, setShowTourPrompt] = useState(false);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowTourPrompt(true);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, []);
+
   const DrugInformationContent = () => {
     return (
       <div className="max-w-5xl mx-auto px-4 py-4 md:py-8 mt-0 md:mt-16 relative">
+        {showTourPrompt && (
+          <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+              <h2 className="text-lg font-semibold mb-2">Take a quick tour?</h2>
+              <p className="mb-4">Would you like a quick tour of the drug information page?</p>
+              <div className="flex justify-center gap-4">
+                <button className="bg-indigo-500 text-white px-4 py-2 rounded" onClick={() => { setShowTourPrompt(false); startTour(); }}>Yes, show me</button>
+                <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded" onClick={() => setShowTourPrompt(false)}>No, thanks</button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex flex-col md:flex-row justify-center items-center mb-0 md:mb-[20px]">
           <div className="text-center mb-4 md:mb-0">
             <h1 className="hidden md:block text-[36px] font-semibold text-[#214498] mb-[4px] mt-0 font-['DM_Sans'] font-[600]">Drug Information</h1>
@@ -250,7 +272,7 @@ export default function DrugInformationPage() {
           </div>
         </div>
         
-        <div className="relative mb-4 md:mb-8" ref={searchContainerRef}>
+        <div className="relative mb-4 md:mb-8 druginfo-search-bar" ref={searchContainerRef}>
           <div className="flex items-center border-[2.7px] border-[#3771FE]/[0.27] rounded-lg h-[56px] md:h-[69px] w-full max-w-[1118px] mx-auto pr-3 md:pr-4 bg-white">
             <div className="pl-3 md:pl-4 flex items-center">
               <Search className="text-[#9599A8] stroke-[1.5] w-[18px] h-[18px] md:w-[20px] md:h-[20px]" fill="none" />
@@ -302,7 +324,7 @@ export default function DrugInformationPage() {
           
           {/* Recommendations dropdown */}
           {showRecommendations && recommendations.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-w-[1118px] mx-auto">
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-w-[1118px] mx-auto druginfo-recommendations">
               {recommendations.map((drug, index) => (
                 <Link 
                   key={index}
@@ -415,7 +437,7 @@ export default function DrugInformationPage() {
         </div>
         
         {/* Drug table */}
-        <div className="w-full max-w-[1118px] mx-auto rounded-lg overflow-hidden">
+        <div className="w-full max-w-[1118px] mx-auto rounded-lg overflow-hidden druginfo-table">
           <div className="overflow-x-auto">
             <table className="w-full table-fixed">
               <colgroup>

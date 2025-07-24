@@ -19,6 +19,7 @@ import Link from 'next/link'
 import { MovingBorder } from "@/components/ui/moving-border"
 import { cn } from "@/lib/utils"
 import { logger } from '@/lib/logger'
+import { useDrinfoSummaryTour } from '@/components/TourContext'
 
 interface DrInfoSummaryProps {
   user: any;
@@ -1521,17 +1522,38 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
     }
   };
 
+  const { startTour } = useDrinfoSummaryTour();
+  const [showTourPrompt, setShowTourPrompt] = useState(false);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowTourPrompt(true);
+    }, 25000);
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
     <div className="p-2 sm:p-4 md:p-6 h-[100dvh] flex flex-col relative overflow-hidden">
+      {showTourPrompt && (
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+            <h2 className="text-lg font-semibold mb-2">Take a quick tour?</h2>
+            <p className="mb-4">Would you like a quick tour of the answer and feedback features?</p>
+            <div className="flex justify-center gap-4">
+              <button className="bg-indigo-500 text-white px-4 py-2 rounded" onClick={() => { setShowTourPrompt(false); startTour(); }}>Yes, show me</button>
+              <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded" onClick={() => setShowTourPrompt(false)}>No, thanks</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Top Bar with Share Button */}
       <div className="flex justify-between items-center mb-4 px-2 sm:px-4">
         <div className="flex-1"></div>
         <button
           onClick={handleShare}
           disabled={!sessionId || messages.length === 0}
-          className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#C8C8C8] text-[#223258] rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="flex items-center space-x-2 px-4 py-2 bg-white border border-[#C8C8C8] text-[#223258] rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium drinfo-share-step"
         >
-                      <img src="/Share icon.svg" alt="Share" className="w-5 h-5" />
+          <img src="/Share icon.svg" alt="Share" className="w-5 h-5" />
           <span className="hidden sm:inline">Share</span>
           <span className="sm:hidden">Share</span>
         </button>
@@ -1566,7 +1588,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                         </div>
                       ) : (
                         <>
-                          <div ref={idx === messages.length - 1 ? answerIconRef : null} className="flex items-start gap-2 mb-3 sm:mb-4">
+                          <div ref={idx === messages.length - 1 ? answerIconRef : null} className="flex items-start gap-2 mb-3 sm:mb-4 drinfo-answer-step">
                             <div className="flex-shrink-0 mt-1">
                               <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
                                 <img src="/answer-icon.svg" alt="Answer" className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -1612,7 +1634,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                 onShowAll={handleShowAllCitations}
                                 getCitationCount={getCitationCount}
                               />
-                              <div className="mt-3 sm:mt-4">
+                              <div className="mt-3 sm:mt-4 drinfo-feedback-step">
                                 <AnswerFeedback
                                   conversationId={sessionId || ''}
                                   threadId={msg.threadId}
@@ -1620,7 +1642,8 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                                   // Only show retry for the last assistant message
                                   {...(idx === messages.length - 1 ? {
                                     onReload: () => handleReload(msg.id),
-                                    isReloading: reloadingMessageId === msg.id
+                                    isReloading: reloadingMessageId === msg.id,
+                                    className: 'drinfo-reload-step',
                                   } : {})}
                                   messageId={msg.id}
                                 />

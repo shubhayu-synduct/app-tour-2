@@ -1,5 +1,6 @@
 import React from "react";
 import { FileEdit } from "lucide-react";
+import { useDrinfoSummaryTour } from '@/components/TourContext';
 
 interface Citation {
   title: string;
@@ -17,6 +18,8 @@ interface ReferenceGridProps {
 }
 
 export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowAll, getCitationCount }) => {
+  const { nextStep, run, setStepIndex } = useDrinfoSummaryTour ? useDrinfoSummaryTour() : {};
+
   // Filter out implicit drug citations
   const filteredCitations = Object.entries(citations).filter(([key, citation]) => {
     // If it's a drug citation and has drug_citation_type === 'implicit', hide it
@@ -31,7 +34,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
   const visibleCitations = Object.fromEntries(filteredCitations);
 
   return (
-    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 w-full">
+    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 w-full drinfo-citation-grid-step">
       {(() => {
         const entries = filteredCitations;
         const showAll = getCitationCount(visibleCitations) >= 1;
@@ -148,13 +151,22 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
           items.push(
             <div 
               key="show-all"
-              className="rounded-xl p-3 sm:p-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 show-all-citations-btn h-[95px] md:h-[105px] lg:h-[125px]"
+              className="rounded-xl p-3 sm:p-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 show-all-citations-btn drinfo-citation-showall-step h-[95px] md:h-[105px] lg:h-[125px]"
               style={{
                 background: "#EEF3FF",
                 border: "1px solid #3771FE",
                 width: "100%"
               }}
-              onClick={() => onShowAll(visibleCitations)}
+              onClick={() => {
+                onShowAll(visibleCitations);
+                // If the tour is running and we're on step 6, advance to step 7
+                if (run && typeof setStepIndex === 'function' && typeof nextStep === 'function') {
+                  // Use a small timeout to ensure Joyride has time to focus the next element
+                  setTimeout(() => {
+                    nextStep();
+                  }, 300);
+                }
+              }}
             >
               <p
                 style={{

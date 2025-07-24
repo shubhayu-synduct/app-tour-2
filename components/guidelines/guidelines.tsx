@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { getFirebaseFirestore } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { logger } from '@/lib/logger'
+import { useGuidelineTour } from '@/components/TourContext'
 
 interface Guideline {
   id: number;
@@ -39,6 +40,8 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
   const [isMobile, setIsMobile] = useState(false)
   const [userCountry, setUserCountry] = useState<string>('')
   const { user } = useAuth()
+  const { startTour } = useGuidelineTour();
+  const [showTourPrompt, setShowTourPrompt] = useState(false);
 
   const categoryOrder = ['National', 'Europe', 'International', 'USA'];
 
@@ -179,8 +182,27 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowTourPrompt(true);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
     <div className="container mx-auto px-6 sm:px-2 lg:px-0 py-4 sm:py-6 lg:py-8 mt-0 sm:mt-16 max-w-full sm:max-w-2xl md:max-w-4xl">
+      {showTourPrompt && (
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+            <h2 className="text-lg font-semibold mb-2">Take a quick tour?</h2>
+            <p className="mb-4">Would you like a quick tour of the guidelines page?</p>
+            <div className="flex justify-center gap-4">
+              <button className="bg-indigo-500 text-white px-4 py-2 rounded" onClick={() => { setShowTourPrompt(false); startTour(); }}>Yes, show me</button>
+              <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded" onClick={() => setShowTourPrompt(false)}>No, thanks</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 sm:mb-8 text-center">
           <h1
@@ -209,7 +231,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
           </p>
         </div>
         
-        <div className="relative mb-6 sm:mb-8">
+        <div className="relative mb-6 sm:mb-8 guidelines-search-bar">
           <div className="relative w-full">
             <input
               type="text"
@@ -263,7 +285,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
           </div>
         )}
         
-        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4" style={{ background: '#EEF3FF' }}>
+        <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 guidelines-accordion" style={{ background: '#EEF3FF' }}>
           {categoryOrder
             .map(category => (
               <div key={category} className="border px-0 pb-2 sm:pb-4 pt-1 sm:pt-2" style={{ borderColor: '#A2BDFF', borderWidth: 1, borderStyle: 'solid', background: '#fff' }}>
@@ -304,7 +326,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                           guideline.category && 
                           guideline.last_updated
                         )
-                        .map((guideline) => (
+                        .map((guideline, idx) => (
                     <div key={guideline.id}>
                         <div className="p-2 sm:p-4 shadow-sm border" style={{ background: '#fff', borderColor: '#A2BDFF' }}>
                         <div className="space-y-2 sm:space-y-3">
@@ -375,7 +397,7 @@ export default function Guidelines({ initialGuidelines = [] }: GuidelinesProps) 
                             <button 
                               onClick={() => handleGuidelineClick(guideline)}
                               disabled={!guideline.pdf_saved}
-                                className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 transition-colors text-xs sm:text-sm
+                                className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 transition-colors text-xs sm:text-sm guideline-summary-btn
                                 ${guideline.pdf_saved 
                                     ? '' 
                                     : 'cursor-not-allowed'}

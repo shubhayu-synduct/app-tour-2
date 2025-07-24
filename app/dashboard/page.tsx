@@ -12,6 +12,7 @@ import { ArrowRight, X, Search } from "lucide-react"
 import { v4 as uuidv4 } from 'uuid'
 import { logger } from '@/lib/logger';
 // Removed GoogleGenAI import - now using secure server-side API
+import { useTour } from "@/components/TourContext";
 
 // Define the interface for the message structure
 interface ChatMessage {
@@ -40,6 +41,15 @@ export default function Dashboard() {
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const lastQueryRef = useRef<string>("")
   const lastWordRef = useRef<string>("")
+  const { startTour } = useTour();
+  const [showTourPrompt, setShowTourPrompt] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowTourPrompt(true);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Check if there's a meaningful change in the query
   const hasMeaningfulChange = (newQuery: string) => {
@@ -331,6 +341,18 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="flex flex-col min-h-[calc(100vh-56px)] md:min-h-screen">
+        {showTourPrompt && (
+          <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+              <h2 className="text-lg font-semibold mb-2">Take a quick tour?</h2>
+              <p className="mb-4">Would you like a quick tour of the dashboard features?</p>
+              <div className="flex justify-center gap-4">
+                <button className="bg-indigo-500 text-white px-4 py-2 rounded" onClick={() => { setShowTourPrompt(false); startTour(); }}>Yes, show me</button>
+                <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded" onClick={() => setShowTourPrompt(false)}>No, thanks</button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full max-w-[1200px] px-4 md:px-6 py-8 md:py-16">
             <div className="flex flex-col items-center justify-center">
@@ -339,7 +361,7 @@ export default function Dashboard() {
               </h1>
               <form onSubmit={handleSearch} className="w-full max-w-2xl">
                 <div ref={searchRef} className="relative mx-auto">
-                  <div className="w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4">
+                  <div className="w-full bg-white rounded border-2 border-[#3771fe44] shadow-[0px_0px_11px_#0000000c] p-3 md:p-4 dashboard-search-bar">
                     <div className="flex items-center">
                       <div className="relative flex-1">
                         <textarea
@@ -373,10 +395,9 @@ export default function Dashboard() {
                         />
                       </div>
                     </div>
-
                     <div className="flex justify-between items-center mt-2">
                       {/* Toggle switch for Acute/Research mode */}
-                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <label className="flex items-center gap-2 cursor-pointer select-none dashboard-acute-toggle">
                         <input
                           type="checkbox"
                           checked={activeMode === 'instant'}
@@ -400,7 +421,6 @@ export default function Dashboard() {
                       </button>
                     </div>
                   </div>
-
                   {/* Suggestions dropdown */}
                   {showSuggestions && suggestions.length > 0 && (
                     <div className="absolute top-full left-0 right-0 bg-white rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto z-50">
@@ -431,5 +451,5 @@ export default function Dashboard() {
         </div>
       </div>
     </DashboardLayout>
-  )
+  );
 }

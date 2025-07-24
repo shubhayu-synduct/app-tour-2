@@ -159,7 +159,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             <nav className="space-y-1">
               <div className="mb-6">
                 <button
-                  className="flex items-center justify-center w-full rounded-md p-2 border border-solid border-[#cecece] hover:bg-gray-50"
+                  className="flex items-center justify-center w-full rounded-md p-2 border border-solid border-[#cecece] hover:bg-gray-50 sidebar-new-search"
                   onClick={() => {
                     router.push("/dashboard");
                     if (window.innerWidth < 768) {
@@ -196,7 +196,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     setIsOpen(false);
                   }
                 }}
-                className={`flex items-center px-3 py-2 rounded-lg ${
+                className={`flex items-center px-3 py-2 rounded-lg sidebar-guidelines ${
                   isActive('/guidelines') 
                     ? 'text-[#223258] bg-blue-50 font-medium' 
                     : 'text-[#223258] hover:bg-gray-100'
@@ -213,7 +213,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                     setIsOpen(false);
                   }
                 }}
-                className={`flex items-center px-3 py-2 rounded-lg ${
+                className={`flex items-center px-3 py-2 rounded-lg sidebar-drug-info ${
                   isActive('/drug-information') 
                     ? 'text-[#223258] bg-blue-50 font-medium' 
                     : 'text-[#223258] hover:bg-gray-100'
@@ -254,7 +254,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center justify-between w-full p-2 rounded-lg hover:bg-gray-50"
+                className="flex items-center justify-between w-full p-2 rounded-lg hover:bg-gray-50 sidebar-profile"
               >
                 <div className="flex items-center">
                   <div className="h-8 w-8 rounded-[8px] bg-[#E4ECFF] flex items-center justify-center text-[#223258] font-semibold border border-[#223258]">
