@@ -1,5 +1,5 @@
 import React from "react";
-import { FileEdit } from "lucide-react";
+import { FileEdit, Info } from "lucide-react";
 import { useDrinfoSummaryTour } from '@/components/TourContext';
 
 interface Citation {
@@ -151,7 +151,7 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
           items.push(
             <div 
               key="show-all"
-              className="rounded-xl p-3 sm:p-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 show-all-citations-btn drinfo-citation-showall-step h-[95px] md:h-[105px] lg:h-[125px]"
+              className="rounded-xl p-3 sm:p-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 show-all-citations-btn drinfo-citation-showall-step h-[95px] md:h-[105px] lg:h-[125px] relative"
               style={{
                 background: "#EEF3FF",
                 border: "1px solid #3771FE",
@@ -180,6 +180,16 @@ export const ReferenceGrid: React.FC<ReferenceGridProps> = ({ citations, onShowA
               >
                 Show All ({getCitationCount(visibleCitations)})
               </p>
+              {/* Tooltip for Show All button */}
+              <div className="absolute top-2 right-2 group">
+                <Info className="w-3 h-3 text-gray-500 hover:text-gray-700 cursor-help" />
+                <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <p className="text-xs text-gray-700 font-['DM_Sans']">
+                    Click to view all references used to generate this answer in a detailed sidebar.
+                  </p>
+                  <div className="absolute top-full right-2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-transparent border-t-white"></div>
+                </div>
+              </div>
             </div>
           );
         }

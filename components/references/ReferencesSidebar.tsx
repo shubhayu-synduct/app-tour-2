@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { X, ArrowLeft } from "lucide-react";
+import { X, ArrowLeft, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GuidelineSummaryModal } from "./GuidelineSummaryModal";
 import { DrugInformationModal } from "./DrugInformationModal";
 import { GuidelineMobileModal } from "./GuidelineMobileModal";
 import { getSessionCookie } from "@/lib/auth-service";
+import { useDrinfoSummaryTour } from '@/components/TourContext';
 
 interface Citation {
   title: string;
@@ -29,6 +30,24 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
   const [showDrugModal, setShowDrugModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
+  
+  // Get tour context to check if we're on step 7
+  const { run, stepIndex } = useDrinfoSummaryTour ? useDrinfoSummaryTour() : {};
+  const isStep7 = run && stepIndex === 6; // stepIndex is 0-based, so step 7 is index 6
+
+  // Disable body scrolling when on step 7
+  useEffect(() => {
+    if (isStep7) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isStep7]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -96,8 +115,13 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-end">
       <div
-        className="citations-sidebar bg-white h-full shadow-xl p-3 sm:p-4 md:p-6 animate-slide-in-right flex flex-col"
-        style={{ width: "90vw", maxWidth: "800px", fontFamily: 'DM Sans, sans-serif' }}
+        className={`citations-sidebar bg-white h-full shadow-xl p-3 sm:p-4 md:p-6 animate-slide-in-right flex flex-col ${isStep7 ? 'overflow-hidden' : ''}`}
+        style={{ 
+          width: "90vw", 
+          maxWidth: "800px", 
+          fontFamily: 'DM Sans, sans-serif',
+          ...(isStep7 && { overflow: 'hidden', pointerEvents: 'none' })
+        }}
       >
         {!showGuidelineModal && !showDrugModal ? (
           // References View
@@ -116,7 +140,10 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto">
+            <div 
+              className={`flex-1 overflow-y-auto ${isStep7 ? 'overflow-hidden' : ''}`}
+              style={isStep7 ? { pointerEvents: 'none' } : {}}
+            >
               <div className="space-y-4 sm:space-y-6">
                 {filteredCitations.map(([key, citation]) => (
                   <div
@@ -212,21 +239,33 @@ export const ReferencesSidebar: React.FC<ReferencesSidebarProps> = ({ open, cita
                     </div>
                     <div className="flex justify-end mt-4 pr-4 pb-4">
                       {citation.source_type === 'guidelines_database' && (  // Fixed: backend sends 'guidelines_database' (with 's')
-                        <button
-                          className="flex flex-row items-center justify-center gap-x-2 rounded-[5px] px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors guideline-summary-btn"
-                          style={{
-                            border: "none"
-                          }}
-                          onClick={() => handleGuidelineClick(citation)}
-                        >
-                          <span className="text-white font-regular text-xs sm:text-sm md:text-base" style={{ fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
-                            Guideline AI Summary
-                          </span>
-                          <svg width="16" height="16" className="sm:w-5 sm:h-5 md:w-6 md:h-6 flex-shrink-0 mt-0 md:mt-2" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="7 12 11 8 7 4" />
-                            <polyline points="11 12 15 8 11 4" />
-                          </svg>
-                        </button>
+                        <div className="relative">
+                          <button
+                            className="flex flex-row items-center justify-center gap-x-2 rounded-[5px] px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 bg-[#002A7C] hover:bg-[#1B3B8B] transition-colors guideline-summary-btn"
+                            style={{
+                              border: "none"
+                            }}
+                            onClick={() => handleGuidelineClick(citation)}
+                          >
+                            <span className="text-white font-regular text-xs sm:text-sm md:text-base" style={{ fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.01em' }}>
+                              Guideline AI Summary
+                            </span>
+                            <svg width="16" height="16" className="sm:w-5 sm:h-5 md:w-6 md:h-6 flex-shrink-0 mt-0 md:mt-2" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="7 12 11 8 7 4" />
+                              <polyline points="11 12 15 8 11 4" />
+                            </svg>
+                          </button>
+                          {/* Tooltip for Guideline AI Summary button */}
+                          <div className="absolute top-1 right-1 group">
+                            <Info className="w-3 h-3 text-white hover:text-gray-200 cursor-help" />
+                            <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                              <p className="text-xs text-gray-700 font-['DM_Sans']">
+                                Get an AI-generated summary of this guideline with key points and recommendations.
+                              </p>
+                              <div className="absolute top-full right-4 w-0 h-0 border-l-3 border-r-3 border-t-3 border-transparent border-t-white"></div>
+                            </div>
+                          </div>
+                        </div>
                       )}
                       {citation.source_type === 'drug_database' && (
                         <button

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react'
-import { ArrowRight, ChevronDown, Copy, Search, ExternalLink, X, FileEdit, ThumbsUp, ThumbsDown, Share2, Check, Mail, RotateCcw } from 'lucide-react'
+import { ArrowRight, ChevronDown, Copy, Search, ExternalLink, X, FileEdit, ThumbsUp, ThumbsDown, Share2, Check, Mail, RotateCcw, Info } from 'lucide-react'
 import { fetchDrInfoSummary, sendFollowUpQuestion, Citation } from '@/lib/drinfo-summary-service'
 import { getFirebaseFirestore } from '@/lib/firebase'
 import { collection, addDoc, updateDoc, doc, getDoc, getDocs, query as firestoreQuery, where, orderBy, serverTimestamp, FieldPath, setDoc, deleteDoc } from 'firebase/firestore'
@@ -1524,6 +1524,56 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
 
   const { startTour } = useDrinfoSummaryTour();
   const [showTourPrompt, setShowTourPrompt] = useState(false);
+  
+  // Custom scroll function to scroll to bottom of answer and citation grid
+  const scrollToAnswerBottom = () => {
+    // First, scroll to the very bottom of the answer content
+    setTimeout(() => {
+      // Scroll to the very bottom of the content container
+      const contentRef = document.querySelector('.flex-1.overflow-y-auto');
+      if (contentRef) {
+        contentRef.scrollTop = contentRef.scrollHeight;
+      }
+      
+      // Also scroll the window to the bottom
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      });
+      
+      // Scroll to the follow-up question area to ensure we're at the very bottom
+      const followUpArea = document.querySelector('.follow-up-question-search');
+      if (followUpArea) {
+        followUpArea.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+      
+      // Additional scroll to citation grid
+      const citationGrid = document.querySelector('.drinfo-citation-grid-step');
+      if (citationGrid) {
+        citationGrid.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+    }, 100);
+  };
+
+  // Modified tour start function with 2-second delay
+  const startTourWithDelay = () => {
+    setShowTourPrompt(false);
+    scrollToAnswerBottom();
+    
+    // Delay tour start by 2 seconds to allow scrolling to complete
+    setTimeout(() => {
+      startTour();
+    }, 2000);
+  };
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       setShowTourPrompt(true);
@@ -1539,7 +1589,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
             <h2 className="text-lg font-semibold mb-2">Take a quick tour?</h2>
             <p className="mb-4">Would you like a quick tour of the answer and feedback features?</p>
             <div className="flex justify-center gap-4">
-              <button className="bg-indigo-500 text-white px-4 py-2 rounded" onClick={() => { setShowTourPrompt(false); startTour(); }}>Yes, show me</button>
+              <button className="bg-indigo-500 text-white px-4 py-2 rounded" onClick={startTourWithDelay}>Yes, show me</button>
               <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded" onClick={() => setShowTourPrompt(false)}>No, thanks</button>
             </div>
           </div>
@@ -1608,7 +1658,7 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                           {(msg.content || (idx === messages.length - 1 && isStreaming)) && (
                             <div className="mb-4 sm:mb-6">
                               <div
-                                className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-base sm:text-base prose-h2:text-base prose-h2:font-semibold prose-h3:text-base prose-h3:font-semibold"
+                                className="prose prose-slate prose-ul:text-black marker:text-black max-w-none text-base sm:text-base prose-h2:text-base prose-h2:font-semibold prose-h3:text-base prose-h3:font-semibold drinfo-answer-content"
                                 style={{ fontFamily: 'DM Sans, sans-serif' }}
                                 dangerouslySetInnerHTML={{
                                   __html:
@@ -1674,11 +1724,21 @@ export function DrInfoSummary({ user, sessionId, onChatCreated, initialMode = 'r
                             e.target.style.height = e.target.scrollHeight + 'px';
                           }}
                           placeholder="Ask a follow-up question..."
-                          className="w-full text-base md:text-[16px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto"
+                          className="w-full text-base md:text-[16px] text-[#223258] font-normal font-['DM_Sans'] outline-none resize-none min-h-[24px] max-h-[200px] overflow-y-auto follow-up-question-search"
                           onKeyDown={(e) => e.key === 'Enter' && handleFollowUpQuestion(e as any)}
                           rows={1}
                           style={{ height: '24px' }}
                         />
+                        {/* Tooltip for follow-up question */}
+                        <div className="absolute top-2 right-2 group">
+                          <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                          <div className="absolute bottom-full right-0 mb-2 w-64 p-3 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <p className="text-sm text-gray-700 font-['DM_Sans']">
+                              Ask follow-up questions to get more specific information about the previous answer. You can ask for clarification, additional details, or related information.
+                            </p>
+                            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                          </div>
+                        </div>
                       </div>
                       <div className="flex justify-between items-center mt-2">
                         {/* Toggle switch for Acute/Research mode */}
